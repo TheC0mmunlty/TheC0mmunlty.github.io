@@ -9,7 +9,7 @@
     }
 
     .container {
-      width: 600px;
+      width: 700px;
       margin: 40px auto;
       background: #f2f2f2;
       border: 1px solid #999;
@@ -44,14 +44,55 @@
     }
 
     .post {
+      display: flex;
       border-top: 1px solid #ccc;
-      padding: 10px;
       background: white;
+      padding: 10px;
+    }
+
+    .profile {
+      width: 150px;
+      border-right: 1px solid #ddd;
+      padding-right: 10px;
+      margin-right: 10px;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      background: #bbb;
+      margin: auto;
+      border-radius: 5px;
     }
 
     .username {
-      color: #2b4f8a;
       font-weight: bold;
+      color: #2b4f8a;
+      margin-top: 5px;
+    }
+
+    .joined {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .badges {
+      margin-top: 5px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      background: #3b6ea5;
+      color: white;
+      padding: 2px 4px;
+      margin: 2px;
+      border-radius: 3px;
+    }
+
+    .content {
+      flex: 1;
     }
 
     .message {
@@ -73,6 +114,7 @@
 
     .reply-box {
       margin-top: 5px;
+      display: none;
     }
   </style>
 </head>
@@ -81,41 +123,61 @@
 
 <div class="container">
 
-  <div class="header">💬 Roblox-Style Forum (2014)</div>
+  <div class="header">💬 Roblox-Style Forum (2014 Profile Update)</div>
 
-  <!-- NEW POST -->
   <div class="new-post">
     <input id="user" placeholder="Username">
     <textarea id="msg" placeholder="Write your post..."></textarea>
     <button onclick="addPost()">Post</button>
   </div>
 
-  <!-- POSTS -->
   <div id="posts"></div>
 
 </div>
 
 <script>
+function getRandomBadges() {
+  const allBadges = ["Builder", "Veteran", "Beta Tester", "Active"];
+  let count = Math.floor(Math.random() * 3) + 1;
+  let shuffled = allBadges.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
 function addPost() {
   let user = document.getElementById("user").value;
   let msg = document.getElementById("msg").value;
+
+  let joinYear = 2010 + Math.floor(Math.random() * 10);
+  let joinDate = "Joined " + joinYear;
+
+  let badges = getRandomBadges();
+
+  let badgeHTML = badges.map(b => `<div class="badge">${b}</div>`).join("");
 
   let post = document.createElement("div");
   post.className = "post";
 
   post.innerHTML = `
-    <div class="username">${user}</div>
-    <div class="message">${msg}</div>
-
-    <button class="reply-btn" onclick="showReply(this)">Reply</button>
-
-    <div class="reply-box" style="display:none;">
-      <input placeholder="Reply username">
-      <input placeholder="Reply message">
-      <button onclick="addReply(this)">Send</button>
+    <div class="profile">
+      <div class="avatar"></div>
+      <div class="username">${user}</div>
+      <div class="joined">${joinDate}</div>
+      <div class="badges">${badgeHTML}</div>
     </div>
 
-    <div class="replies"></div>
+    <div class="content">
+      <div class="message">${msg}</div>
+
+      <button class="reply-btn" onclick="showReply(this)">Reply</button>
+
+      <div class="reply-box">
+        <input placeholder="Reply username">
+        <input placeholder="Reply message">
+        <button onclick="addReply(this)">Send</button>
+      </div>
+
+      <div class="replies"></div>
+    </div>
   `;
 
   document.getElementById("posts").prepend(post);
