@@ -1,61 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Roblox Forum</title>
+  <title>Roblox Forum 2014</title>
   <style>
     body {
-      background: #d9d9d9;
+      margin: 0;
+      background: #cfcfcf;
       font-family: Arial;
     }
 
-    .container {
-      width: 700px;
-      margin: 40px auto;
-      background: #f2f2f2;
-      border: 1px solid #999;
-    }
-
-    .header {
-      background: #cfcfcf;
+    /* TOP BAR */
+    .topbar {
+      background: #3b6ea5;
+      color: white;
       padding: 10px;
       font-weight: bold;
-      border-bottom: 1px solid #999;
     }
 
+    .container {
+      width: 750px;
+      margin: 20px auto;
+    }
+
+    /* POST BOX */
     .new-post {
+      background: #e9e9e9;
       padding: 10px;
-      border-bottom: 1px solid #999;
+      border: 1px solid #999;
+      margin-bottom: 10px;
     }
 
     input, textarea {
       width: 100%;
       margin-top: 5px;
-      padding: 5px;
+      padding: 6px;
       border: 1px solid #aaa;
     }
 
     button {
       margin-top: 5px;
-      padding: 5px;
+      padding: 6px;
       background: #3b6ea5;
       color: white;
       border: none;
       cursor: pointer;
     }
 
+    /* POST */
     .post {
       display: flex;
-      border-top: 1px solid #ccc;
       background: white;
-      padding: 10px;
+      border: 1px solid #999;
+      margin-bottom: 10px;
     }
 
     .profile {
-      width: 150px;
-      border-right: 1px solid #ddd;
-      padding-right: 10px;
-      margin-right: 10px;
+      width: 160px;
+      background: #f3f3f3;
+      border-right: 1px solid #ccc;
       text-align: center;
+      padding: 10px;
     }
 
     .avatar {
@@ -63,7 +67,7 @@
       height: 60px;
       background: #bbb;
       margin: auto;
-      border-radius: 5px;
+      border-radius: 4px;
     }
 
     .username {
@@ -75,10 +79,6 @@
     .joined {
       font-size: 11px;
       color: #666;
-    }
-
-    .badges {
-      margin-top: 5px;
     }
 
     .badge {
@@ -93,41 +93,44 @@
 
     .content {
       flex: 1;
+      padding: 10px;
     }
 
     .message {
-      margin-top: 5px;
+      margin-bottom: 10px;
     }
 
     .reply-btn {
-      margin-top: 5px;
-      font-size: 12px;
       background: #888;
+      font-size: 12px;
     }
 
     .replies {
-      margin-left: 20px;
-      margin-top: 10px;
+      margin-left: 15px;
       border-left: 2px solid #ccc;
       padding-left: 10px;
+      margin-top: 10px;
     }
 
     .reply-box {
-      margin-top: 5px;
       display: none;
+      margin-top: 5px;
     }
   </style>
 </head>
 
 <body>
 
+<div class="topbar">
+  Roblox Community Forum (2014 Style)
+</div>
+
 <div class="container">
 
-  <div class="header">💬 Roblox-Style Forum (2014 Profile Update)</div>
-
+  <!-- NEW POST -->
   <div class="new-post">
     <input id="user" placeholder="Username">
-    <textarea id="msg" placeholder="Write your post..."></textarea>
+    <textarea id="msg" placeholder="Write something..."></textarea>
     <button onclick="addPost()">Post</button>
   </div>
 
@@ -136,23 +139,19 @@
 </div>
 
 <script>
-function getRandomBadges() {
-  const allBadges = ["Builder", "Veteran", "Beta Tester", "Active"];
-  let count = Math.floor(Math.random() * 3) + 1;
-  let shuffled = allBadges.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+function getBadges() {
+  const badges = ["Member", "Veteran", "Builder", "Active"];
+  return badges.sort(() => 0.5 - Math.random()).slice(0, 2);
 }
 
 function addPost() {
   let user = document.getElementById("user").value;
   let msg = document.getElementById("msg").value;
 
-  let joinYear = 2010 + Math.floor(Math.random() * 10);
-  let joinDate = "Joined " + joinYear;
+  let join = 2009 + Math.floor(Math.random() * 10);
+  let badgeList = getBadges();
 
-  let badges = getRandomBadges();
-
-  let badgeHTML = badges.map(b => `<div class="badge">${b}</div>`).join("");
+  let badgeHTML = badgeList.map(b => `<div class="badge">${b}</div>`).join("");
 
   let post = document.createElement("div");
   post.className = "post";
@@ -161,18 +160,18 @@ function addPost() {
     <div class="profile">
       <div class="avatar"></div>
       <div class="username">${user}</div>
-      <div class="joined">${joinDate}</div>
-      <div class="badges">${badgeHTML}</div>
+      <div class="joined">Joined ${join}</div>
+      <div>${badgeHTML}</div>
     </div>
 
     <div class="content">
       <div class="message">${msg}</div>
 
-      <button class="reply-btn" onclick="showReply(this)">Reply</button>
+      <button class="reply-btn" onclick="toggleReply(this)">Reply</button>
 
       <div class="reply-box">
-        <input placeholder="Reply username">
-        <input placeholder="Reply message">
+        <input placeholder="Username">
+        <input placeholder="Reply...">
         <button onclick="addReply(this)">Send</button>
       </div>
 
@@ -183,26 +182,22 @@ function addPost() {
   document.getElementById("posts").prepend(post);
 }
 
-function showReply(btn) {
+function toggleReply(btn) {
   let box = btn.parentElement.querySelector(".reply-box");
   box.style.display = box.style.display === "none" ? "block" : "none";
 }
 
 function addReply(btn) {
   let box = btn.parentElement;
-  let post = box.parentElement;
-
   let inputs = box.querySelectorAll("input");
+
   let user = inputs[0].value;
   let msg = inputs[1].value;
 
   let reply = document.createElement("div");
-  reply.innerHTML = `
-    <div class="username">${user}</div>
-    <div class="message">${msg}</div>
-  `;
+  reply.innerHTML = `<b>${user}</b>: ${msg}`;
 
-  post.querySelector(".replies").appendChild(reply);
+  box.parentElement.querySelector(".replies").appendChild(reply);
 
   inputs[0].value = "";
   inputs[1].value = "";
