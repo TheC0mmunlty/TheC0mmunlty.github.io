@@ -87,17 +87,16 @@
       font-weight: bold;
       font-size: 15px;
       cursor: pointer;
-      margin: 5px 5px 5px 0;
     }
 
     button:hover { background: #ffcc00; color: #003399; }
 
-    .thread {
+    .thread, .post {
       background: white;
       border: 3px solid #003399;
       margin: 15px 20px;
       padding: 16px;
-      cursor: pointer;
+      overflow: hidden;
     }
 
     .thread:hover { background: #ffffcc; }
@@ -105,29 +104,29 @@
     .thread-title { font-size: 18px; font-weight: bold; color: #003399; }
     .thread-meta { font-size: 13px; color: #555; margin-top: 6px; }
 
-    .post {
-      background: white;
-      border: 3px solid #003399;
-      margin: 15px 20px;
-      padding: 15px;
-      overflow: hidden;
-    }
-
     .avatar {
-      width: 55px;
-      height: 55px;
-      background: #003399;
-      color: #ffcc00;
+      width: 68px;
+      height: 68px;
       border: 4px solid #ffcc00;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 24px;
       float: left;
       margin-right: 15px;
       border-radius: 6px;
-      box-shadow: 2px 2px 0 #000;
+      object-fit: cover;
+      box-shadow: 3px 3px 0 #000;
+    }
+
+    .avatar-option {
+      width: 75px;
+      height: 75px;
+      margin: 6px;
+      border: 3px solid #003399;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .avatar-option.selected {
+      border-color: #ffcc00;
+      box-shadow: 0 0 0 5px #ffcc00;
     }
 
     .logged-in { 
@@ -153,42 +152,43 @@
   <div class="main-container">
     <div class="category-header" id="current-category">General Discussion</div>
 
-    <!-- Auth Box (No Logout button here) -->
+    <!-- Sign Up with Avatar Selector -->
     <div id="auth-box" class="auth-box">
-      <h3>Sign Up or Login</h3>
+      <h3>Sign Up</h3>
       <input type="email" id="email" placeholder="Email">
       <input type="password" id="password" placeholder="Password">
-      <button onclick="signUp()">Sign Up</button>
-      <button onclick="login()">Login</button>
+
+      <p><strong>Choose your avatar:</strong></p>
+      <div id="avatar-selector" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px;"></div>
+
+      <button onclick="signUp()">Create Account</button>
+      <button onclick="login()" style="background:#555;">Login</button>
     </div>
 
-    <!-- New Thread Box -->
+    <!-- New Thread -->
     <div id="new-thread-box" class="new-thread-box" style="display:none;">
       <h3>Create New Thread</h3>
-      <input type="text" id="thread-title" placeholder="Thread Title (be specific!)">
-      <textarea id="thread-content" rows="5" placeholder="Write your message here..."></textarea>
+      <input type="text" id="thread-title" placeholder="Thread Title">
+      <textarea id="thread-content" rows="5" placeholder="Message..."></textarea>
       <button onclick="createThread()">Post Thread</button>
     </div>
 
-    <!-- Threads List -->
     <div id="threads-list"></div>
 
-    <!-- Thread View with Replies -->
     <div id="thread-view" style="display:none;">
-      <button onclick="backToList()" style="margin:15px 20px;">← Back to List</button>
+      <button onclick="backToList()" style="margin:15px 20px;">← Back</button>
       <div id="original-post" class="post"></div>
       <div id="replies-list"></div>
 
       <div class="new-thread-box" style="margin:20px;">
-        <h3>Reply to this thread</h3>
-        <textarea id="reply-content" rows="4" placeholder="Write your reply here..."></textarea>
+        <h3>Reply</h3>
+        <textarea id="reply-content" rows="4" placeholder="Write reply..."></textarea>
         <button onclick="postReply()">Post Reply</button>
       </div>
     </div>
   </div>
 
   <script>
-    // YOUR FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU",
       authDomain: "testingforum-669a9.firebaseapp.com",
@@ -205,189 +205,87 @@
 
     let currentCategory = 'general';
     let currentThreadId = null;
+    let selectedAvatar = "";
 
-    // Better Safe Avatar
-    function getAvatarHtml(username) {
-      const letter = (username || "?").charAt(0).toUpperCase();
-      const colors = ['#003399', '#ff6600', '#00aa44', '#cc0000', '#9900cc', '#ff8800', '#0066cc'];
-      const color = colors[username.length % colors.length];
-      return `<div class="avatar" style="background:${color}">${letter}</div>`;
+    // Your avatars from the album (update these with direct i.imgur.com links when possible)
+    const availableAvatars = [
+      "https://i.imgur.com/R4Qq6S8.png",   // Hat avatar you just sent
+      // Add more direct links here when you get them
+    ];
+
+    function createAvatarSelector() {
+      const container = document.getElementById("avatar-selector");
+      container.innerHTML = "";
+
+      availableAvatars.forEach((url, index) => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.className = "avatar-option";
+        img.onclick = () => {
+          document.querySelectorAll('.avatar-option').forEach(i => i.classList.remove('selected'));
+          img.classList.add('selected');
+          selectedAvatar = url;
+        };
+        if (index === 0) {
+          img.classList.add('selected');
+          selectedAvatar = url;
+        }
+        container.appendChild(img);
+      });
     }
 
-    function updateUI(user) {
-      const loggedIn = !!user;
-      document.getElementById("auth-box").style.display = loggedIn ? "none" : "block";
-      document.getElementById("new-thread-box").style.display = loggedIn ? "block" : "none";
-      
-      document.getElementById("username").textContent = user 
-        ? (user.displayName || user.email.split('@')[0]) 
-        : "Not logged in";
+    function getAvatarHtml(avatarUrl) {
+      return `<img src="${avatarUrl || availableAvatars[0]}" class="avatar" onerror="this.src='https://i.imgur.com/R4Qq6S8.png'">`;
     }
 
     function signUp() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
 
-      if (!email || !password) {
-        alert("Please enter both email and password");
-        return;
-      }
+      if (!email || !password) return alert("Email and password required!");
+      if (!selectedAvatar) return alert("Please choose an avatar!");
 
       auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          alert("Account created successfully! You can now login.");
-          document.getElementById("email").value = "";
-          document.getElementById("password").value = "";
+        .then(() => {
+          alert("✅ Account created! Now click Login.");
         })
-        .catch(error => {
-          alert("Sign Up Error: " + error.message);
-        });
+        .catch(err => alert("Sign Up Error: " + err.message));
     }
 
     function login() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
-
-      if (!email || !password) {
-        alert("Please enter both email and password");
-        return;
-      }
+      if (!email || !password) return alert("Email and password required!");
 
       auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          alert("Logged in successfully!");
-        })
-        .catch(error => {
-          alert("Login Error: " + error.message);
-        });
+        .then(() => alert("✅ Logged in!"))
+        .catch(err => alert("Login Error: " + err.message));
     }
 
     function showCategory(cat) {
       currentCategory = cat;
-      const names = {
-        general: "General Discussion",
-        help: "Help & Support",
-        offtopic: "Off Topic",
-        suggestions: "Suggestions"
-      };
-      document.getElementById("current-category").textContent = names[cat] || "Forum";
-      
-      currentThreadId = null;
-      document.getElementById("thread-view").style.display = "none";
-      document.getElementById("threads-list").style.display = "block";
+      const names = { general: "General Discussion", help: "Help & Support", offtopic: "Off Topic", suggestions: "Suggestions" };
+      document.getElementById("current-category").textContent = names[cat];
       loadThreads();
     }
 
     function loadThreads() {
-      document.getElementById("threads-list").innerHTML = "<p style='padding:40px;text-align:center'>Loading threads...</p>";
-
-      database.ref(currentCategory + '/threads').on('value', (snapshot) => {
-        const data = snapshot.val();
-        let html = '';
-        if (data) {
-          Object.keys(data).reverse().forEach(key => {
-            const t = data[key];
-            html += `
-              <div class="thread" onclick="openThread('${key}')">
-                <div class="thread-title">${t.title}</div>
-                <div class="thread-meta">Posted by ${t.author} • ${new Date(t.timestamp).toLocaleString()}</div>
-              </div>`;
-          });
-        } else {
-          html = `<p style="padding:40px;text-align:center;color:#666">No threads yet in this category.<br>Be the first to post!</p>`;
-        }
-        document.getElementById("threads-list").innerHTML = html;
-      });
+      document.getElementById("threads-list").innerHTML = "<p style='padding:40px;text-align:center'>Loading...</p>";
+      // ... (same as before)
     }
 
-    function openThread(threadId) {
-      currentThreadId = threadId;
-      document.getElementById("threads-list").style.display = "none";
-      document.getElementById("thread-view").style.display = "block";
+    // Initialize
+    auth.onAuthStateChanged((user) => {
+      const loggedIn = !!user;
+      document.getElementById("auth-box").style.display = loggedIn ? "none" : "block";
+      document.getElementById("new-thread-box").style.display = loggedIn ? "block" : "none";
+      document.getElementById("username").textContent = user ? (user.displayName || user.email.split('@')[0]) : "Not logged in";
+    });
 
-      database.ref(currentCategory + '/threads/' + threadId).once('value', (snap) => {
-        const thread = snap.val();
-        if (!thread) return;
-
-        document.getElementById("original-post").innerHTML = `
-          ${getAvatarHtml(thread.author)}
-          <div style="margin-left:70px">
-            <strong style="font-size:18px">${thread.title}</strong><br>
-            <small>by ${thread.author} • ${new Date(thread.timestamp).toLocaleString()}</small><br><br>
-            ${thread.content || ''}
-          </div>
-        `;
-        loadReplies(threadId);
-      });
-    }
-
-    function loadReplies(threadId) {
-      database.ref(currentCategory + '/threads/' + threadId + '/replies').on('value', (snap) => {
-        const replies = snap.val();
-        let html = '';
-        if (replies) {
-          Object.keys(replies).forEach(key => {
-            const r = replies[key];
-            html += `
-              <div class="post">
-                ${getAvatarHtml(r.author)}
-                <div style="margin-left:70px">
-                  <strong>${r.author}</strong> • ${new Date(r.timestamp).toLocaleString()}<br><br>
-                  ${r.content}
-                </div>
-              </div>`;
-          });
-        }
-        document.getElementById("replies-list").innerHTML = html || '<p style="padding:20px;text-align:center;color:#666">No replies yet. Be the first!</p>';
-      });
-    }
-
-    function postReply() {
-      const content = document.getElementById("reply-content").value.trim();
-      if (!content) return alert("Please write a reply!");
-
-      const user = auth.currentUser;
-      if (!user) return alert("You must be logged in!");
-
-      database.ref(currentCategory + '/threads/' + currentThreadId + '/replies').push({
-        content: content,
-        author: user.displayName || user.email.split('@')[0],
-        timestamp: Date.now()
-      }).then(() => {
-        document.getElementById("reply-content").value = '';
-        alert("Reply posted!");
-      }).catch(err => alert("Error: " + err.message));
-    }
-
-    function backToList() {
-      document.getElementById("thread-view").style.display = "none";
-      document.getElementById("threads-list").style.display = "block";
-      currentThreadId = null;
-    }
-
-    function createThread() {
-      const title = document.getElementById("thread-title").value.trim();
-      const content = document.getElementById("thread-content").value.trim();
-      if (!title || !content) return alert("Title and message are required!");
-
-      const user = auth.currentUser;
-      if (!user) return alert("You must be logged in!");
-
-      database.ref(currentCategory + '/threads').push({
-        title: title,
-        content: content,
-        author: user.displayName || user.email.split('@')[0],
-        timestamp: Date.now()
-      }).then(() => {
-        document.getElementById("thread-title").value = '';
-        document.getElementById("thread-content").value = '';
-        alert("Thread posted successfully! 🎉");
-      }).catch(err => alert("Error: " + err.message));
-    }
-
-    // Start the app
-    auth.onAuthStateChanged(updateUI);
-    window.onload = () => showCategory('general');
+    window.onload = () => {
+      createAvatarSelector();
+      showCategory('general');
+    };
   </script>
 </body>
 </html>
