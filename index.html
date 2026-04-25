@@ -63,14 +63,22 @@
       border-bottom: 5px solid #ffcc00;
     }
 
-    .auth-box, .new-thread-box, .avatar-box {
+    .auth-box {
       margin: 20px;
       padding: 18px;
       background: #f8f8f8;
       border: 4px solid #003399;
+      text-align: center;
     }
 
-    input, textarea {
+    .welcome-image {
+      width: 100%;
+      max-width: 600px;
+      border: 4px solid #003399;
+      margin-bottom: 20px;
+    }
+
+    input, textarea, select {
       width: 100%;
       padding: 10px;
       margin-bottom: 12px;
@@ -87,6 +95,7 @@
       font-weight: bold;
       font-size: 15px;
       cursor: pointer;
+      margin: 5px;
     }
 
     button:hover { background: #ffcc00; color: #003399; }
@@ -97,7 +106,6 @@
       margin: 15px 20px;
       padding: 16px;
       overflow: hidden;
-      cursor: pointer;
     }
 
     .thread:hover { background: #ffffcc; }
@@ -133,21 +141,12 @@
       box-shadow: 3px 3px 0 #000;
     }
 
-    .avatar-option {
-      width: 75px;
-      height: 75px;
-      margin: 6px;
-      border: 3px solid #003399;
-      cursor: pointer;
-      border-radius: 8px;
+    .logged-in { 
+      float: right; 
+      color: #ffcc00; 
+      margin-top: 8px; 
+      font-size: 14px; 
     }
-
-    .avatar-option.selected {
-      border-color: #ffcc00;
-      box-shadow: 0 0 0 5px #ffcc00;
-    }
-
-    .logged-in { float: right; color: #ffcc00; margin-top: 8px; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -159,23 +158,32 @@
     <a onclick="showCategory('help')">Help</a>
     <a onclick="showCategory('offtopic')">Off Topic</a>
     <a onclick="showCategory('suggestions')">Suggestions</a>
-    <a onclick="showAvatarPage()">Avatar</a>
     <span class="logged-in">Logged in as: <strong id="username">Not logged in</strong></span>
   </div>
 
   <div class="main-container">
     <div class="category-header" id="current-category">General Discussion</div>
 
-    <!-- Auth Box -->
+    <!-- Sign Up / Login Box with Welcome Image -->
     <div id="auth-box" class="auth-box">
+      <img src="https://i.imgur.com/89Pvm9d.png" class="welcome-image" alt="Welcome to Roblox Forums">
+      
       <h3>Sign Up</h3>
       <input type="email" id="email" placeholder="Email">
       <input type="password" id="password" placeholder="Password">
+      
+      <label><strong>Gender:</strong></label>
+      <select id="gender">
+        <option value="">Select Gender</option>
+        <option value="Boy">Boy</option>
+        <option value="Girl">Girl</option>
+      </select>
+
       <button onclick="signUp()">Create Account</button>
       <button onclick="login()" style="background:#555;">Login</button>
     </div>
 
-    <!-- New Thread -->
+    <!-- New Thread Box -->
     <div id="new-thread-box" class="new-thread-box" style="display:none;">
       <h3>Create New Thread</h3>
       <input type="text" id="thread-title" placeholder="Thread Title">
@@ -183,18 +191,8 @@
       <button onclick="createThread()">Post Thread</button>
     </div>
 
-    <!-- Avatar Page -->
-    <div id="avatar-page" class="avatar-box" style="display:none;">
-      <h3>Avatar Settings</h3>
-      <p><strong>Choose your avatar:</strong></p>
-      <div id="avatar-selector" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
-      <button onclick="backToMain()" style="margin-top:15px;">Back</button>
-    </div>
-
-    <!-- Threads List -->
     <div id="threads-list"></div>
 
-    <!-- Thread View + Replies -->
     <div id="thread-view" style="display:none;">
       <button onclick="backToList()" style="margin:15px 20px;">← Back to List</button>
       <div id="original-post" class="post"></div>
@@ -225,53 +223,14 @@
 
     let currentCategory = 'general';
     let currentThreadId = null;
-    let userAvatar = "https://i.imgur.com/R4Qq6S8.png"; // Default hat avatar
-
-    // Your avatars (add more direct links here later)
-    const availableAvatars = [
-      "https://i.imgur.com/R4Qq6S8.png"   // Your hat avatar
-    ];
-
-    function getAvatarHtml(avatarUrl) {
-      if (avatarUrl) {
-        return `<img src="${avatarUrl}" class="avatar" onerror="this.outerHTML='<div class=\'letter-avatar\'>?</div>'">`;
-      }
-      return `<div class="letter-avatar">?</div>`;
-    }
 
     function showCategory(cat) {
       currentCategory = cat;
       const names = { general: "General Discussion", help: "Help & Support", offtopic: "Off Topic", suggestions: "Suggestions" };
       document.getElementById("current-category").textContent = names[cat];
       document.getElementById("thread-view").style.display = "none";
-      document.getElementById("avatar-page").style.display = "none";
       document.getElementById("threads-list").style.display = "block";
       loadThreads();
-    }
-
-    function showAvatarPage() {
-      document.getElementById("threads-list").style.display = "none";
-      document.getElementById("thread-view").style.display = "none";
-      document.getElementById("avatar-page").style.display = "block";
-      document.getElementById("current-category").textContent = "Avatar Settings";
-
-      const container = document.getElementById("avatar-selector");
-      container.innerHTML = "";
-      availableAvatars.forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.className = "avatar-option";
-        img.onclick = () => {
-          userAvatar = url;
-          alert("Avatar selected! (This will be saved to your account soon)");
-        };
-        container.appendChild(img);
-      });
-    }
-
-    function backToMain() {
-      document.getElementById("avatar-page").style.display = "none";
-      showCategory(currentCategory);
     }
 
     function loadThreads() {
@@ -286,11 +245,11 @@
             html += `
               <div class="thread" onclick="openThread('${key}')">
                 <div class="thread-title">${t.title}</div>
-                <div class="thread-meta">Posted by ${t.author} • ${new Date(t.timestamp).toLocaleString()}</div>
+                <div class="thread-meta">Posted by ${t.author}</div>
               </div>`;
           });
         } else {
-          html = `<p style="padding:40px;text-align:center;color:#666">No threads yet. Be the first to post!</p>`;
+          html = `<p style="padding:40px;text-align:center;color:#666">No threads yet. Be the first!</p>`;
         }
         document.getElementById("threads-list").innerHTML = html;
       });
@@ -299,17 +258,15 @@
     function createThread() {
       const title = document.getElementById("thread-title").value.trim();
       const content = document.getElementById("thread-content").value.trim();
-
-      if (!title || !content) return alert("Please fill title and message!");
+      if (!title || !content) return alert("Title and message required!");
 
       const user = auth.currentUser;
-      if (!user) return alert("You must be logged in to post!");
+      if (!user) return alert("You must be logged in!");
 
       database.ref(currentCategory + '/threads').push({
         title: title,
         content: content,
         author: user.displayName || user.email.split('@')[0],
-        avatar: userAvatar,
         timestamp: Date.now()
       }).then(() => {
         document.getElementById("thread-title").value = '';
@@ -328,21 +285,18 @@
         if (!thread) return;
 
         document.getElementById("original-post").innerHTML = `
-          ${getAvatarHtml(thread.avatar)}
-          <div style="margin-left:75px">
+          <div style="margin-left:10px">
             <strong style="font-size:18px">${thread.title}</strong><br>
-            <small>by ${thread.author} • ${new Date(thread.timestamp).toLocaleString()}</small><br><br>
+            <small>by ${thread.author}</small><br><br>
             ${thread.content || ''}
           </div>
         `;
-
         loadReplies(threadId);
       });
     }
 
     function loadReplies(threadId) {
-      const repliesRef = database.ref(currentCategory + '/threads/' + threadId + '/replies');
-      repliesRef.on('value', (snap) => {
+      database.ref(currentCategory + '/threads/' + threadId + '/replies').on('value', (snap) => {
         const replies = snap.val();
         let html = '';
         if (replies) {
@@ -350,8 +304,7 @@
             const r = replies[key];
             html += `
               <div class="post">
-                ${getAvatarHtml(r.avatar)}
-                <div style="margin-left:75px">
+                <div style="margin-left:10px">
                   <strong>${r.author}</strong> • ${new Date(r.timestamp).toLocaleString()}<br><br>
                   ${r.content}
                 </div>
@@ -364,7 +317,7 @@
 
     function postReply() {
       const content = document.getElementById("reply-content").value.trim();
-      if (!content) return alert("Please write a reply!");
+      if (!content) return alert("Write a reply!");
 
       const user = auth.currentUser;
       if (!user) return alert("You must be logged in!");
@@ -372,7 +325,6 @@
       database.ref(currentCategory + '/threads/' + currentThreadId + '/replies').push({
         content: content,
         author: user.displayName || user.email.split('@')[0],
-        avatar: userAvatar,
         timestamp: Date.now()
       }).then(() => {
         document.getElementById("reply-content").value = '';
@@ -385,14 +337,21 @@
       document.getElementById("threads-list").style.display = "block";
     }
 
-    // Sign Up & Login
     function signUp() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
+      const gender = document.getElementById("gender").value;
+
       if (!email || !password) return alert("Email and password required!");
+      if (!gender) return alert("Please select Boy or Girl!");
 
       auth.createUserWithEmailAndPassword(email, password)
-        .then(() => alert("Account created! Now login."))
+        .then(() => {
+          alert("✅ Account created successfully! Now login.");
+          document.getElementById("email").value = "";
+          document.getElementById("password").value = "";
+          document.getElementById("gender").value = "";
+        })
         .catch(err => alert("Sign Up Error: " + err.message));
     }
 
@@ -402,7 +361,7 @@
       if (!email || !password) return alert("Email and password required!");
 
       auth.signInWithEmailAndPassword(email, password)
-        .then(() => alert("Logged in successfully!"))
+        .then(() => alert("✅ Logged in successfully!"))
         .catch(err => alert("Login Error: " + err.message));
     }
 
