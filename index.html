@@ -2,177 +2,165 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROBLOX Forum - Archive</title>
+    <title>ROBLOX Forum - Login</title>
     <style>
-        /* THE "OLD ROBLOX" AESTHETIC */
-        body {
-            font-family: Verdana, Arial, Helvetica, sans-serif;
-            background-color: #E1E1E1;
-            margin: 0;
-            padding: 0;
-        }
+        body { font-family: Verdana, Arial; background-color: #E1E1E1; margin: 0; padding: 0; }
+        header { background: #000; color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #555; }
+        
+        .main-container { width: 900px; margin: 20px auto; background: white; border: 1px solid #888; box-shadow: 3px 3px 0px #888; min-height: 500px; }
+        
+        /* AUTH BOX */
+        .auth-container { width: 400px; margin: 100px auto; border: 1px solid #0055ff; background: #f0f5ff; }
+        .auth-header { background: #0055ff; color: white; padding: 5px; font-weight: bold; font-size: 14px; }
+        .auth-body { padding: 20px; text-align: center; }
+        
+        input, select { width: 85%; padding: 6px; margin: 10px 0; border: 1px solid #a4a4a4; font-size: 12px; }
+        
+        /* BUTTONS */
+        .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-family: Verdana; font-size: 12px; }
+        .btn:hover { background: #fff; }
+        .btn-primary { font-weight: bold; border-width: 2px; }
 
-        header {
-            background-color: #000;
-            color: white;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .container {
-            width: 900px;
-            margin: 20px auto;
-            background: white;
-            border: 1px solid #999;
-            padding: 15px;
-        }
-
-        .forum-header {
-            background: #ccc;
-            padding: 5px;
-            font-weight: bold;
-            border: 1px solid #666;
-            margin-bottom: 10px;
-        }
-
-        .thread-row {
-            border-bottom: 1px solid #ddd;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .auth-box {
-            border: 2px solid #0055ff;
-            padding: 20px;
-            background: #f0f5ff;
-            margin-bottom: 20px;
-        }
-
-        button {
-            background: #e1e1e1;
-            border: 1px solid #777;
-            cursor: pointer;
-            padding: 5px 10px;
-        }
-
-        button:hover { background: #fff; }
-
-        input, select { margin: 5px 0; display: block; }
-
+        /* FORUM */
+        .forum-header { background: #ccc; border: 1px solid #999; padding: 8px; font-weight: bold; font-size: 13px; color: #333; margin-top: 10px; }
+        .forum-row { border-bottom: 1px solid #ddd; padding: 12px; display: flex; justify-content: space-between; font-size: 13px; }
+        .forum-row:hover { background: #fdfdfd; }
+        
+        .user-bar { background: #eee; padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-size: 24px; font-weight: bold;">ROBLOX FORUM</div>
-    <div id="user-status">Not Logged In</div>
+    <div style="font-size: 22px; letter-spacing: -1px;">ROBLOX FORUM</div>
+    <div id="nav-status">Guest</div>
 </header>
 
-<div class="container">
-    <div id="auth-section" class="auth-box">
-        <h3 id="form-title">Login / Sign Up</h3>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        
-        <div id="signup-extras">
-            <label>Gender:</label>
-            <select id="gender">
-                <option value="Boy">Boy</option>
-                <option value="Girl">Girl</option>
-            </select>
-        </div>
+<div class="main-container">
 
-        <button onclick="signUp()">Sign Up</button>
-        <button onclick="login()">Login</button>
-        <button onclick="logout()" class="hidden" id="logout-btn">Logout</button>
+    <div id="logged-out-view">
+        <div class="auth-container">
+            <div class="auth-header">User Login / Registration</div>
+            <div class="auth-body">
+                <input type="email" id="email" placeholder="Email Address">
+                <input type="password" id="password" placeholder="Password">
+                
+                <div id="gender-selection">
+                    <label style="font-size: 11px; display: block; margin-top: 5px;">I am a:</label>
+                    <select id="gender">
+                        <option value="Boy">Boy</option>
+                        <option value="Girl">Girl</option>
+                    </select>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-primary" onclick="handleAuth('login')">Login</button>
+                    <button class="btn" onclick="handleAuth('signup')">Sign Up</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="forum-header">General Help & Discussion</div>
-    <div id="forum-threads">
-        <div class="thread-row">
-            <span>Welcome to the Old School Forum!</span>
-            <span>By: Admin</span>
+    <div id="logged-in-view" class="hidden">
+        <div class="user-bar">
+            <span id="welcome-text" style="font-weight: bold;">Welcome!</span>
+            <button class="btn" onclick="logout()">Logout</button>
         </div>
-        <div class="thread-row">
-            <span>How do I change my character?</span>
-            <span>By: Builderman</span>
+
+        <div style="padding: 15px;">
+            <div class="forum-header">General Help & Discussion</div>
+            <div id="forum-list">
+                <div class="forum-row">
+                    <span style="color: #0055ff; font-weight: bold;">[Official] Rules of the Forum</span>
+                    <span>By: Admin</span>
+                </div>
+                <div class="forum-row">
+                    <span style="color: #0055ff;">How do I get the 'Friend' badge?</span>
+                    <span>By: BloxPlayer06</span>
+                </div>
+            </div>
+
+            <div class="forum-header" style="margin-top: 30px;">Friend List</div>
+            <div id="friends-box" style="padding: 20px; color: #888; font-style: italic; border: 1px solid #eee;">
+                You don't have any friends added yet.
+            </div>
         </div>
     </div>
+
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  // PASTE YOUR FIREBASE CONFIG HERE
+  // YOUR PROVIDED CONFIG
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU",
+    authDomain: "testingforum-669a9.firebaseapp.com",
+    databaseURL: "https://testingforum-669a9-default-rtdb.firebaseio.com",
+    projectId: "testingforum-669a9",
+    storageBucket: "testingforum-669a9.firebasestorage.app",
+    messagingSenderId: "685025117821",
+    appId: "1:685025117821:web:c3340c8d5475e33eded314"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  const db = getFirestore(app);
+  const db = getDatabase(app);
 
-  // --- FUNCTIONS ---
-
-  window.signUp = async () => {
+  // AUTHENTICATION LOGIC
+  window.handleAuth = async (mode) => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const gender = document.getElementById('gender').value;
 
+    if(!email || !password) return alert("Fill in all fields!");
+
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        
-        // Save Gender to Firestore
-        await setDoc(doc(db, "users", user.uid), {
-            email: email,
-            gender: gender
-        });
-        alert("Account Created as " + gender);
+        if (mode === 'signup') {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            // Save gender to Realtime Database
+            await set(ref(db, 'users/' + userCredential.user.uid), {
+                email: email,
+                gender: gender
+            });
+            alert("Registered successfully!");
+        } else {
+            await signInWithEmailAndPassword(auth, email, password);
+        }
     } catch (error) {
         alert(error.message);
     }
   };
 
-  window.login = async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        alert("Logged In!");
-    } catch (error) {
-        alert(error.message);
-    }
-  };
+  window.logout = () => signOut(auth);
 
-  window.logout = () => {
-    signOut(auth);
-  };
+  // UI STATE UPDATER
+  onAuthStateChanged(auth, (user) => {
+    const outView = document.getElementById('logged-out-view');
+    const inView = document.getElementById('logged-in-view');
+    const navStatus = document.getElementById('nav-status');
+    const welcome = document.getElementById('welcome-text');
 
-  // Monitor Auth State
-  onAuthStateChanged(auth, async (user) => {
-    const status = document.getElementById('user-status');
-    const logoutBtn = document.getElementById('logout-btn');
     if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const userData = userDoc.data();
-        status.innerText = `Logged in as: ${user.email} (${userData?.gender || 'User'})`;
-        logoutBtn.classList.remove('hidden');
+        outView.classList.add('hidden');
+        inView.classList.remove('hidden');
+        navStatus.innerText = user.email;
+        
+        // Fetch gender from DB
+        const dbRef = ref(db);
+        get(child(dbRef, `users/${user.uid}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                welcome.innerText = `Welcome back, ${data.gender}!`;
+            }
+        });
     } else {
-        status.innerText = "Not Logged In";
-        logoutBtn.classList.add('hidden');
+        outView.classList.remove('hidden');
+        inView.classList.add('hidden');
+        navStatus.innerText = "Guest";
     }
   });
 </script>
