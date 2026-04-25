@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Forum System Fixed</title>
+<title>Rebuilt Social Forum</title>
 
 <style>
 body {
@@ -10,7 +10,6 @@ body {
   background:#dfe5ec;
 }
 
-/* TOPBAR */
 .topbar {
   background:#3b4f6b;
   color:white;
@@ -25,16 +24,9 @@ body {
   cursor:pointer;
 }
 
-/* MENU */
-.menu {
-  display:flex;
-  gap:10px;
-  margin-left:20px;
-}
-
 .menu button {
-  padding:5px 10px;
-  cursor:pointer;
+  margin-left:5px;
+  padding:5px;
 }
 
 /* SECTIONS */
@@ -44,11 +36,8 @@ body {
   margin:20px auto;
 }
 
-.active {
-  display:block;
-}
+.active { display:block; }
 
-/* BOX */
 .box {
   background:white;
   border:1px solid #bbb;
@@ -56,7 +45,6 @@ body {
   margin-bottom:10px;
 }
 
-/* POSTS */
 .post {
   background:white;
   border:1px solid #bbb;
@@ -64,27 +52,16 @@ body {
   margin-top:10px;
 }
 
-/* ADMIN */
-#adminPanel {
-  background:#fff3f3;
+input, textarea {
+  width:100%;
+  margin-top:5px;
+  padding:5px;
 }
 
-/* PROFILE */
-#profile {
-  display:none;
-  position:fixed;
-  top:20%;
-  left:50%;
-  transform:translateX(-50%);
-  background:white;
-  border:2px solid #333;
-  padding:10px;
-  width:300px;
-  z-index:999;
+.badge {
+  font-size:12px;
+  color:green;
 }
-
-button { margin-top:5px; }
-input, textarea { width:100%; margin-top:5px; padding:5px; }
 </style>
 </head>
 
@@ -95,43 +72,53 @@ input, textarea { width:100%; margin-top:5px; padding:5px; }
 
 <img class="logo"
 src="https://cdn.discordapp.com/attachments/1495473511836291142/1497459975067275389/Logo.png"
-onclick="showSection('postsSection')">
+onclick="show('posts')">
 
-<span>Forum System</span>
+<span>Social Forum</span>
 
 <div class="menu">
-  <button onclick="showSection('postsSection')">Posts</button>
-  <button onclick="showSection('friendsSection')">Friends</button>
-  <button onclick="showSection('clansSection')">Clans</button>
-  <button onclick="showSection('groupsSection')">Groups</button>
-  <button onclick="showSection('adminSection')">Admin</button>
+<button onclick="show('posts')">Posts</button>
+<button onclick="show('friends')">Friends</button>
+<button onclick="show('clans')">Clans</button>
+<button onclick="show('admin')">Admin</button>
 </div>
 
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="section active">
+<div class="box">
+<h3>Login</h3>
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<button onclick="signup()">Signup</button>
+</div>
 </div>
 
 <!-- POSTS -->
-<div id="postsSection" class="section active">
+<div id="posts" class="section">
 
 <div class="box">
 <h3>Create Post</h3>
-<textarea id="msg"></textarea>
+<textarea id="postInput"></textarea>
 <button onclick="createPost()">Post</button>
 </div>
 
-<div id="posts"></div>
+<div id="postList"></div>
 
 </div>
 
 <!-- FRIENDS -->
-<div id="friendsSection" class="section">
+<div id="friends" class="section">
 <div class="box">
 <h3>Friends</h3>
-<div id="friends"></div>
+<div id="friendList"></div>
 </div>
 </div>
 
 <!-- CLANS -->
-<div id="clansSection" class="section">
+<div id="clans" class="section">
 <div class="box">
 <h3>Clans</h3>
 <input id="clanName" placeholder="Clan name">
@@ -140,28 +127,13 @@ onclick="showSection('postsSection')">
 </div>
 </div>
 
-<!-- GROUPS -->
-<div id="groupsSection" class="section">
-<div class="box">
-<h3>Groups</h3>
-<div id="groups"></div>
-</div>
-</div>
-
 <!-- ADMIN -->
-<div id="adminSection" class="section">
-<div class="box" id="adminPanel">
+<div id="admin" class="section">
+<div class="box">
 <h3>Admin Dashboard</h3>
-<textarea id="announcement"></textarea>
+<textarea id="announce"></textarea>
 <button onclick="postAnnouncement()">Post Announcement</button>
 </div>
-</div>
-
-<!-- PROFILE -->
-<div id="profile">
-<h3 id="pName"></h3>
-<p id="pEmail"></p>
-<button onclick="closeProfile()">Close</button>
 </div>
 
 <script type="module">
@@ -171,10 +143,16 @@ import {
   getFirestore,
   collection,
   addDoc,
-  getDocs
+  getDocs,
+  query,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 
 /* FIREBASE */
 const firebaseConfig = {
@@ -190,35 +168,55 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-let currentUser = null;
+/* CENSOR SYSTEM */
+function censor(text){
+  const badWords = ["badword1","badword2","fuck","shit","nigger","cunt"];
+  let out = text;
 
-/* NAV MENU */
-window.showSection = function(id){
-  document.querySelectorAll(".section").forEach(s=>{
-    s.classList.remove("active");
+  badWords.forEach(w=>{
+    let regex = new RegExp(w,"gi");
+    out = out.replace(regex,"****");
   });
 
+  return out;
+}
+
+/* NAV */
+window.show = function(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 };
 
-/* POSTS FIX */
+/* AUTH */
+window.signup = async function(){
+  await createUserWithEmailAndPassword(auth,email.value,pass.value);
+  show("posts");
+};
+
+window.login = async function(){
+  await signInWithEmailAndPassword(auth,email.value,pass.value);
+  show("posts");
+};
+
+/* POSTS */
 window.createPost = async function(){
-  if(!msg.value) return;
+
+  if(!postInput.value) return;
 
   await addDoc(collection(db,"posts"),{
-    text:msg.value,
-    user:"Player",
+    text:censor(postInput.value),
+    user:email.value,
     time:Date.now()
   });
 
-  msg.value="";
+  postInput.value="";
   loadPosts();
 };
 
-/* LOAD POSTS */
 async function loadPosts(){
-  let snap = await getDocs(collection(db,"posts"));
-  posts.innerHTML="";
+  let snap = await getDocs(query(collection(db,"posts"),orderBy("time","desc")));
+
+  postList.innerHTML="";
 
   snap.forEach(d=>{
     let p=d.data();
@@ -226,18 +224,24 @@ async function loadPosts(){
     let div=document.createElement("div");
     div.className="post";
 
-    div.innerText = p.user+": "+p.text;
+    div.innerHTML = `<b>${p.user}</b><br>${p.text}`;
 
-    posts.appendChild(div);
+    postList.appendChild(div);
   });
 }
 loadPosts();
+
+/* FRIENDS (basic structure) */
+async function loadFriends(){
+  friendList.innerHTML="Friend system ready for expansion";
+}
+loadFriends();
 
 /* CLANS */
 window.createClan = async function(){
   await addDoc(collection(db,"clans"),{
     name:clanName.value,
-    owner:"Player"
+    owner:email.value
   });
 
   loadClans();
@@ -245,33 +249,24 @@ window.createClan = async function(){
 
 async function loadClans(){
   let snap = await getDocs(collection(db,"clans"));
+
   clanList.innerHTML="";
 
   snap.forEach(d=>{
     let c=d.data();
     let div=document.createElement("div");
+
     div.className="post";
-    div.innerText="⚔ "+c.name;
+    div.innerText="⚔ "+c.name+" (Owner: "+c.owner+")";
 
     clanList.appendChild(div);
   });
 }
 loadClans();
 
-/* FRIENDS / GROUPS */
-async function loadFriends(){
-  friends.innerHTML="No system connected yet";
-}
-loadFriends();
-
-async function loadGroups(){
-  groups.innerHTML="Group system ready for upgrade";
-}
-loadGroups();
-
 /* ANNOUNCEMENT */
 window.postAnnouncement = async function(){
-  alert("Admin panel ready (hook for Firebase)");
+  alert("Admin system ready (hooked)");
 };
 
 </script>
