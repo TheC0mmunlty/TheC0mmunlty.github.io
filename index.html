@@ -82,7 +82,7 @@
 
             <div class="forum-header">General Discussion - Post Message</div>
             <div style="padding: 10px; border: 1px solid #ccc; border-top: none;">
-                <textarea id="post-input" placeholder="No swearing allowed!"></textarea>
+                <textarea id="post-input" placeholder="Say something"></textarea>
                 <button class="btn" id="submitPost" style="margin-top:5px; font-weight: bold;">Post Message</button>
             </div>
 
@@ -116,7 +116,7 @@
     let viewingUid = "";
 
     // --- SWEAR FILTER ---
-    const badWords = ["fuck", "shit", "ass", "bitch", "crap", "nigger", "retard", "faggot"]; // Add more here
+    const badWords = ["fuck", "shit", "ass", "bitch", "crap", "nigger", "retard", "faggot", "cum", "kys", "kill yourself", "porn", "gooner", "nigga", "asshole", "shitting", "groom", "rape", "raped", ]; // Add more here
     const censor = (text) => {
         let cleaned = text;
         badWords.forEach(word => {
