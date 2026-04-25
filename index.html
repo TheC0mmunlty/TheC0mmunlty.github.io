@@ -1,114 +1,135 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Block Fan Forum</title>
+<title>Social Forum Final System</title>
 
 <style>
 body {
-  margin: 0;
-  font-family: Arial;
-  background: #dfe5ec;
+  margin:0;
+  font-family:Arial;
+  background:#dfe5ec;
 }
 
 .topbar {
-  background: #3b4f6b;
-  color: white;
-  padding: 10px;
-  font-weight: bold;
+  background:#3b4f6b;
+  color:white;
+  padding:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
+.logo {
+  height:30px;
+  cursor:pointer;
+}
+
+/* ONLINE DOT */
+.onlineDot {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:gray;
+  display:inline-block;
+}
+
+.online {
+  background:#00ff4c;
+  box-shadow:0 0 6px #00ff4c;
+}
+
+/* CONTAINER */
 .container {
-  width: 850px;
-  margin: 20px auto;
+  width:850px;
+  margin:20px auto;
 }
 
 .box {
-  background: #f9f9f9;
-  border: 1px solid #b8c2cc;
-  padding: 10px;
-  margin-bottom: 10px;
+  background:white;
+  border:1px solid #bbb;
+  padding:10px;
+  margin-bottom:10px;
 }
 
-.post {
-  background: white;
-  border: 1px solid #b8c2cc;
-  padding: 10px;
-  margin-top: 10px;
+/* FRIEND / CLAN LIST */
+.item {
+  padding:5px;
+  border-bottom:1px solid #ddd;
+  cursor:pointer;
 }
 
-.adminBadge {
-  width: 16px;
-  vertical-align: middle;
+.item:hover {
+  background:#eee;
 }
 
-#profile {
+/* PROFILE PAGE */
+#profilePage {
   display:none;
   position:fixed;
-  top:20%;
-  left:50%;
-  transform:translateX(-50%);
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:#dfe5ec;
+  padding:20px;
+}
+
+#profileCard {
+  width:400px;
   background:white;
+  padding:15px;
   border:2px solid #333;
-  padding:10px;
-  width:300px;
-  z-index:999;
 }
 
 button { margin-top:5px; }
-input, textarea { width:100%; margin-top:5px; padding:5px; }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">🧱 Block Fan Forum</div>
+<div class="topbar">
+<img class="logo" src="https://cdn.discordapp.com/attachments/1495473511836291142/1497459975067275389/Logo.png"
+onclick="location.reload()">
+
+Social Network
+</div>
 
 <div class="container">
 
-<!-- LOGIN -->
-<div id="authBox" class="box">
-<h3>Login / Signup</h3>
-<input id="username" placeholder="Username">
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="signup()">Sign Up</button>
-<button onclick="login()">Login</button>
-</div>
-
-<!-- ANNOUNCEMENT -->
-<div class="box" id="announcementBox">
-<h3>📢 Announcements</h3>
-<div id="announcementList"></div>
-</div>
-
-<!-- POST -->
-<div id="forumBox" style="display:none;">
-
+<!-- FRIENDS -->
 <div class="box">
-<h3>Create Post</h3>
-<textarea id="msg"></textarea>
-<button onclick="createPost(msg.value)">Post</button>
+<h3>👥 Friends</h3>
+<div id="friends"></div>
 </div>
 
-<div id="posts"></div>
+<!-- CLANS -->
+<div class="box">
+<h3>⚔ Clans</h3>
+<input id="clanName" placeholder="Create clan name">
+<button onclick="createClan()">Create Clan</button>
+<div id="clanList"></div>
+</div>
 
+<!-- GROUPS -->
+<div class="box">
+<h3>💬 Friend Groups</h3>
+<div id="groups"></div>
 </div>
 
 </div>
 
-<!-- PROFILE -->
-<div id="profile">
-<h3>Profile</h3>
-<p id="pName"></p>
-<p id="pRole"></p>
+<!-- PROFILE PAGE -->
+<div id="profilePage">
+  <div id="profileCard">
+    <h2 id="pName"></h2>
 
-<button onclick="followUser()">Follow</button>
-<button onclick="openDM()">DM</button>
-<button onclick="banUser()">Ban (Admin)</button>
-<button onclick="closeProfile()">Close</button>
+    <span class="onlineDot" id="pStatus"></span>
+    <p id="pEmail"></p>
+
+    <button onclick="closeProfile()">Close</button>
+  </div>
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
@@ -116,17 +137,14 @@ import {
   getFirestore,
   collection,
   addDoc,
-  query,
-  orderBy,
-  onSnapshot,
+  getDocs,
+  setDoc,
   doc,
-  setDoc
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 import {
   getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 
@@ -144,128 +162,136 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-/* DATA */
 let currentUser = null;
-let currentProfile = null;
 
-const admins = ["fahid.001x@gmail.com"];
+/* ONLINE STATUS */
+onAuthStateChanged(auth, async user=>{
+  if(!user) return;
 
-/* AUTH */
-window.signup = async () => {
-  const cred = await createUserWithEmailAndPassword(auth, email.value, pass.value);
+  currentUser = user;
 
-  await setDoc(doc(db, "users", cred.user.uid), {
-    username: username.value,
-    email: cred.user.email,
-    followers: [],
-    messages: []
-  });
-};
+  await setDoc(doc(db,"users",user.uid),{
+    email:user.email,
+    online:true
+  },{merge:true});
 
-window.login = () =>
-  signInWithEmailAndPassword(auth, email.value, pass.value);
-
-/* USER LOGIN */
-onAuthStateChanged(auth, user => {
-  if (user) {
-    currentUser = user;
-
-    authBox.style.display = "none";
-    forumBox.style.display = "block";
-  }
+  loadFriends();
+  loadClans();
 });
 
-/* POSTS */
-window.createPost = async function(text) {
-  if (!text) return;
+/* FRIEND LIST */
+async function loadFriends(){
+  let snap = await getDocs(collection(db,"friends"));
 
-  await addDoc(collection(db, "posts"), {
-    text,
-    user: username.value,
-    email: currentUser.email,
-    time: Date.now()
+  friends.innerHTML="";
+
+  snap.forEach(d=>{
+    let f=d.data();
+
+    if(f.status==="accepted" &&
+      (f.from===currentUser.email || f.to===currentUser.email)){
+
+      let friend = f.from===currentUser.email ? f.to : f.from;
+
+      let div=document.createElement("div");
+      div.className="item";
+
+      div.innerHTML = `
+        <span class="onlineDot online"></span>
+        ${friend}
+      `;
+
+      div.onclick=()=>openProfile(friend);
+
+      friends.appendChild(div);
+    }
   });
+}
+
+/* CLANS */
+window.createClan = async function(){
+  await addDoc(collection(db,"clans"),{
+    name:clanName.value,
+    owner:currentUser.email,
+    members:[currentUser.email]
+  });
+
+  loadClans();
 };
 
-/* LOAD POSTS */
-const q = query(collection(db, "posts"), orderBy("time","desc"));
+async function loadClans(){
+  let snap = await getDocs(collection(db,"clans"));
 
-onSnapshot(q, snap => {
-  posts.innerHTML = "";
+  clanList.innerHTML="";
 
-  snap.forEach(d => {
-    let p = d.data();
+  snap.forEach(d=>{
+    let c=d.data();
 
-    let isAdmin = admins.includes(p.email);
+    let div=document.createElement("div");
+    div.className="item";
 
-    let badge = isAdmin
-      ? `<img class="adminBadge" src="https://cdn.discordapp.com/attachments/1495473511836291142/1497453590070165584/Untitled.png">`
-      : "";
-
-    let color = isAdmin ? "red" : "black";
-
-    let div = document.createElement("div");
-    div.className = "post";
-
-    div.innerHTML = `
-      <b style="color:${color}; cursor:pointer"
-      onclick="openProfile('${p.email}','${p.user}')">
-        ${p.user}
-      </b>
-      ${badge}
-      <br>
-      ${p.text}
+    div.innerHTML=`
+      ⚔ ${c.name} (Owner: ${c.owner})
     `;
 
-    posts.appendChild(div);
+    div.onclick=async()=>{
+      await addDoc(collection(db,"clanJoinRequests"),{
+        clan:c.name,
+        user:currentUser.email,
+        status:"pending"
+      });
+
+      alert("Join request sent");
+    };
+
+    clanList.appendChild(div);
   });
-});
+}
 
-/* PROFILE */
-window.openProfile = function(email, name) {
-  currentProfile = email;
+/* FRIEND GROUPS */
+async function loadGroups(){
+  let snap = await getDocs(collection(db,"friends"));
 
-  pName.innerText = name;
-  pRole.innerText = admins.includes(email) ? "Admin" : "User";
+  groups.innerHTML="";
 
-  profile.style.display = "block";
-};
+  let myFriends=[];
 
-window.closeProfile = () => profile.style.display = "none";
-
-/* FOLLOW (placeholder) */
-window.followUser = function() {
-  alert("Follow system ready for upgrade");
-};
-
-/* DM (placeholder) */
-window.openDM = function() {
-  alert("DM system ready for upgrade");
-};
-
-/* BAN (admin only) */
-window.banUser = function() {
-  if (!admins.includes(currentUser.email)) return alert("No permission");
-  alert("Ban system hook ready");
-};
-
-/* ANNOUNCEMENTS */
-const annQ = query(collection(db, "announcements"), orderBy("time","desc"));
-
-onSnapshot(annQ, snap => {
-  announcementList.innerHTML = "";
-
-  snap.forEach(d => {
-    let a = d.data();
-
-    let div = document.createElement("div");
-    div.className = "box";
-
-    div.innerHTML = "📢 " + a.text;
-
-    announcementList.appendChild(div);
+  snap.forEach(d=>{
+    let f=d.data();
+    if(f.status==="accepted"){
+      if(f.from===currentUser.email) myFriends.push(f.to);
+      if(f.to===currentUser.email) myFriends.push(f.from);
+    }
   });
-});
+
+  let div=document.createElement("div");
+  div.className="item";
+  div.innerText="Group Chat ("+myFriends.length+" members)";
+  groups.appendChild(div);
+}
+
+/* PROFILE PAGE */
+window.openProfile = async function(email){
+  profilePage.style.display="block";
+
+  pName.innerText=email;
+  pEmail.innerText=email;
+
+  pStatus.classList.add("online");
+};
+
+window.closeProfile = function(){
+  profilePage.style.display="none";
+};
+
+/* LOOP */
+setInterval(()=>{
+  if(currentUser){
+    loadFriends();
+    loadClans();
+    loadGroups();
+  }
+},4000);
 
 </script>
 
