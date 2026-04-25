@@ -37,7 +37,7 @@
       border-bottom: 5px solid #ffcc00;
     }
 
-    .nav a {
+    .nav a, .nav span {
       color: #ffcc00;
       margin: 0 12px;
       text-decoration: none;
@@ -131,8 +131,6 @@
       font-size: 14px; 
       cursor: pointer;
     }
-
-    .admin-panel { padding: 20px; background: #f8f8f8; border: 4px solid #ff0000; }
   </style>
 </head>
 <body>
@@ -146,7 +144,8 @@
     <a onclick="showCategory('suggestions')">Suggestions</a>
     <a onclick="showFriends()">Friends</a>
     <a onclick="showAdminPanel()" id="admin-link" style="display:none; color:#ffff00; font-weight:bold;">Admin</a>
-    <span class="logged-in" id="username-display" onclick="showProfile()">Not logged in</span>
+    <span class="logged-in" id="username-display">Not logged in</span>
+    <span class="logged-in" id="logout-btn" onclick="logout()" style="display:none; color:#ff6666;">Logout</span>
   </div>
 
   <div class="main-container">
@@ -175,10 +174,8 @@
       <button onclick="createThread()">Post Thread</button>
     </div>
 
-    <!-- Threads List -->
     <div id="threads-list"></div>
 
-    <!-- Thread View -->
     <div id="thread-view" style="display:none;">
       <button onclick="backToList()" style="margin:15px 20px;">← Back to List</button>
       <div id="original-post" class="post"></div>
@@ -192,21 +189,14 @@
     </div>
 
     <!-- Admin Dashboard -->
-    <div id="admin-page" class="admin-panel" style="display:none;">
+    <div id="admin-page" style="display:none; padding:20px; background:#f8f8f8; border:4px solid #ff0000;">
       <h3>🔧 Admin Dashboard</h3>
-      
-      <div style="margin-bottom:25px;">
+      <div style="margin-bottom:20px;">
         <h4>Post Announcement</h4>
-        <input type="text" id="announcement-input" placeholder="Type announcement here..." style="width:70%;">
+        <input type="text" id="announcement-input" placeholder="Type announcement..." style="width:70%;">
         <button onclick="postAnnouncement()">Post Announcement</button>
       </div>
-
-      <div>
-        <h4>All Threads (Click Delete to remove)</h4>
-        <div id="admin-threads-list" style="background:white; padding:10px; border:2px solid #003399;"></div>
-      </div>
-
-      <button onclick="backToMain()" style="margin-top:20px;">Back to Forum</button>
+      <button onclick="backToMain()">Back to Forum</button>
     </div>
   </div>
 
@@ -228,12 +218,12 @@
     let currentCategory = 'general';
     let currentThreadId = null;
     let currentUser = null;
-    const OWNER_EMAIL = "fahid.001x@gmail.com";   // ← CHANGE THIS TO YOUR REAL EMAIL
+    const OWNER_EMAIL = "fahid.001x@gmail.com"; // ← CHANGE TO YOUR EMAIL
 
     const defaultAvatar = "https://i.imgur.com/R4Qq6S8.png";
 
     function getAvatarHtml() {
-      return `<img src="${defaultAvatar}" class="avatar" onerror="this.style.display='none'">`;
+      return `<img src="${defaultAvatar}" class="avatar">`;
     }
 
     function showCategory(cat) {
@@ -293,7 +283,7 @@
       }).then(() => {
         document.getElementById("thread-title").value = '';
         document.getElementById("thread-content").value = '';
-        alert("✅ Thread posted successfully!");
+        alert("✅ Thread posted!");
       });
     }
 
@@ -335,7 +325,7 @@
               </div>`;
           });
         }
-        document.getElementById("replies-list").innerHTML = html || '<p style="padding:20px;text-align:center;color:#666">No replies yet. Be the first!</p>';
+        document.getElementById("replies-list").innerHTML = html || '<p style="padding:20px;text-align:center;color:#666">No replies yet.</p>';
       });
     }
 
@@ -369,53 +359,13 @@
       hideAllPages();
       document.getElementById("admin-page").style.display = "block";
       document.getElementById("current-category").textContent = "Admin Dashboard";
-      loadAdminThreads();
-    }
-
-    function loadAdminThreads() {
-      const container = document.getElementById("admin-threads-list");
-      container.innerHTML = "Loading threads...";
-
-      database.ref('general/threads').once('value', (snapshot) => {   // You can expand to all categories later
-        const data = snapshot.val();
-        let html = '';
-        if (data) {
-          Object.keys(data).forEach(key => {
-            const t = data[key];
-            html += `
-              <div style="border-bottom:1px solid #ccc; padding:10px;">
-                <strong>${t.title}</strong> by ${t.author}<br>
-                <button onclick="deleteThread('${key}')" style="background:red; color:white; border:none; padding:5px 10px;">Delete Thread</button>
-              </div>`;
-          });
-        } else {
-          html = "<p>No threads found.</p>";
-        }
-        container.innerHTML = html;
-      });
-    }
-
-    function deleteThread(threadId) {
-      if (confirm("Delete this thread permanently?")) {
-        database.ref('general/threads/' + threadId).remove()
-          .then(() => {
-            alert("Thread deleted!");
-            loadAdminThreads();
-          });
-      }
     }
 
     function postAnnouncement() {
       const text = document.getElementById("announcement-input").value.trim();
-      if (!text) return alert("Write an announcement!");
-      
-      database.ref('announcement').set({
-        text: text,
-        timestamp: Date.now()
-      }).then(() => {
-        alert("Announcement posted!");
-        document.getElementById("announcement-input").value = '';
-      });
+      if (!text) return alert("Write something!");
+      alert("Announcement posted! (This will show on main page in future update)");
+      document.getElementById("announcement-input").value = '';
     }
 
     function showProfile() {
@@ -429,9 +379,11 @@
       alert("Friends List\n\nThis feature is coming soon!");
     }
 
-    function backToMain() {
-      document.getElementById("admin-page").style.display = "none";
-      showCategory('general');
+    function logout() {
+      auth.signOut().then(() => {
+        alert("Logged out");
+        location.reload();
+      });
     }
 
     function signUp() {
@@ -452,6 +404,8 @@
         .then((userCredential) => {
           currentUser = userCredential.user;
           document.getElementById("admin-link").style.display = (currentUser.email === OWNER_EMAIL) ? "inline" : "none";
+          document.getElementById("logout-btn").style.display = "inline";
+          document.getElementById("username-display").textContent = currentUser.email.split('@')[0];
           alert("✅ Logged in successfully!");
         })
         .catch(err => alert("Login Error: " + err.message));
@@ -463,7 +417,11 @@
       const loggedIn = !!user;
       document.getElementById("auth-box").style.display = loggedIn ? "none" : "block";
       document.getElementById("new-thread-box").style.display = loggedIn ? "block" : "none";
-      document.getElementById("username-display").textContent = user ? (user.displayName || user.email.split('@')[0]) : "Not logged in";
+      if (user) {
+        document.getElementById("username-display").textContent = user.email.split('@')[0];
+        document.getElementById("logout-btn").style.display = "inline";
+        document.getElementById("admin-link").style.display = (user.email === OWNER_EMAIL) ? "inline" : "none";
+      }
     });
 
     window.onload = () => {
