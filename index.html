@@ -1,108 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Block Fan Forum</title>
-
-<style>
-body {
-  margin: 0;
-  background: #0a0a0a;
-  font-family: Arial;
-  color: white;
-}
-
-.topbar {
-  background: #111b2e;
-  padding: 10px;
-  font-weight: bold;
-}
-
-.container {
-  width: 800px;
-  margin: 20px auto;
-}
-
-.box {
-  background: #151515;
-  border: 1px solid #333;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
-input, textarea, select {
-  width: 100%;
-  margin-top: 5px;
-  padding: 6px;
-  background: black;
-  color: white;
-  border: 1px solid #333;
-}
-
-button {
-  margin-top: 5px;
-  padding: 6px;
-  background: #3b6ea5;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.post {
-  background: #121212;
-  border: 1px solid #333;
-  margin: 10px 0;
-  padding: 10px;
-}
-</style>
-
-</head>
-
-<body>
-
-<div class="topbar">🧱 Block Fan Forum</div>
-
-<div class="container">
-
-<!-- AUTH -->
-<div id="authBox" class="box">
-<h3>Login / Signup</h3>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="signup()">Sign Up</button>
-<button onclick="login()">Login</button>
-</div>
-
-<!-- FORUM -->
-<div id="forumBox" style="display:none;">
-
-<div class="box">
-<h3>Create Post</h3>
-
-<input id="user" placeholder="Username">
-<select id="category">
-  <option>General</option>
-  <option>Help</option>
-  <option>Off-topic</option>
-</select>
-
-<textarea id="msg" placeholder="Write post..."></textarea>
-<button onclick="createPost(user.value, msg.value, category.value)">Post</button>
-</div>
-
-<div class="box">
-<h3>Feedback</h3>
-<textarea id="fb" placeholder="Send feedback"></textarea>
-<button onclick="sendFeedback(currentUser, fb.value)">Send</button>
-</div>
-
-<div id="posts"></div>
-
-</div>
-
-</div>
-
-<!-- FIREBASE CORE -->
-<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
 import {
   getFirestore,
@@ -138,8 +33,11 @@ const auth = getAuth(app);
 let currentUser = null;
 
 // 🔐 AUTH
-window.signup = () => createUserWithEmailAndPassword(auth, email.value, pass.value);
-window.login = () => signInWithEmailAndPassword(auth, email.value, pass.value);
+window.signup = () =>
+  createUserWithEmailAndPassword(auth, email.value, pass.value);
+
+window.login = () =>
+  signInWithEmailAndPassword(auth, email.value, pass.value);
 
 onAuthStateChanged(auth, user => {
   if (user) {
@@ -147,35 +45,46 @@ onAuthStateChanged(auth, user => {
 
     authBox.style.display = "none";
     forumBox.style.display = "block";
+
+    createUserIfNew(user.email);
   }
 });
 
+// 👤 CREATE USER PROFILE
+async function createUserIfNew(email) {
+  await addDoc(collection(db, "users"), {
+    email,
+    role: "user",
+    joinDate: Date.now()
+  });
+}
+
 // 💬 POST
 window.createPost = async function(user, text, category) {
-  if (!text) return;
-
   await addDoc(collection(db, "posts"), {
     user,
     text,
     category,
     time: Date.now()
   });
-
-  msg.value = "";
 };
 
-// ⭐ FEEDBACK
-window.sendFeedback = async function(user, msg) {
-  await addDoc(collection(db, "feedback"), {
-    user,
-    msg,
+// 💬 REPLY
+window.reply = async function(postId) {
+  let text = prompt("Reply:");
+  if (!text) return;
+
+  await addDoc(collection(db, "replies"), {
+    postId,
+    text,
+    user: currentUser,
     time: Date.now()
   });
 };
 
 // 🚨 REPORT
 window.reportPost = async function(postId) {
-  let reason = prompt("Why report?");
+  let reason = prompt("Report reason:");
   if (!reason) return;
 
   await addDoc(collection(db, "reports"), {
@@ -184,13 +93,11 @@ window.reportPost = async function(postId) {
     user: currentUser,
     time: Date.now()
   });
-
-  alert("Reported!");
 };
 
-// 💌 MESSAGE (NEWS BUTTON)
+// 💌 MESSAGE SYSTEM
 window.openDM = async function(toUser) {
-  let text = prompt("Message to " + toUser);
+  let text = prompt("Message:");
   if (!text) return;
 
   await addDoc(collection(db, "messages"), {
@@ -199,8 +106,22 @@ window.openDM = async function(toUser) {
     text,
     time: Date.now()
   });
+};
 
-  alert("Sent!");
+// 🛡 ADMIN CHECK
+const admins = ["you@gmail.com"];
+function isAdmin(email) {
+  return admins.includes(email);
+}
+
+// 🗑 DELETE
+window.deletePost = async function(id) {
+  if (!isAdmin(currentUser)) {
+    alert("No permission");
+    return;
+  }
+
+  await deleteDoc(doc(db, "posts", id));
 };
 
 // 🔥 LOAD POSTS
@@ -221,14 +142,12 @@ onSnapshot(q, snap => {
       ${d.text}
       <br><br>
 
+      <button onclick="reply('${id}')">Reply</button>
       <button onclick="reportPost('${id}')">Report</button>
       <button onclick="openDM('${d.user}')">Message</button>
+      <button onclick="deletePost('${id}')">Delete</button>
     `;
 
     posts.appendChild(div);
   });
 });
-</script>
-
-</body>
-</html>
