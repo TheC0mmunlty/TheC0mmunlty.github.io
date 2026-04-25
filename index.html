@@ -32,7 +32,7 @@
     <div id="logged-out-view">
         <div class="auth-card">
             <h3 style="color: #0055ff; margin: 0 0 10px 0;">Forum Login</h3>
-            <input type="text" id="reg-username" placeholder="Username (New Users)">
+            <input type="text" id="reg-username" placeholder="Username (For Sign Up)">
             <input type="email" id="auth-email" placeholder="Email">
             <input type="password" id="auth-password" placeholder="Password">
             <select id="reg-gender">
@@ -48,7 +48,7 @@
 
     <div id="logged-in-view" class="hidden">
         <div style="background: #eee; padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;">
-            <span id="welcome-text" style="font-weight: bold;">Loading...</span>
+            <span id="welcome-text" style="font-weight: bold;">Syncing Profile...</span>
             <div>
                 <button class="btn btn-admin hidden" id="adminBtn">Admin Panel</button>
                 <button class="btn" id="logoutBtn">Logout</button>
@@ -57,14 +57,14 @@
 
         <div style="padding: 20px;">
             <div id="admin-panel" class="admin-dashboard hidden">
-                <h3>Admin Dashboard</h3>
+                <h3 style="margin-top:0;">Moderator Tools</h3>
                 <input type="text" id="admin-msg-input" placeholder="Banner text">
                 <button class="btn" id="updateAnnouncement">Update Banner</button>
             </div>
 
             <div class="forum-header">General Discussion - Post Message</div>
             <div style="padding: 10px; border: 1px solid #ccc; border-top: none;">
-                <textarea id="post-input" placeholder="Type here..."></textarea>
+                <textarea id="post-input" placeholder="What's on your mind?"></textarea>
                 <button class="btn" id="submitPost" style="margin-top:5px; font-weight: bold;">Post Message</button>
             </div>
 
@@ -93,18 +93,17 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // --- ADMIN PERMISSION ---
     const ADMIN_EMAIL = "fahid.001x@gmail.com"; 
 
-    let currentUsername = null; // Starts as null to prevent "undefined" error
+    let currentUsername = ""; 
 
-    // AUTH SIGNUP
+    // SIGN UP
     document.getElementById('signupBtn').onclick = async () => {
         const u = document.getElementById('reg-username').value;
         const e = document.getElementById('auth-email').value;
         const p = document.getElementById('auth-password').value;
         const g = document.getElementById('reg-gender').value;
-        if(!u || !e || !p) return alert("Fill all fields");
+        if(!u || !e || !p) return alert("Fill everything out!");
         try {
             const res = await createUserWithEmailAndPassword(auth, e, p);
             await set(ref(db, 'users/' + res.user.uid), { username: u, gender: g, email: e });
@@ -112,71 +111,74 @@
         } catch(err) { alert(err.message); }
     };
 
-    // LOGIN & LOGOUT
     document.getElementById('loginBtn').onclick = () => {
         signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value)
         .catch(err => alert(err.message));
     };
+
     document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-    // POSTING (FIXED UNDEFINED ERROR)
+    // POSTING
     document.getElementById('submitPost').onclick = async () => {
         const msg = document.getElementById('post-input').value;
         if(!msg) return alert("Type something!");
-        if(!currentUsername) return alert("Profile still loading, please wait 1 second...");
+        
+        // Final fallback if name is still empty
+        const finalAuthor = currentUsername || auth.currentUser.email;
 
         try {
             await push(ref(db, 'threads'), {
                 message: msg,
-                author: currentUsername,
+                author: finalAuthor,
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             });
             document.getElementById('post-input').value = "";
         } catch(err) { alert("Post Error: " + err.message); }
     };
 
-    // ADMIN TOOLS
+    // ADMIN BANNER
     document.getElementById('updateAnnouncement').onclick = async () => {
         const msg = document.getElementById('admin-msg-input').value;
         await set(ref(db, 'site_settings/announcement'), msg);
     };
+
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
 
-    // MAIN APP LOGIC
+    // OBSERVER
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             document.getElementById('logged-out-view').classList.add('hidden');
             document.getElementById('logged-in-view').classList.remove('hidden');
             document.getElementById('user-display').innerText = user.email;
 
-            // 1. Force Fetch Username
+            // Fetch Data
             const snap = await get(child(ref(db), `users/${user.uid}`));
-            if (snap.exists()) {
+            if (snap.exists() && snap.val().username) {
                 const data = snap.val();
                 currentUsername = data.username;
-                document.getElementById('welcome-text').innerText = `Welcome back, ${data.username}! [${data.gender}]`;
+                document.getElementById('welcome-text').innerText = `Welcome back, ${currentUsername}! [${data.gender}]`;
             } else {
-                currentUsername = user.email; // Fallback if DB is empty
-                document.getElementById('welcome-text').innerText = `Welcome, ${user.email}!`;
+                // If username is undefined, use email
+                currentUsername = user.email;
+                document.getElementById('welcome-text').innerText = `Welcome back, ${currentUsername}!`;
             }
 
-            // 2. Admin Logic
             if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
                 document.getElementById('adminBtn').classList.remove('hidden');
             }
 
-            // 3. Sync Posts
+            // Sync Threads
             onValue(ref(db, 'threads'), (s) => {
                 const display = document.getElementById('thread-display');
                 display.innerHTML = "";
                 s.forEach((childSnap) => {
                     const post = childSnap.val();
-                    const postHTML = `<div class="thread-row"><span>${post.message}</span><span class="thread-author">By: <b>${post.author || 'Guest'}</b> at ${post.time || 'unknown'}</span></div>`;
+                    const postHTML = `<div class="thread-row"><span>${post.message}</span><span class="thread-author">By: <b>${post.author}</b> at ${post.time || 'now'}</span></div>`;
                     display.insertAdjacentHTML('afterbegin', postHTML);
                 });
             });
 
-            // 4. Sync Banner
+            // Sync Banner
             onValue(ref(db, 'site_settings/announcement'), (s) => {
                 const banner = document.getElementById('announcement-banner');
                 if(s.exists() && s.val() !== "") {
