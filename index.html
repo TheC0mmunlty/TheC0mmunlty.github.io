@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Rebuilt Social Forum</title>
+<title>Stable Forum System</title>
 
 <style>
 body {
@@ -24,19 +24,10 @@ body {
   cursor:pointer;
 }
 
-.menu button {
-  margin-left:5px;
-  padding:5px;
-}
-
-/* SECTIONS */
-.section {
-  display:none;
+.container {
   width:850px;
   margin:20px auto;
 }
-
-.active { display:block; }
 
 .box {
   background:white;
@@ -52,53 +43,50 @@ body {
   margin-top:10px;
 }
 
-input, textarea {
-  width:100%;
-  margin-top:5px;
+/* CHAT */
+#chatBox {
+  position:fixed;
+  right:10px;
+  bottom:10px;
+  width:300px;
+  height:350px;
+  background:white;
+  border:2px solid #333;
+  display:flex;
+  flex-direction:column;
+}
+
+#messages {
+  flex:1;
+  overflow:auto;
   padding:5px;
 }
 
-.badge {
-  font-size:12px;
-  color:green;
+.msg {
+  margin:3px;
+  padding:4px;
+  background:#f1f1f1;
+}
+
+input, textarea {
+  width:100%;
+  padding:5px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
-
 <img class="logo"
-src="https://cdn.discordapp.com/attachments/1495473511836291142/1497459975067275389/Logo.png"
-onclick="show('posts')">
+src="https://cdn.discordapp.com/attachments/1495473511836291142/1497459975067275389/Logo.png">
 
-<span>Social Forum</span>
-
-<div class="menu">
-<button onclick="show('posts')">Posts</button>
-<button onclick="show('friends')">Friends</button>
-<button onclick="show('clans')">Clans</button>
-<button onclick="show('admin')">Admin</button>
+<span>Stable Forum</span>
 </div>
 
-</div>
-
-<!-- LOGIN -->
-<div id="login" class="section active">
-<div class="box">
-<h3>Login</h3>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-<button onclick="signup()">Signup</button>
-</div>
-</div>
+<div class="container">
 
 <!-- POSTS -->
-<div id="posts" class="section">
-
 <div class="box">
 <h3>Create Post</h3>
 <textarea id="postInput"></textarea>
@@ -109,31 +97,18 @@ onclick="show('posts')">
 
 </div>
 
-<!-- FRIENDS -->
-<div id="friends" class="section">
-<div class="box">
-<h3>Friends</h3>
-<div id="friendList"></div>
-</div>
+<!-- CHAT -->
+<div id="chatBox">
+
+<div style="background:#3b4f6b;color:white;padding:5px;">
+Chat
 </div>
 
-<!-- CLANS -->
-<div id="clans" class="section">
-<div class="box">
-<h3>Clans</h3>
-<input id="clanName" placeholder="Clan name">
-<button onclick="createClan()">Create Clan</button>
-<div id="clanList"></div>
-</div>
-</div>
+<div id="messages"></div>
 
-<!-- ADMIN -->
-<div id="admin" class="section">
-<div class="box">
-<h3>Admin Dashboard</h3>
-<textarea id="announce"></textarea>
-<button onclick="postAnnouncement()">Post Announcement</button>
-</div>
+<input id="chatInput" placeholder="Message...">
+<button onclick="sendMsg()">Send</button>
+
 </div>
 
 <script type="module">
@@ -145,14 +120,9 @@ import {
   addDoc,
   getDocs,
   query,
-  orderBy
+  orderBy,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 
 /* FIREBASE */
 const firebaseConfig = {
@@ -166,108 +136,100 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
-/* CENSOR SYSTEM */
-function censor(text){
-  const badWords = ["badword1","badword2","fuck","shit","nigger","cunt"];
-  let out = text;
+/* SAFE GLOBALS */
+window.currentUser = "Player";
+window.currentChat = "global";
 
-  badWords.forEach(w=>{
-    let regex = new RegExp(w,"gi");
-    out = out.replace(regex,"****");
-  });
+/* ======================
+   POSTS (FIXED)
+====================== */
 
-  return out;
-}
+window.createPost = async function () {
 
-/* NAV */
-window.show = function(id){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-};
+  const input = document.getElementById("postInput");
 
-/* AUTH */
-window.signup = async function(){
-  await createUserWithEmailAndPassword(auth,email.value,pass.value);
-  show("posts");
-};
-
-window.login = async function(){
-  await signInWithEmailAndPassword(auth,email.value,pass.value);
-  show("posts");
-};
-
-/* POSTS */
-window.createPost = async function(){
-
-  if(!postInput.value) return;
+  if (!input.value.trim()) return;
 
   await addDoc(collection(db,"posts"),{
-    text:censor(postInput.value),
-    user:email.value,
-    time:Date.now()
+    text: input.value,
+    user: window.currentUser,
+    time: Date.now()
   });
 
-  postInput.value="";
+  input.value = "";
   loadPosts();
 };
 
-async function loadPosts(){
-  let snap = await getDocs(query(collection(db,"posts"),orderBy("time","desc")));
+async function loadPosts() {
 
-  postList.innerHTML="";
+  const q = query(collection(db,"posts"), orderBy("time","desc"));
+  const snap = await getDocs(q);
 
-  snap.forEach(d=>{
-    let p=d.data();
+  const list = document.getElementById("postList");
+  list.innerHTML = "";
 
-    let div=document.createElement("div");
-    div.className="post";
+  snap.forEach(d => {
+    const p = d.data();
+
+    const div = document.createElement("div");
+    div.className = "post";
 
     div.innerHTML = `<b>${p.user}</b><br>${p.text}`;
 
-    postList.appendChild(div);
+    list.appendChild(div);
   });
 }
+
 loadPosts();
 
-/* FRIENDS (basic structure) */
-async function loadFriends(){
-  friendList.innerHTML="Friend system ready for expansion";
-}
-loadFriends();
+/* ======================
+   CHAT (FIXED)
+====================== */
 
-/* CLANS */
-window.createClan = async function(){
-  await addDoc(collection(db,"clans"),{
-    name:clanName.value,
-    owner:email.value
+window.sendMsg = async function () {
+
+  const input = document.getElementById("chatInput");
+
+  if (!input.value.trim()) return;
+
+  await addDoc(collection(db,"messages"),{
+    room: "global",
+    from: window.currentUser,
+    text: input.value,
+    time: Date.now()
   });
 
-  loadClans();
+  input.value = "";
 };
 
-async function loadClans(){
-  let snap = await getDocs(collection(db,"clans"));
+function loadChat() {
 
-  clanList.innerHTML="";
+  const q = query(collection(db,"messages"), orderBy("time"));
 
-  snap.forEach(d=>{
-    let c=d.data();
-    let div=document.createElement("div");
+  onSnapshot(q, snap => {
 
-    div.className="post";
-    div.innerText="⚔ "+c.name+" (Owner: "+c.owner+")";
+    const box = document.getElementById("messages");
+    box.innerHTML = "";
 
-    clanList.appendChild(div);
+    snap.forEach(d => {
+      const m = d.data();
+
+      if (m.room === "global") {
+        const div = document.createElement("div");
+        div.className = "msg";
+
+        div.innerHTML = `<b>${m.from}</b>: ${m.text}`;
+
+        box.appendChild(div);
+      }
+    });
+
+    box.scrollTop = box.scrollHeight;
   });
 }
-loadClans();
 
-/* ANNOUNCEMENT */
-window.postAnnouncement = async function(){
-  alert("Admin system ready (hooked)");
-};
+loadChat();
 
 </script>
 
