@@ -124,23 +124,6 @@
       box-shadow: 3px 3px 0 #000;
     }
 
-    .letter-avatar {
-      width: 68px;
-      height: 68px;
-      background: #003399;
-      color: #ffcc00;
-      border: 4px solid #ffcc00;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: bold;
-      float: left;
-      margin-right: 15px;
-      border-radius: 6px;
-      box-shadow: 3px 3px 0 #000;
-    }
-
     .logged-in { 
       float: right; 
       color: #ffcc00; 
@@ -149,7 +132,7 @@
       cursor: pointer;
     }
 
-    .clickable { cursor: pointer; color: #003399; text-decoration: underline; }
+    .admin-panel { padding: 20px; background: #f8f8f8; border: 4px solid #ff0000; }
   </style>
 </head>
 <body>
@@ -162,7 +145,7 @@
     <a onclick="showCategory('offtopic')">Off Topic</a>
     <a onclick="showCategory('suggestions')">Suggestions</a>
     <a onclick="showFriends()">Friends</a>
-    <a onclick="showAdminPanel()" id="admin-link" style="display:none; color:#ffff00;">Admin</a>
+    <a onclick="showAdminPanel()" id="admin-link" style="display:none; color:#ffff00; font-weight:bold;">Admin</a>
     <span class="logged-in" id="username-display" onclick="showProfile()">Not logged in</span>
   </div>
 
@@ -192,18 +175,38 @@
       <button onclick="createThread()">Post Thread</button>
     </div>
 
+    <!-- Threads List -->
     <div id="threads-list"></div>
 
+    <!-- Thread View -->
     <div id="thread-view" style="display:none;">
       <button onclick="backToList()" style="margin:15px 20px;">← Back to List</button>
       <div id="original-post" class="post"></div>
       <div id="replies-list"></div>
 
       <div style="margin:20px; padding:18px; background:#f8f8f8; border:4px solid #003399;">
-        <h3>Reply</h3>
-        <textarea id="reply-content" rows="4" placeholder="Write your reply..."></textarea>
+        <h3>Reply to this thread</h3>
+        <textarea id="reply-content" rows="4" placeholder="Write your reply here..."></textarea>
         <button onclick="postReply()">Post Reply</button>
       </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-page" class="admin-panel" style="display:none;">
+      <h3>🔧 Admin Dashboard</h3>
+      
+      <div style="margin-bottom:25px;">
+        <h4>Post Announcement</h4>
+        <input type="text" id="announcement-input" placeholder="Type announcement here..." style="width:70%;">
+        <button onclick="postAnnouncement()">Post Announcement</button>
+      </div>
+
+      <div>
+        <h4>All Threads (Click Delete to remove)</h4>
+        <div id="admin-threads-list" style="background:white; padding:10px; border:2px solid #003399;"></div>
+      </div>
+
+      <button onclick="backToMain()" style="margin-top:20px;">Back to Forum</button>
     </div>
   </div>
 
@@ -225,27 +228,32 @@
     let currentCategory = 'general';
     let currentThreadId = null;
     let currentUser = null;
+    const OWNER_EMAIL = "fahid.001x@gmail.com";   // ← CHANGE THIS TO YOUR REAL EMAIL
 
-    // CHANGE THIS TO YOUR EMAIL
-    const OWNER_EMAIL = "fahid.001x@gmail.com";   // ← Put your real email here
-
-    const defaultAvatar = "https://i.imgur.com/R4Qq6S8.png"; // Your hat avatar
+    const defaultAvatar = "https://i.imgur.com/R4Qq6S8.png";
 
     function getAvatarHtml() {
-      return `<img src="${defaultAvatar}" class="avatar">`;
+      return `<img src="${defaultAvatar}" class="avatar" onerror="this.style.display='none'">`;
     }
 
     function showCategory(cat) {
       currentCategory = cat;
       const names = { general: "General Discussion", help: "Help & Support", offtopic: "Off Topic", suggestions: "Suggestions" };
       document.getElementById("current-category").textContent = names[cat];
-      document.getElementById("thread-view").style.display = "none";
+      hideAllPages();
       document.getElementById("threads-list").style.display = "block";
       loadThreads();
     }
 
+    function hideAllPages() {
+      document.getElementById("auth-box").style.display = "none";
+      document.getElementById("new-thread-box").style.display = "none";
+      document.getElementById("thread-view").style.display = "none";
+      document.getElementById("admin-page").style.display = "none";
+    }
+
     function loadThreads() {
-      document.getElementById("threads-list").innerHTML = "<p style='padding:40px;text-align:center'>Loading...</p>";
+      document.getElementById("threads-list").innerHTML = "<p style='padding:40px;text-align:center'>Loading threads...</p>";
 
       database.ref(currentCategory + '/threads').on('value', (snapshot) => {
         const data = snapshot.val();
@@ -255,12 +263,15 @@
             const t = data[key];
             html += `
               <div class="thread" onclick="openThread('${key}')">
-                <div class="thread-title">${t.title}</div>
-                <div class="thread-meta">Posted by <span class="clickable" onclick="event.stopImmediatePropagation(); showProfilePopup('${t.author}')">${t.author}</span></div>
+                ${getAvatarHtml()}
+                <div style="margin-left:80px">
+                  <div class="thread-title">${t.title}</div>
+                  <div class="thread-meta">Posted by ${t.author}</div>
+                </div>
               </div>`;
           });
         } else {
-          html = `<p style="padding:40px;text-align:center;color:#666">No threads yet. Be the first!</p>`;
+          html = `<p style="padding:40px;text-align:center;color:#666">No threads yet. Be the first to post!</p>`;
         }
         document.getElementById("threads-list").innerHTML = html;
       });
@@ -282,13 +293,13 @@
       }).then(() => {
         document.getElementById("thread-title").value = '';
         document.getElementById("thread-content").value = '';
-        alert("✅ Thread posted!");
+        alert("✅ Thread posted successfully!");
       });
     }
 
     function openThread(threadId) {
       currentThreadId = threadId;
-      document.getElementById("threads-list").style.display = "none";
+      hideAllPages();
       document.getElementById("thread-view").style.display = "block";
 
       database.ref(currentCategory + '/threads/' + threadId).once('value', (snap) => {
@@ -299,7 +310,7 @@
           ${getAvatarHtml()}
           <div style="margin-left:80px">
             <strong style="font-size:18px">${thread.title}</strong><br>
-            by <span class="clickable" onclick="showProfilePopup('${thread.author}')">${thread.author}</span><br><br>
+            by ${thread.author}<br><br>
             ${thread.content || ''}
           </div>
         `;
@@ -324,7 +335,7 @@
               </div>`;
           });
         }
-        document.getElementById("replies-list").innerHTML = html || '<p style="padding:20px;text-align:center;color:#666">No replies yet.</p>';
+        document.getElementById("replies-list").innerHTML = html || '<p style="padding:20px;text-align:center;color:#666">No replies yet. Be the first!</p>';
       });
     }
 
@@ -350,15 +361,67 @@
       document.getElementById("threads-list").style.display = "block";
     }
 
-    function showProfilePopup(username) {
-      let isAdmin = (currentUser && currentUser.email === OWNER_EMAIL) ? " [ADMIN]" : "";
-      alert(`Profile of ${username}${isAdmin}\n\nThis will be expanded later with friends, avatar, etc.`);
+    function showAdminPanel() {
+      if (!currentUser || currentUser.email !== OWNER_EMAIL) {
+        alert("You are not the admin!");
+        return;
+      }
+      hideAllPages();
+      document.getElementById("admin-page").style.display = "block";
+      document.getElementById("current-category").textContent = "Admin Dashboard";
+      loadAdminThreads();
+    }
+
+    function loadAdminThreads() {
+      const container = document.getElementById("admin-threads-list");
+      container.innerHTML = "Loading threads...";
+
+      database.ref('general/threads').once('value', (snapshot) => {   // You can expand to all categories later
+        const data = snapshot.val();
+        let html = '';
+        if (data) {
+          Object.keys(data).forEach(key => {
+            const t = data[key];
+            html += `
+              <div style="border-bottom:1px solid #ccc; padding:10px;">
+                <strong>${t.title}</strong> by ${t.author}<br>
+                <button onclick="deleteThread('${key}')" style="background:red; color:white; border:none; padding:5px 10px;">Delete Thread</button>
+              </div>`;
+          });
+        } else {
+          html = "<p>No threads found.</p>";
+        }
+        container.innerHTML = html;
+      });
+    }
+
+    function deleteThread(threadId) {
+      if (confirm("Delete this thread permanently?")) {
+        database.ref('general/threads/' + threadId).remove()
+          .then(() => {
+            alert("Thread deleted!");
+            loadAdminThreads();
+          });
+      }
+    }
+
+    function postAnnouncement() {
+      const text = document.getElementById("announcement-input").value.trim();
+      if (!text) return alert("Write an announcement!");
+      
+      database.ref('announcement').set({
+        text: text,
+        timestamp: Date.now()
+      }).then(() => {
+        alert("Announcement posted!");
+        document.getElementById("announcement-input").value = '';
+      });
     }
 
     function showProfile() {
       if (currentUser) {
-        let rank = (currentUser.email === OWNER_EMAIL) ? " [ADMIN]" : "";
-        alert(`Logged in as: ${currentUser.email}${rank}`);
+        const rank = (currentUser.email === OWNER_EMAIL) ? " [ADMIN]" : "";
+        alert(`Profile of ${currentUser.email.split('@')[0]}${rank}\n\nMore features coming soon.`);
       }
     }
 
@@ -366,12 +429,9 @@
       alert("Friends List\n\nThis feature is coming soon!");
     }
 
-    function showAdminPanel() {
-      if (!currentUser || currentUser.email !== OWNER_EMAIL) {
-        alert("You are not the admin!");
-        return;
-      }
-      alert("Admin Dashboard\n\nYou can delete posts here in future updates.");
+    function backToMain() {
+      document.getElementById("admin-page").style.display = "none";
+      showCategory('general');
     }
 
     function signUp() {
@@ -392,7 +452,7 @@
         .then((userCredential) => {
           currentUser = userCredential.user;
           document.getElementById("admin-link").style.display = (currentUser.email === OWNER_EMAIL) ? "inline" : "none";
-          alert("Logged in successfully!");
+          alert("✅ Logged in successfully!");
         })
         .catch(err => alert("Login Error: " + err.message));
     }
