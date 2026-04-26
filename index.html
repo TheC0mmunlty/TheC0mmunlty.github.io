@@ -18,7 +18,7 @@
             width: 100%;
             padding: 6px 0;
             text-align: center;
-            display: none; /* Only shows when an admin sets a message */
+            display: none; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
         .announcement-text { 
@@ -26,7 +26,6 @@
             font-size: 14px; 
             color: #fff; 
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .main-wrapper { width: 900px; margin: 20px auto; background: #fff; border: 1px solid #888; min-height: 800px; box-shadow: 0px 0px 20px rgba(0,0,0,0.5); position: relative; }
@@ -54,6 +53,7 @@
         #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 100; justify-content: center; align-items: center; }
         .profile-card { background: white; padding: 20px; border: 2px solid #555; width: 350px; text-align: center; border-radius: 8px; }
         .bio-box { background: #f4f4f4; border: 1px solid #ddd; padding: 10px; margin: 10px 0; font-size: 12px; color: #333; text-align: left; border-radius: 4px; min-height: 50px; }
+        .uid-display { font-size: 10px; color: #888; margin-top: 10px; word-break: break-all; background: #eee; padding: 5px; border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -91,14 +91,13 @@
         <div id="admin-panel" class="hidden" style="border: 2px dashed orange; padding: 15px; margin: 15px; background: #fffdf0;">
             <strong>Staff Controls</strong><br>
             <input type="text" id="announce-text" placeholder="Set Announcement (2012 Style)" style="width: 80%;">
-            <div style="margin-top: 10px;">
-                <button class="btn btn-admin" id="postAnnounce">Update Banner</button>
-                <button class="btn btn-danger" id="clearAnnounce">Remove Banner</button>
-            </div>
+            <button class="btn btn-admin" id="postAnnounce">Update Banner</button>
+            <button class="btn btn-danger" id="clearAnnounce">X</button>
             <hr>
-            <input type="text" id="target-uid" placeholder="Target UID">
-            <button class="btn btn-danger" id="applyBan">Ban</button>
+            <input type="text" id="target-uid" placeholder="User UID (Auto-fills on click)">
+            <button class="btn btn-danger" id="applyBan">Ban User</button>
             <button class="btn btn-admin" id="applyAdmin">Promote</button>
+            <button class="btn" id="applyUnrank">Unrank</button>
         </div>
 
         <div style="padding: 15px;">
@@ -116,6 +115,7 @@
         <p id="p-id" style="color: #d00; font-weight: bold; font-size: 11px;"></p>
         <div id="p-bio" class="bio-box"></div>
         <button id="edit-bio-btn" class="btn hidden">Edit Bio</button>
+        <div id="p-uid-display" class="uid-display"></div>
         <hr>
         <button class="btn" onclick="document.getElementById('profile-overlay').style.display='none'">Close</button>
     </div>
@@ -145,7 +145,7 @@
         if (user) {
             const banSnap = await get(child(ref(db), `bans/${user.uid}`));
             if(banSnap.exists()){
-                document.body.innerHTML = `<div style="background:black; color:white; height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column;"><h1>BANNED</h1><p>Reason: ${banSnap.val().reason}</p></div>`;
+                document.body.innerHTML = `<div style="background:black; color:white; height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center; font-family:Impact;"><h1>ACCESS DENIED</h1><p>REASON: ${banSnap.val().reason}</p></div>`;
                 return;
             }
             document.getElementById('logged-in-view').classList.remove('hidden');
@@ -155,11 +155,10 @@
             const userData = snap.val();
             document.getElementById('welcome-text').innerText = "Logged in: " + (userData ? userData.username : "User");
             
-            if(user.email.toLowerCase() === OWNER_EMAIL || (userData && userData.rank === "admin")) {
+            if(user.email.toLowerCase() === OWNER_EMAIL || (userData && (userData.rank === "admin" || userData.rank === "owner"))) {
                 document.getElementById('adminBtn').classList.remove('hidden');
             }
 
-            // Sync the 2012 Banner
             onValue(ref(db, 'announcement'), (s) => {
                 const container = document.getElementById('announcement-container');
                 const display = document.getElementById('announcement-display');
@@ -198,14 +197,20 @@
             const d = snap.val();
             document.getElementById('p-name').innerText = d.username;
             document.getElementById('p-id').innerText = "Forum ID: #" + (d.player_id || "???");
-            document.getElementById('p-bio').innerText = d.bio || "This user is too mysterious for a bio.";
+            document.getElementById('p-bio').innerText = d.bio || "No bio set.";
+            document.getElementById('p-uid-display').innerText = "UID: " + uid;
             document.getElementById('profile-overlay').style.display = 'flex';
             
+            // Auto-fill Admin Box
+            if(!document.getElementById('adminBtn').classList.contains('hidden')) {
+                document.getElementById('target-uid').value = uid;
+            }
+
             const editBtn = document.getElementById('edit-bio-btn');
             if(uid === auth.currentUser.uid) {
                 editBtn.classList.remove('hidden');
                 editBtn.onclick = () => {
-                    const newBio = prompt("What's your story?", d.bio || "");
+                    const newBio = prompt("Edit your bio:", d.bio || "");
                     if(newBio !== null) {
                         update(ref(db, `users/${uid}`), { bio: newBio });
                         document.getElementById('p-bio').innerText = newBio;
@@ -220,6 +225,19 @@
         if(txt) set(ref(db, 'announcement'), { text: txt });
     };
     document.getElementById('clearAnnounce').onclick = () => remove(ref(db, 'announcement'));
+    document.getElementById('applyBan').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        const reason = prompt("Ban reason?");
+        if(uid && reason) set(ref(db, `bans/${uid}`), { reason: reason }).then(()=>alert("User Banned"));
+    };
+    document.getElementById('applyAdmin').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        if(uid) update(ref(db, `users/${uid}`), { rank: "admin" }).then(()=>alert("Promoted"));
+    };
+    document.getElementById('applyUnrank').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        if(uid) update(ref(db, `users/${uid}`), { rank: "member" }).then(()=>alert("Unranked"));
+    };
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
     document.getElementById('submitPost').onclick = () => {
