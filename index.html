@@ -8,9 +8,8 @@
         header { background: #000; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #555; }
         .main-wrapper { width: 900px; margin: 30px auto; background: #fff; border: 1px solid #888; min-height: 800px; box-shadow: 0px 0px 20px rgba(0,0,0,0.5); position: relative; }
         
-        /* Rank Styles */
-        .owner-name { color: #FF0000 !important; font-weight: bold; text-shadow: 0px 0px 2px rgba(255,0,0,0.3); }
-        .rank-icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 4px; }
+        .owner-name { color: #FF0000 !important; font-weight: bold; }
+        .rank-icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 5px; }
         
         .auth-card { width: 400px; margin: 80px auto; border: 1px solid #0055ff; background: #f0f5ff; padding: 20px; text-align: center; }
         input, select, textarea { width: 90%; padding: 6px; margin: 5px 0; border: 1px solid #999; font-size: 12px; }
@@ -20,34 +19,25 @@
         .btn { background: #e1e1e1; border: 1px solid #777; padding: 4px 10px; cursor: pointer; font-size: 11px; }
         .btn-admin { background: #ffcc00; font-weight: bold; border-color: #b89600; }
         .btn-danger { background: #ff4444; color: white; border: 1px solid #800; }
+        .btn-success { background: #28a745; color: white; border: 1px solid #1e7e34; }
         .hidden { display: none !important; }
-        #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 100; justify-content: center; align-items: center; }
-        .profile-card { background: white; padding: 20px; border: 2px solid #555; width: 350px; text-align: center; box-shadow: 5px 5px 0px #000; }
-        #ban-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #900; color: #fff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 100; justify-content: center; align-items: center; }
+        .profile-card { background: white; padding: 20px; border: 2px solid #555; width: 350px; text-align: center; }
+        #ban-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #900; color: #fff; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="ban-view" class="hidden">
-    <h1 style="font-family: Arial Black; font-size: 40px;">BANNED</h1>
-    <p id="ban-reason-text" style="font-size: 20px;"></p>
+    <h1 style="font-family: Arial Black; font-size: 50px;">BANNED</h1>
+    <p id="ban-reason-text" style="font-size: 24px;"></p>
+    <p style="margin-top: 20px;">Your access has been revoked.</p>
 </div>
 
 <header>
     <div style="font-weight:bold; font-size: 18px;">THE ROBLOXIANS FORUM</div>
     <div id="user-display" style="font-size: 11px; color: #ccc;">Guest</div>
 </header>
-
-<div id="profile-overlay">
-    <div class="profile-card">
-        <h2 id="p-name">User Profile</h2>
-        <p id="p-id" style="font-size: 12px; color: #d00; font-weight: bold;"></p> 
-        <p id="p-gender" style="color: #666; font-size: 12px;"></p>
-        <p id="p-uid-hidden" style="font-size: 10px; color: #aaa;"></p>
-        <hr>
-        <button class="btn" onclick="document.getElementById('profile-overlay').style.display='none'">Close</button>
-    </div>
-</div>
 
 <div class="main-wrapper">
     <div id="logged-out-view" class="hidden">
@@ -74,19 +64,34 @@
         </div>
 
         <div id="admin-panel" class="hidden" style="border: 2px dashed orange; padding: 15px; margin: 15px; background: #fffdf0;">
-            <strong>Admin Tools</strong><br>
-            <input type="text" id="target-uid" placeholder="User UID" style="width: 80%;"><br>
-            <button class="btn btn-admin" id="applyBan">Ban User</button>
+            <strong>Moderation Tools</strong><br>
+            <input type="text" id="target-uid" placeholder="User UID" style="width: 80%; margin-top:5px;"><br>
+            <div style="margin-top: 10px;">
+                <button class="btn btn-danger" id="applyBan">Ban</button>
+                <button class="btn btn-success" id="applyUnban">Unban</button>
+                <button class="btn btn-admin" id="applyAdmin">Make Admin</button>
+            </div>
         </div>
 
         <div style="padding: 15px;">
             <div class="forum-header">General Discussion</div>
             <div style="padding: 15px; border: 1px solid #ccc; background: #f9f9f9;">
-                <textarea id="post-input" placeholder="No swearing!"></textarea><br>
-                <button class="btn" id="submitPost" style="margin-top:8px; font-weight: bold;">Post Message</button>
+                <textarea id="post-input" placeholder="Type here..."></textarea><br>
+                <button class="btn" id="submitPost" style="margin-top:8px; font-weight: bold;">Post</button>
             </div>
             <div id="thread-display"></div>
         </div>
+    </div>
+</div>
+
+<div id="profile-overlay">
+    <div class="profile-card">
+        <h2 id="p-name">Profile</h2>
+        <p id="p-id" style="font-size: 12px; color: #d00; font-weight: bold;"></p> 
+        <p id="p-gender" style="color: #666; font-size: 12px;"></p>
+        <p id="p-uid-hidden" style="font-size: 10px; color: #aaa;"></p>
+        <hr>
+        <button class="btn" onclick="document.getElementById('profile-overlay').style.display='none'">Close</button>
     </div>
 </div>
 
@@ -110,9 +115,9 @@
     const db = getDatabase(app);
     const OWNER_EMAIL = "fahid.001x@gmail.com"; 
 
-    // --- PASTE YOUR IMAGE LINKS HERE ---
-    const OWNER_ICON = "https://i.imgur.com/your_owner_image.png"; 
-    const ADMIN_ICON = "https://i.imgur.com/your_admin_image.png";
+    // Replace with your uploaded image URLs
+    const OWNER_ICON = "https://imgur.com/a/cUzaTFG"; 
+    const ADMIN_ICON = "https://imgur.com/a/cUzaTFG";
 
     const badWords = ["fuck", "shit", "ass", "bitch", "crap", "nigger", "retard", "faggot", "cum", "kys", "kill yourself", "porn", "gooner", "nigga", "asshole", "shitting", "groom", "rape", "raped","dick", "xnxx", "faggoter", "cock", "fag", "dounche", "dounchebag"];
     const filterText = (text) => {
@@ -126,13 +131,22 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            const banSnap = await get(child(ref(db), `bans/${user.uid}`));
+            if(banSnap.exists()){
+                document.getElementById('logged-in-view').classList.add('hidden');
+                document.getElementById('ban-view').classList.remove('hidden');
+                document.getElementById('ban-reason-text').innerText = "Reason: " + banSnap.val().reason;
+                return;
+            }
+
             const snap = await get(child(ref(db), `users/${user.uid}`));
             let userData = snap.val();
 
-            // Fix Owner ID
-            if(user.email.toLowerCase() === OWNER_EMAIL.toLowerCase() && (!userData || userData.player_id !== 1)) {
-                await update(ref(db, `users/${user.uid}`), { player_id: 1, rank: "owner" });
-                userData = (await get(child(ref(db), `users/${user.uid}`))).val();
+            if(user.email.toLowerCase() === OWNER_EMAIL.toLowerCase()) {
+                if(!userData || userData.rank !== "owner") {
+                    await update(ref(db, `users/${user.uid}`), { player_id: 1, rank: "owner" });
+                    userData = (await get(child(ref(db), `users/${user.uid}`))).val();
+                }
             }
 
             document.getElementById('welcome-text').innerText = "Welcome, " + (userData ? userData.username : "User");
@@ -145,33 +159,30 @@
             loadThreads(isStaff);
         } else {
             document.getElementById('logged-out-view').classList.remove('hidden');
+            document.getElementById('logged-in-view').classList.add('hidden');
+            document.getElementById('ban-view').classList.add('hidden');
         }
     });
 
-    function loadThreads(isStaff) {
+    async function loadThreads(isStaff) {
         onValue(ref(db, 'threads'), async (s) => {
             const d = document.getElementById('thread-display'); d.innerHTML = "";
-            const threads = [];
-            s.forEach(c => threads.push({id: c.key, ...c.val()}));
+            let threads = [];
+            s.forEach(c => { threads.push({id: c.key, ...c.val()}); });
+            threads.reverse();
 
-            for (const p of threads.reverse()) {
-                const userSnap = await get(child(ref(db), `users/${p.uid}`));
-                const userD = userSnap.val();
-                
-                let nameClass = "";
-                let iconHtml = "";
-
-                if (userD && userD.rank === "owner") {
-                    nameClass = "owner-name";
-                    iconHtml = `<img src="${OWNER_ICON}" class="rank-icon">`;
-                } else if (userD && userD.rank === "admin") {
-                    iconHtml = `<img src="${ADMIN_ICON}" class="rank-icon">`;
-                }
+            for (let p of threads) {
+                const uSnap = await get(child(ref(db), `users/${p.uid}`));
+                const uD = uSnap.val();
+                let nameStyle = (uD && uD.rank === "owner") ? "owner-name" : "";
+                let icon = "";
+                if(uD && uD.rank === "owner") icon = `<img src="${OWNER_ICON}" class="rank-icon">`;
+                else if(uD && uD.rank === "admin") icon = `<img src="${ADMIN_ICON}" class="rank-icon">`;
 
                 const row = document.createElement('div');
                 row.className = 'thread-row';
                 row.innerHTML = `
-                    <div>${iconHtml}<span class="clickable-name ${nameClass}" onclick="openProfile('${p.uid}')">${p.author}</span>: <span>${p.message}</span></div>
+                    <div>${icon}<span class="clickable-name ${nameStyle}" onclick="openProfile('${p.uid}')">${p.author}</span>: <span>${p.message}</span></div>
                     ${(p.uid === auth.currentUser.uid || isStaff) ? `<button class="btn" onclick="deletePost('${p.id}')" style="color:red; border:none; background:none;">[x]</button>` : ""}
                 `;
                 d.appendChild(row);
@@ -192,16 +203,26 @@
         }
     };
 
+    document.getElementById('applyBan').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        const reason = prompt("Ban Reason:");
+        if(uid && reason) set(ref(db, `bans/${uid}`), { reason: reason }).then(() => alert("Banned."));
+    };
+
+    document.getElementById('applyUnban').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        if(uid) remove(ref(db, `bans/${uid}`)).then(() => alert("Unbanned."));
+    };
+
+    document.getElementById('applyAdmin').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        if(uid) update(ref(db, `users/${uid}`), { rank: "admin" }).then(() => alert("Promoted."));
+    };
+
     document.getElementById('submitPost').onclick = () => {
         const msg = document.getElementById('post-input').value.trim();
         if(msg) push(ref(db, 'threads'), { message: filterText(msg), author: document.getElementById('welcome-text').innerText.replace("Welcome, ", ""), uid: auth.currentUser.uid });
         document.getElementById('post-input').value = "";
-    };
-
-    document.getElementById('applyBan').onclick = () => {
-        const uid = document.getElementById('target-uid').value;
-        const reason = prompt("Enter Ban Reason:");
-        if(uid && reason) { set(ref(db, `bans/${uid}`), { reason: reason }); alert("Banned!"); }
     };
 
     document.getElementById('signupBtn').onclick = async () => {
@@ -209,16 +230,16 @@
         const e = document.getElementById('auth-email').value.trim();
         const p = document.getElementById('auth-password').value;
         const g = document.getElementById('reg-gender').value;
-        const result = await runTransaction(ref(db, 'global_id_counter'), (c) => (c || 0) + 1);
+        const resTransaction = await runTransaction(ref(db, 'global_id_counter'), (c) => (c || 0) + 1);
         const res = await createUserWithEmailAndPassword(auth, e, p);
-        await set(ref(db, 'users/' + res.user.uid), { username: u, gender: g, email: e, rank: "member", player_id: result.snapshot.val() });
+        await set(ref(db, 'users/' + res.user.uid), { username: u, gender: g, email: e, rank: "member", player_id: resTransaction.snapshot.val() });
         location.reload();
     };
 
     document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value);
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
-    window.deletePost = (id) => remove(ref(db, `threads/${id}`));
+    window.deletePost = (id) => { if(confirm("Delete?")) remove(ref(db, `threads/${id}`)); };
 </script>
 </body>
 </html>
