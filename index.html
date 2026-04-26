@@ -138,7 +138,7 @@
             const userData = snap.val();
             document.getElementById('welcome-text').innerText = "Logged in: " + (userData ? userData.username : "User");
             
-            // FIX: Ensure you ALWAYS have access if you are the owner
+            // ADMIN ACCESS PROTECTION
             if(user.email.toLowerCase() === OWNER_EMAIL || (userData && userData.rank === "admin")) {
                 isStaff = true;
                 document.getElementById('adminBtn').classList.remove('hidden');
@@ -175,15 +175,18 @@
 
     async function loadThreads() {
         onValue(ref(db, 'threads'), async (s) => {
-            const d = document.getElementById('thread-display'); d.innerHTML = "";
-            let threads = []; s.forEach(c => { threads.push({id: c.key, ...c.val()}); });
+            const d = document.getElementById('thread-display'); 
+            d.innerHTML = ""; // FIX: Wipes old HTML to stop duplicate message "pushing"
+            
+            let threads = []; 
+            s.forEach(c => { threads.push({id: c.key, ...c.val()}); });
             threads.reverse();
 
             for (let p of threads) {
                 const uSnap = await get(child(ref(db), `users/${p.uid}`));
                 const uD = uSnap.val();
                 
-                // COLOR LOGIC FIX: Check saved theme color first, fallback to Red for owner, then Blue.
+                // COLOR LOGIC FIX: User Picked Color > Owner Red > Default Blue
                 let displayColor = "#0055ff";
                 if(uD && uD.themeColor) displayColor = uD.themeColor;
                 else if(uD && uD.email && uD.email.toLowerCase() === OWNER_EMAIL) displayColor = "#FF0000";
@@ -230,7 +233,7 @@
         }
     };
 
-    // ADMIN PANEL ACTIONS
+    // ADMIN ACTIONS PRESERVED
     document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement'), { text: document.getElementById('announce-text').value });
     document.getElementById('applyBan').onclick = () => {
         const uid = document.getElementById('target-uid').value;
