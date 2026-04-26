@@ -5,111 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Robloxians - 2012 Legacy</title>
     <style>
-        body { font-family: "MS Sans Serif", Geneva, sans-serif; margin: 0; background-image: url('https://wallpapercave.com/wp/wp9084955.jpg'); background-attachment: fixed; background-size: cover; }
+        body { font-family: "MS Sans Serif", Geneva, sans-serif; margin: 0; background: #ccc url('https://wallpapercave.com/wp/wp9084955.jpg') fixed center; background-size: cover; }
         header { background: #0055ff; color: white; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #0033aa; }
-        #announcement-container { background: #ff9800; border-bottom: 2px solid #cc7a00; color: #fff; padding: 12px; font-weight: bold; text-align: center; display: none; font-size: 14px; }
         .main-wrapper { width: 950px; margin: 20px auto; background: rgba(238, 238, 238, 0.95); border: 1px solid #888; min-height: 600px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.4); }
-        .auth-box { text-align: center; padding: 40px; }
-        .auth-box input { display: block; margin: 10px auto; padding: 8px; width: 250px; border: 1px solid #777; }
-        .forum-header { background: #ddd; color: #333; padding: 8px; font-weight: bold; border: 1px solid #bbb; }
-        textarea { width: 100%; box-sizing: border-box; border: 1px solid #ccc; padding: 10px; font-size: 14px; margin-bottom: 10px; }
+        .hidden { display: none !important; }
         .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-submit { background: #ffcc00; border-color: #ccaa00; }
-        .btn-admin { background: #ffff00; color: #000; border: 1px solid #777; } 
-        .btn-danger { background: #ff4444; color: white; border: 1px solid #aa0000; }
-        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; font-size: 14px; }
-        .hidden { display: none !important; }
-        #admin-panel { border: 2px solid #0055ff; padding: 15px; margin-bottom: 15px; background: #fff; }
+        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; }
         
-        .profile-card { background: white; border: 1px solid #ccc; padding: 20px; display: flex; gap: 20px; margin-bottom: 20px; }
-        .avatar-box { width: 150px; height: 150px; border: 1px solid #000; background: #eee; position: relative; overflow: hidden; }
-        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-        .ceo-badge { background: gold; color: black; font-weight: bold; padding: 2px 5px; border: 1px solid #000; font-size: 10px; margin-left: 5px; }
-        .clickable-name { color: #0055ff; cursor: pointer; text-decoration: underline; font-weight: bold; }
-        .tab-btn { padding: 5px 10px; background: #ddd; border: 1px solid #999; cursor: pointer; }
-        .active-tab { background: #fff; border-bottom: none; }
+        /* THE BLOCKY CHARACTER SYSTEM */
+        .avatar-frame { 
+            width: 80px; height: 110px; 
+            position: relative; 
+            background: #e1e1e1; 
+            border: 1px solid #999; 
+            display: flex; flex-direction: column; align-items: center; 
+            transform: scale(0.8);
+        }
+        .profile-large .avatar-frame { transform: scale(1.8); margin: 50px; }
+        
+        .char-head { width: 20px; height: 20px; background: #f5cd30; border: 1px solid rgba(0,0,0,0.2); z-index: 5; }
+        .char-torso { width: 40px; height: 40px; background: #0d5f97; border: 1px solid rgba(0,0,0,0.2); position: relative; }
+        .char-arm { width: 15px; height: 38px; background: #f5cd30; border: 1px solid rgba(0,0,0,0.2); position: absolute; top: 0; }
+        .arm-l { left: -16px; transform: rotate(5deg); }
+        .arm-r { right: -16px; transform: rotate(-5deg); }
+        .char-leg { width: 18px; height: 40px; background: #a06110; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
+        
+        /* CEO GLOW */
+        .ceo-glow { outline: 3px solid gold; box-shadow: 0 0 15px gold; }
+        .ceo-badge { background: gold; color: black; font-weight: bold; padding: 2px 5px; font-size: 10px; border: 1px solid #000; }
+
+        .color-picker { display: flex; gap: 5px; margin: 10px 0; }
+        .color-dot { width: 20px; height: 20px; border: 1px solid #000; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-weight:bold; font-size: 18px;">ROBLOX - The Robloxians</div>
-    <div id="user-display" style="font-size: 12px;">Guest</div>
+    <div style="font-weight:bold; font-size: 18px;">ROBLOX</div>
+    <div id="user-display">Guest</div>
 </header>
-
-<div id="announcement-container"><span id="announcement-display"></span></div>
 
 <div class="main-wrapper">
     <div id="auth-view">
-        <div class="auth-box">
-            <h2 style="color:#0055ff;">Sign in to The Robloxians</h2>
-            <input type="text" id="reg-user" placeholder="Username (New accounts only)">
-            <input type="email" id="auth-email" placeholder="Email Address">
-            <input type="password" id="auth-pass" placeholder="Password">
-            <div style="margin-top:15px;">
-                <button class="btn" id="loginBtn">Login</button>
-                <button class="btn btn-submit" id="signupBtn">Create Account</button>
-            </div>
+        <div style="text-align:center; padding: 50px;">
+            <h2>Login</h2>
+            <input type="email" id="auth-email" placeholder="Email"><br><br>
+            <input type="password" id="auth-pass" placeholder="Password"><br><br>
+            <button class="btn btn-submit" id="loginBtn">Login</button>
         </div>
     </div>
 
     <div id="logged-in-view" class="hidden">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;">
-            <span id="welcome-text" style="font-weight: bold; font-size: 18px;"></span>
-            <div>
-                <button class="btn" onclick="showView('forum-home')">Forum</button>
-                <button class="btn" id="myProfileBtn">My Profile</button>
-                <button class="btn btn-admin hidden" id="adminBtn">Admin</button>
-                <button class="btn btn-danger" id="logoutBtn">Logout</button>
-            </div>
-        </div>
-
-        <div id="admin-panel" class="hidden">
-            <strong>Admin Dashboard</strong><br>
-            Banner: <input type="text" id="announce-text" placeholder="Global message..." style="width:60%;">
-            <button class="btn btn-submit" id="postAnnounce">Save</button>
-            <hr>
-            UID: <input type="text" id="target-uid" placeholder="UID...">
-            <button class="btn" id="applyBan" style="color:red;">Ban</button>
-            <button class="btn" id="applyUnban">Unban</button>
+        <div style="margin-bottom: 20px;">
+            <button class="btn" onclick="showView('forum-home')">Forum</button>
+            <button class="btn" id="myProfileBtn">My Profile</button>
+            <button class="btn" onclick="location.reload()">Logout</button>
         </div>
 
         <div id="forum-home">
-            <div class="forum-header">Community Feed</div>
-            <textarea id="post-input" placeholder="What's on your mind?"></textarea>
-            <button class="btn btn-submit" id="submitPost">Submit Post</button>
-            <div id="thread-display" style="margin-top: 15px;"></div>
+            <textarea id="post-input" placeholder="What's on your mind?" style="width:100%; height: 50px;"></textarea>
+            <button class="btn btn-submit" id="submitPost">Post to Forum</button>
+            <div id="thread-display" style="margin-top: 20px;"></div>
         </div>
 
         <div id="profile-view" class="hidden">
-            <div class="profile-card">
-                <div class="avatar-box" id="profile-avatar-container">
-                    <img id="view-avatar-img" src="https://tr.rbxcdn.com/38c6ed8c6333b4984483d7155056e077/420/420/Avatar/Png" alt="Avatar">
-                </div>
-                <div style="flex:1;">
-                    <h2 id="view-username">User <span id="view-ceo" class="hidden ceo-badge">CEO</span></h2>
-                    <p id="view-bio" style="font-style: italic; color: #555;">No bio yet.</p>
-                    <div id="edit-profile-area" class="hidden">
-                        <textarea id="edit-bio" placeholder="Update bio..."></textarea>
-                        <input type="text" id="edit-avatar-url" placeholder="Avatar Image URL">
-                        <button class="btn btn-submit" id="saveProfile">Save Changes</button>
+            <div style="display:flex; background:white; padding:20px; border:1px solid #ccc;">
+                <div class="profile-large" id="profile-render"></div>
+                <div style="margin-left: 100px;">
+                    <h2 id="view-username">User</h2>
+                    <div id="ceo-tag" class="hidden ceo-badge">CEO / FOUNDER</div>
+                    <p id="view-bio">Loading bio...</p>
+                    
+                    <div id="customizer" class="hidden">
+                        <hr>
+                        <strong>Avatar Colors</strong>
+                        <div class="color-picker">Head: 
+                            <div class="color-dot" style="background:#f5cd30" onclick="updateColor('h','#f5cd30')"></div>
+                            <div class="color-dot" style="background:#f2f3f3" onclick="updateColor('h','#f2f3f3')"></div>
+                            <div class="color-dot" style="background:#635f62" onclick="updateColor('h','#635f62')"></div>
+                        </div>
+                        <div class="color-picker">Torso: 
+                            <div class="color-dot" style="background:#0d5f97" onclick="updateColor('t','#0d5f97')"></div>
+                            <div class="color-dot" style="background:#ff0000" onclick="updateColor('t','#ff0000')"></div>
+                            <div class="color-dot" style="background:#a06110" onclick="updateColor('t','#a06110')"></div>
+                        </div>
+                        <div class="color-picker">Legs: 
+                            <div class="color-dot" style="background:#212121" onclick="updateColor('l','#212121')"></div>
+                            <div class="color-dot" style="background:#a06110" onclick="updateColor('l','#a06110')"></div>
+                            <div class="color-dot" style="background:#0d5f97" onclick="updateColor('l','#0d5f97')"></div>
+                        </div>
                     </div>
-                    <div id="friend-actions" class="hidden">
-                        <button class="btn btn-submit" id="addFriendBtn">Send Friend Request</button>
-                        <button class="btn" id="sendMessageBtn">Send Message</button>
-                    </div>
                 </div>
-            </div>
-            
-            <div style="display:flex; border-bottom:1px solid #ccc;">
-                <div class="tab-btn active-tab" onclick="switchTab('friends')">Friends</div>
-                <div class="tab-btn" onclick="switchTab('inbox')">Inbox</div>
-            </div>
-            <div id="tab-friends" style="padding:10px; background:white; min-height:100px;">
-                <div id="friend-list-display">No friends yet.</div>
-            </div>
-            <div id="tab-inbox" class="hidden" style="padding:10px; background:white; min-height:100px;">
-                <div id="inbox-display">No messages.</div>
             </div>
         </div>
     </div>
@@ -117,7 +104,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, set, push, onValue, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
@@ -133,144 +120,90 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const OWNER_EMAIL = "fahid.001x@gmail.com";
-    const CEO_UID = "oJm6Z87yVpMe5YgO7G4H0vU7T9m2"; 
+    const CEO_UID = "oJm6Z87yVpMe5YgO7G4H0vU7T9m2";
 
-    window.showView = (viewId) => {
+    function createAvatarHTML(colors, isCEO) {
+        // "Naked" Protection: If Head and Torso are the same skin color, force a shirt
+        let torsoColor = colors.t;
+        if (colors.h === colors.t) torsoColor = "#0d5f97"; // Force Blue Shirt
+
+        return `
+            <div class="avatar-frame ${isCEO ? 'ceo-glow' : ''}">
+                <div class="char-head" style="background:${colors.h}"></div>
+                <div class="char-torso" style="background:${torsoColor}">
+                    <div class="char-arm arm-l" style="background:${colors.h}"></div>
+                    <div class="char-arm arm-r" style="background:${colors.h}"></div>
+                </div>
+                <div style="display:flex;">
+                    <div class="char-leg" style="background:${colors.l}"></div>
+                    <div class="char-leg" style="background:${colors.l}"></div>
+                </div>
+            </div>`;
+    }
+
+    window.showView = (id) => {
         ['forum-home', 'profile-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
-        document.getElementById(viewId).classList.remove('hidden');
-    };
-
-    window.switchTab = (tab) => {
-        ['friends', 'inbox'].forEach(t => {
-            document.getElementById('tab-'+t).classList.add('hidden');
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
-        });
-        document.getElementById('tab-'+tab).classList.remove('hidden');
-        event.target.classList.add('active-tab');
-    };
-
-    document.getElementById('signupBtn').onclick = () => {
-        const email = document.getElementById('auth-email').value;
-        const pass = document.getElementById('auth-pass').value;
-        const user = document.getElementById('reg-user').value;
-        if(!user) return alert("Enter a username!");
-        createUserWithEmailAndPassword(auth, email, pass).then((res) => {
-            set(ref(db, `users/${res.user.uid}`), { username: user, email: email, rank: "member", banned: false, bio: "I'm new here!", avatar: "https://tr.rbxcdn.com/38c6ed8c6333b4984483d7155056e077/420/420/Avatar/Png" });
-        }).catch(err => alert(err.message));
-    };
-
-    document.getElementById('loginBtn').onclick = () => {
-        signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).catch(err => alert(err.message));
+        document.getElementById(id).classList.remove('hidden');
     };
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // BAN WATCHER
-            onValue(ref(db, `users/${user.uid}/banned`), (snapshot) => {
-                if (snapshot.val() === true) { 
-                    alert("Your account is banned."); 
-                    signOut(auth).then(() => location.reload()); 
-                }
-            });
-
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('logged-in-view').classList.remove('hidden');
-            const snap = await get(child(ref(db), `users/${user.uid}`));
-            const userData = snap.val() || {};
-            document.getElementById('welcome-text').innerText = "Hello, " + userData.username + "!";
-            document.getElementById('user-display').innerText = userData.username;
             
-            if(user.email.toLowerCase() === OWNER_EMAIL) document.getElementById('adminBtn').classList.remove('hidden');
-
             onValue(ref(db, 'threads'), (s) => {
                 const display = document.getElementById('thread-display');
                 display.innerHTML = "";
                 s.forEach(c => {
                     const p = c.val();
-                    const r = document.createElement('div');
-                    r.className = 'thread-row';
-                    r.innerHTML = `<img src="${p.avatar || 'https://tr.rbxcdn.com/38c6ed8c6333b4984483d7155056e077/420/420/Avatar/Png'}" style="width:30px; height:30px; margin-right:10px; border-radius:50%;"> 
-                                   <span class="clickable-name" onclick="window.loadProfile('${p.uid}')">${p.author}</span>: ${p.message}`;
-                    display.prepend(r);
+                    const div = document.createElement('div');
+                    div.className = 'thread-row';
+                    const av = createAvatarHTML(p.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, p.uid === CEO_UID);
+                    div.innerHTML = `${av} <div style="margin-left:20px;"><strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${p.author}</strong><br>${p.message}</div>`;
+                    display.prepend(div);
                 });
             });
-
-            onValue(ref(db, 'announcement/text'), (s) => {
-                const banner = document.getElementById('announcement-container');
-                if(s.exists() && s.val() !== "") {
-                    document.getElementById('announcement-display').innerText = s.val();
-                    banner.style.display = 'block';
-                } else banner.style.display = 'none';
-            });
-        } else {
-            document.getElementById('auth-view').classList.remove('hidden');
-            document.getElementById('logged-in-view').classList.add('hidden');
-            document.getElementById('user-display').innerText = "Guest";
         }
     });
 
     window.loadProfile = async (uid) => {
         showView('profile-view');
         const snap = await get(child(ref(db), `users/${uid}`));
-        if(!snap.exists()) return;
         const d = snap.val();
         document.getElementById('view-username').innerText = d.username;
-        document.getElementById('view-bio').innerText = d.bio || "No bio.";
-        document.getElementById('view-avatar-img').src = d.avatar || "https://tr.rbxcdn.com/38c6ed8c6333b4984483d7155056e077/420/420/Avatar/Png";
+        document.getElementById('view-bio').innerText = d.bio || "2012 Veteran.";
+        document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, uid === CEO_UID);
         
-        if(uid === CEO_UID) document.getElementById('view-ceo').classList.remove('hidden');
-        else document.getElementById('view-ceo').classList.add('hidden');
+        if(uid === CEO_UID) document.getElementById('ceo-tag').classList.remove('hidden');
+        else document.getElementById('ceo-tag').classList.add('hidden');
 
-        if(uid === auth.currentUser.uid) {
-            document.getElementById('edit-profile-area').classList.remove('hidden');
-            document.getElementById('friend-actions').classList.add('hidden');
-        } else {
-            document.getElementById('edit-profile-area').classList.add('hidden');
-            document.getElementById('friend-actions').classList.remove('hidden');
-            document.getElementById('addFriendBtn').onclick = () => alert("Friend Request Sent!");
-            document.getElementById('sendMessageBtn').onclick = () => {
-                const m = prompt("Enter message:");
-                if(m) push(ref(db, `messages/${uid}`), { from: auth.currentUser.email, text: m });
-            };
-        }
+        if(auth.currentUser.uid === uid) document.getElementById('customizer').classList.remove('hidden');
+        else document.getElementById('customizer').classList.add('hidden');
     };
 
-    document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
-
-    document.getElementById('saveProfile').onclick = () => {
-        update(ref(db, `users/${auth.currentUser.uid}`), {
-            bio: document.getElementById('edit-bio').value,
-            avatar: document.getElementById('edit-avatar-url').value || "https://tr.rbxcdn.com/38c6ed8c6333b4984483d7155056e077/420/420/Avatar/Png"
-        }).then(() => {
-            alert("Profile Saved!");
-            location.reload();
+    window.updateColor = (part, color) => {
+        get(child(ref(db), `users/${auth.currentUser.uid}/colors`)).then(s => {
+            let current = s.val() || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
+            if(part === 'h') current.h = color;
+            if(part === 't') current.t = color;
+            if(part === 'l') current.l = color;
+            update(ref(db, `users/${auth.currentUser.uid}`), { colors: current }).then(() => loadProfile(auth.currentUser.uid));
         });
     };
 
-    // FIXED POSTING LOGIC
-    document.getElementById('submitPost').onclick = async () => {
-        const msg = document.getElementById('post-input').value;
-        if(!msg || !auth.currentUser) return;
-        
-        const snap = await get(child(ref(db), `users/${auth.currentUser.uid}`));
-        if(snap.exists()){
-            const u = snap.val();
-            push(ref(db, 'threads'), { 
-                message: msg, 
-                author: u.username, 
-                uid: auth.currentUser.uid, 
-                avatar: u.avatar || "https://tr.rbxcdn.com/38c6ed8c6333b4984483d7155056e077/420/420/Avatar/Png"
-            });
-            document.getElementById('post-input').value = "";
-        }
+    document.getElementById('loginBtn').onclick = () => {
+        signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
     };
 
-    document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
-    document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement/text'), document.getElementById('announce-text').value);
-    document.getElementById('applyUnban').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: false });
-    document.getElementById('applyBan').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: true });
-    document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
+    document.getElementById('submitPost').onclick = async () => {
+        const msg = document.getElementById('post-input').value;
+        const snap = await get(child(ref(db), `users/${auth.currentUser.uid}`));
+        const u = snap.val();
+        push(ref(db, 'threads'), { message: msg, author: u.username, uid: auth.currentUser.uid, colors: u.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'} });
+        document.getElementById('post-input').value = "";
+    };
+
+    document.getElementById('myProfileBtn').onclick = () => loadProfile(auth.currentUser.uid);
 </script>
 </body>
 </html>
