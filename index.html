@@ -16,9 +16,7 @@
         .btn-admin { background: #ffff00; color: #000; border: 1px solid #777; }
         .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; }
         
-        /* THE BLOCKY CHARACTER SYSTEM */
         .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(0.8); }
-        .profile-large .avatar-frame { transform: scale(1.8); margin: 50px; }
         .char-head { width: 20px; height: 20px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; }
         .char-torso { width: 40px; height: 40px; border: 1px solid rgba(0,0,0,0.2); position: relative; }
         .char-arm { width: 15px; height: 38px; border: 1px solid rgba(0,0,0,0.2); position: absolute; top: 0; }
@@ -32,8 +30,6 @@
 
         .auth-box { text-align: center; padding: 40px; }
         .auth-box input { display: block; margin: 10px auto; padding: 8px; width: 250px; border: 1px solid #777; }
-        .color-picker { display: flex; gap: 5px; margin: 10px 0; }
-        .color-dot { width: 20px; height: 20px; border: 1px solid #000; cursor: pointer; }
         #admin-panel { border: 2px solid #0055ff; padding: 15px; background: #fff; margin-bottom: 15px; }
     </style>
 </head>
@@ -49,7 +45,7 @@
 <div class="main-wrapper">
     <div id="auth-view" class="auth-box">
         <h2 style="color:#0055ff;">Sign in to The Robloxians</h2>
-        <input type="text" id="reg-user" placeholder="Username (New users only)">
+        <input type="text" id="reg-user" placeholder="Username">
         <input type="email" id="auth-email" placeholder="Email Address">
         <input type="password" id="auth-pass" placeholder="Password">
         <div style="margin-top:15px;">
@@ -64,24 +60,40 @@
             <div>
                 <button class="btn" onclick="showView('forum-home')">Forum</button>
                 <button class="btn" id="myProfileBtn">My Profile</button>
-                <button class="btn btn-admin hidden" id="adminBtn">Admin Panel</button>
+                <button class="btn btn-admin hidden" id="adminBtn">Staff Tools</button>
                 <button class="btn btn-danger" id="logoutBtn">Logout</button>
             </div>
         </div>
 
         <div id="admin-panel" class="hidden">
-            <strong>Admin Dashboard</strong><br>
-            Banner: <input type="text" id="announce-text" placeholder="Global message..." style="width:60%;">
-            <button class="btn btn-submit" id="postAnnounce">Save</button>
-            <hr>
+            <h3 id="panel-title">Staff Dashboard</h3>
+            
+            <div id="admin-only-section" class="hidden">
+                <strong>Global Banner:</strong> 
+                <input type="text" id="announce-text" placeholder="Global message..." style="width:50%;">
+                <button class="btn btn-submit" id="postAnnounce">Save Banner</button>
+                <hr>
+                <strong>Rank/Unrank User:</strong><br>
+                UID: <input type="text" id="rank-uid" placeholder="User UID...">
+                Rank: <select id="rank-select" class="btn">
+                    <option value="0">Player</option>
+                    <option value="1">Moderator</option>
+                    <option value="2">Admin</option>
+                </select>
+                <button class="btn btn-submit" id="applyRank">Update Rank</button>
+                <hr>
+            </div>
+
+            <strong>Ban Hammer:</strong><br>
             Target UID: <input type="text" id="target-uid" placeholder="Paste UID here...">
-            <select id="ban-duration" class="btn">
+            Reason: <input type="text" id="ban-reason-input" placeholder="Enter reason for player...">
+            Length: <select id="ban-duration" class="btn">
                 <option value="perm">Permanent</option>
                 <option value="1">1 Day</option>
                 <option value="3">3 Days</option>
                 <option value="7">7 Days</option>
             </select>
-            <button class="btn" id="applyBan" style="color:red;">Apply Ban</button>
+            <button class="btn btn-danger" id="applyBan">Apply Ban</button>
             <button class="btn" id="applyUnban">Unban User</button>
         </div>
 
@@ -96,33 +108,9 @@
                 <div class="profile-large" id="profile-render"></div>
                 <div style="margin-left: 100px;">
                     <h2 id="view-username">User</h2>
-                    <div style="margin-bottom:10px;">
-                        <span id="view-id" class="user-id-tag">ID: 0</span>
-                        <div id="ceo-tag" class="hidden ceo-badge">CEO</div>
-                    </div>
-                    <p id="view-bio">Loading...</p>
-                    
-                    <div id="customizer" class="hidden">
-                        <hr>
-                        <strong>Character Creator</strong>
-                        <div class="color-picker">Head: 
-                            <div class="color-dot" style="background:#f5cd30" onclick="updateColor('h','#f5cd30')"></div>
-                            <div class="color-dot" style="background:#f2f3f3" onclick="updateColor('h','#f2f3f3')"></div>
-                            <div class="color-dot" style="background:#635f62" onclick="updateColor('h','#635f62')"></div>
-                        </div>
-                        <div class="color-picker">Torso: 
-                            <div class="color-dot" style="background:#0d5f97" onclick="updateColor('t','#0d5f97')"></div>
-                            <div class="color-dot" style="background:#a06110" onclick="updateColor('t','#a06110')"></div>
-                            <div class="color-dot" style="background:#212121" onclick="updateColor('t','#212121')"></div>
-                        </div>
-                        <div class="color-picker">Legs: 
-                            <div class="color-dot" style="background:#212121" onclick="updateColor('l','#212121')"></div>
-                            <div class="color-dot" style="background:#a06110" onclick="updateColor('l','#a06110')"></div>
-                            <div class="color-dot" style="background:#0d5f97" onclick="updateColor('l','#0d5f97')"></div>
-                        </div>
-                        Bio: <textarea id="edit-bio" style="width:100%;"></textarea>
-                        <button class="btn btn-submit" id="saveProfile">Save Changes</button>
-                    </div>
+                    <div id="view-id" class="user-id-tag">ID: 0</div>
+                    <div id="ceo-tag" class="hidden ceo-badge">CEO</div>
+                    <p id="view-bio">Legacy Member</p>
                 </div>
             </div>
         </div>
@@ -150,62 +138,58 @@
     
     const OWNER_EMAIL = "fahid.001x@gmail.com";
     const CEO_UID = "oJm6Z87yVpMe5YgO7G4H0vU7T9m2";
-    const PROTECTED_NAMES = ["fahid", "guest 1337", "solong", "admin", "roblox"];
 
     function createAvatarHTML(colors, isCEO) {
-        let torsoColor = colors.t;
-        if (colors.h === colors.t) torsoColor = "#0d5f97"; 
-        return `<div class="avatar-frame ${isCEO ? 'ceo-glow' : ''}"><div class="char-head" style="background:${colors.h}"></div><div class="char-torso" style="background:${torsoColor}"><div class="char-arm arm-l" style="background:${colors.h}"></div><div class="char-arm arm-r" style="background:${colors.h}"></div></div><div style="display:flex;"><div class="char-leg" style="background:${colors.l}"></div><div class="char-leg" style="background:${colors.l}"></div></div></div>`;
+        return `<div class="avatar-frame ${isCEO ? 'ceo-glow' : ''}"><div class="char-head" style="background:${colors.h}"></div><div class="char-torso" style="background:${colors.t}"><div class="char-arm arm-l" style="background:${colors.h}"></div><div class="char-arm arm-r" style="background:${colors.h}"></div></div><div style="display:flex;"><div class="char-leg" style="background:${colors.l}"></div><div class="char-leg" style="background:${colors.l}"></div></div></div>`;
     }
-
-    window.showView = (id) => {
-        ['forum-home', 'profile-view', 'auth-view'].forEach(v => {
-            const el = document.getElementById(v); if(el) el.classList.add('hidden');
-        });
-        document.getElementById(id).classList.remove('hidden');
-    };
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             onValue(ref(db, `users/${user.uid}`), (snap) => {
                 const data = snap.val();
-                if(data && data.banned === true) {
+                if(!data) return;
+
+                // Ban Check
+                if(data.banned === true) {
                     const now = Date.now();
                     if(data.banExpires === "perm" || now < data.banExpires) {
-                        const msg = data.banExpires === "perm" ? "PERMANENT" : "until " + new Date(data.banExpires).toLocaleString();
-                        alert("You are banned " + msg);
+                        alert(`BANNED\nReason: ${data.banReason || "No reason given"}`);
                         signOut(auth).then(()=>location.reload());
                     } else {
-                        update(ref(db, `users/${user.uid}`), { banned: false, banExpires: 0 });
+                        update(ref(db, `users/${user.uid}`), { banned: false });
                     }
                 }
+
+                // Rank Check
+                const rank = data.rank || 0;
+                if(rank >= 1 || user.email === OWNER_EMAIL) {
+                    document.getElementById('adminBtn').classList.remove('hidden');
+                    if(rank >= 2 || user.email === OWNER_EMAIL) {
+                        document.getElementById('admin-only-section').classList.remove('hidden');
+                    }
+                }
+
+                document.getElementById('welcome-text').innerText = "Hello, " + data.username;
+                document.getElementById('user-display').innerText = data.username;
             });
 
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('logged-in-view').classList.remove('hidden');
-            if(user.email.toLowerCase() === OWNER_EMAIL) document.getElementById('adminBtn').classList.remove('hidden');
-            
-            const uSnap = await get(child(ref(db), `users/${user.uid}`));
-            const uData = uSnap.val() || {};
-            document.getElementById('welcome-text').innerText = "Hello, " + uData.username;
-            document.getElementById('user-display').innerText = uData.username;
 
+            // Forum Thread Rendering
             onValue(ref(db, 'threads'), async (s) => {
                 const display = document.getElementById('thread-display');
                 display.innerHTML = "";
-                const allUsersSnap = await get(child(ref(db), 'users'));
-                const allUsers = allUsersSnap.val() || {};
+                const usersSnap = await get(child(ref(db), 'users'));
+                const allUsers = usersSnap.val() || {};
                 s.forEach(c => {
                     const p = c.val();
-                    const authorData = allUsers[p.uid] || {};
-                    const isBanned = authorData.banned === true;
+                    const author = allUsers[p.uid] || {};
                     const div = document.createElement('div');
                     div.className = 'thread-row';
-                    const av = createAvatarHTML(authorData.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, p.uid === CEO_UID);
-                    div.innerHTML = `${av} <div style="margin-left:20px;">
-                        <strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${isBanned ? '[ Content Deleted ]' : authorData.username}</strong> 
-                        <span class="user-id-tag">#${authorData.id || '?'}</span><br>
-                        ${isBanned ? '<i style="color:gray;">[Removed]</i>' : p.message}
+                    div.innerHTML = `${createAvatarHTML(author.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, p.uid === CEO_UID)} <div style="margin-left:20px;">
+                        <strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${author.banned ? '[ Content Deleted ]' : author.username}</strong><br>
+                        ${author.banned ? '<i>[Post Removed]</i>' : p.message}
                     </div>`;
                     display.prepend(div);
                 });
@@ -221,67 +205,51 @@
         } else { showView('auth-view'); }
     });
 
-    document.getElementById('signupBtn').onclick = async () => {
-        const user = document.getElementById('reg-user').value.trim();
-        const email = document.getElementById('auth-email').value.trim().toLowerCase();
-        const pass = document.getElementById('auth-pass').value;
-
-        if(!user || !email || !pass) return alert("Fill in everything!");
-        if(PROTECTED_NAMES.includes(user.toLowerCase())) return alert("Username reserved!");
-
-        const allUsersSnap = await get(child(ref(db), 'users'));
-        const allUsers = allUsersSnap.val() || {};
-        
-        // Anti-Duplicate Checks
-        const nameTaken = Object.values(allUsers).some(u => u.username?.toLowerCase() === user.toLowerCase());
-        const emailTaken = Object.values(allUsers).some(u => u.email?.toLowerCase() === email);
-
-        if(nameTaken) return alert("Username taken! Try sparkle123 style.");
-        if(emailTaken) return alert("This email is already linked to an account!");
-
-        const countSnap = await get(child(ref(db), 'user_count'));
-        let newId = (countSnap.val() || 0) + 1;
-
-        createUserWithEmailAndPassword(auth, email, pass).then((res) => {
-            set(ref(db, `users/${res.user.uid}`), { 
-                username: user, email: email, id: newId, banned: false, banExpires: 0, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'} 
-            });
-            set(ref(db, 'user_count'), newId);
-            alert("Welcome to the Legacy!");
-        }).catch(err => alert(err.message));
-    };
-
-    window.loadProfile = async (uid) => {
-        showView('profile-view');
-        const snap = await get(child(ref(db), `users/${uid}`));
-        const d = snap.val();
-        document.getElementById('view-username').innerText = d.banned ? "[ Content Deleted ]" : d.username;
-        document.getElementById('view-id').innerText = "ID: " + (d.id || "0");
-        document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, uid === CEO_UID);
-        if(uid === CEO_UID) document.getElementById('ceo-tag').classList.remove('hidden');
-        else document.getElementById('ceo-tag').classList.add('hidden');
-        if(auth.currentUser?.uid === uid) document.getElementById('customizer').classList.remove('hidden');
-    };
-
+    // ACTION: Apply Ban
     document.getElementById('applyBan').onclick = () => {
         const uid = document.getElementById('target-uid').value.trim();
+        const reason = document.getElementById('ban-reason-input').value.trim();
         const days = document.getElementById('ban-duration').value;
+
+        if(uid === CEO_UID) return alert("Nice try! You cannot ban the Owner.");
+
         let expiry = "perm";
         if(days !== "perm") expiry = Date.now() + (parseInt(days) * 86400000);
         
-        update(ref(db, `users/${uid}`), { banned: true, banExpires: expiry }).then(()=>alert("Banned!"));
+        update(ref(db, `users/${uid}`), { 
+            banned: true, 
+            banExpires: expiry, 
+            banReason: reason || "Violation of rules" 
+        }).then(()=>alert("User Banned."));
+    };
+
+    // ACTION: Apply Rank
+    document.getElementById('applyRank').onclick = () => {
+        const uid = document.getElementById('rank-uid').value.trim();
+        const newRank = parseInt(document.getElementById('rank-select').value);
+
+        if(uid === CEO_UID) return alert("You cannot change the Owner's rank.");
+
+        update(ref(db, `users/${uid}`), { rank: newRank }).then(()=>alert("Rank updated."));
     };
 
     document.getElementById('applyUnban').onclick = () => {
-        update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: false, banExpires: 0 }).then(()=>alert("Unbanned."));
+        update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: false }).then(()=>alert("Unbanned."));
     };
 
+    document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement/text'), document.getElementById('announce-text').value);
     document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
-    document.getElementById('submitPost').onclick = () => push(ref(db, 'threads'), { message: document.getElementById('post-input').value, uid: auth.currentUser.uid });
-    document.getElementById('myProfileBtn').onclick = () => loadProfile(auth.currentUser.uid);
+    document.getElementById('signupBtn').onclick = () => {
+        const user = document.getElementById('reg-user').value.trim();
+        createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then((res) => {
+            set(ref(db, `users/${res.user.uid}`), { username: user, rank: 0, banned: false, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'} });
+        });
+    };
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
-    document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement/text'), document.getElementById('announce-text').value);
+    document.getElementById('submitPost').onclick = () => push(ref(db, 'threads'), { message: document.getElementById('post-input').value, uid: auth.currentUser.uid });
+    window.showView = (id) => { document.getElementById('forum-home').classList.add('hidden'); document.getElementById('profile-view').classList.add('hidden'); document.getElementById(id).classList.remove('hidden'); };
+    window.loadProfile = async (uid) => { showView('profile-view'); const snap = await get(child(ref(db), `users/${uid}`)); const d = snap.val(); document.getElementById('view-username').innerText = d.username; document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, uid === CEO_UID); };
 </script>
 </body>
-</html>>
+</html>
