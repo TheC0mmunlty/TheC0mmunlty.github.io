@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <title>The Robloxians Forum</title>
     <style>
-        /* ADDING MODERN FONT BACK */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
+        /* BACK TO CLASSIC FONTS */
         body { 
-            font-family: 'Poppins', Verdana, sans-serif; 
+            font-family: Verdana, Geneva, sans-serif; 
             margin: 0; padding: 0; 
             background-color: #000; 
             background-image: url('https://wallpapercave.com/wp/wp9084955.jpg'); 
@@ -18,9 +16,9 @@
         }
 
         header { 
-            background: rgba(0, 0, 0, 0.9); 
+            background: #000; 
             color: white; 
-            padding: 12px 20px; 
+            padding: 10px 20px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
@@ -29,68 +27,65 @@
 
         .main-wrapper { 
             width: 950px; 
-            margin: 40px auto; 
+            margin: 30px auto; 
             background: white; 
             border: 1px solid #888; 
             min-height: 800px; 
-            box-shadow: 0px 0px 25px rgba(0,0,0,0.6); 
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.5); 
             position: relative; 
         }
 
-        #announcement-banner { background: #FF8C00; border-bottom: 2px solid #CC7000; padding: 12px; text-align: center; font-size: 14px; font-weight: bold; color: white; display: none; }
+        #announcement-banner { background: #FF8C00; border-bottom: 2px solid #CC7000; padding: 10px; text-align: center; font-size: 13px; font-weight: bold; color: white; display: none; }
         
-        .auth-card { width: 400px; margin: 100px auto; border: 1px solid #0055ff; background: #f0f5ff; padding: 20px; text-align: center; border-radius: 8px; }
+        .auth-card { width: 400px; margin: 80px auto; border: 1px solid #0055ff; background: #f0f5ff; padding: 20px; text-align: center; }
         
-        input, select, textarea { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #999; font-family: 'Poppins', sans-serif; font-size: 13px; border-radius: 4px; }
+        input, select, textarea { width: 90%; padding: 6px; margin: 5px 0; border: 1px solid #999; font-family: Verdana; font-size: 12px; }
         
-        .forum-header { background: #333; color: white; padding: 10px; font-weight: bold; margin-top: 15px; font-size: 14px; border-radius: 4px 4px 0 0; }
+        .forum-header { background: #ccc; color: #000; padding: 6px; font-weight: bold; margin-top: 15px; font-size: 13px; border: 1px solid #999; }
         
-        .thread-row { border-bottom: 1px solid #eee; padding: 15px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; background: #fff; }
+        .thread-row { border-bottom: 1px solid #eee; padding: 10px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 12px; background: #fff; }
         
         .clickable-name { color: #0055ff; cursor: pointer; text-decoration: underline; font-weight: bold; }
         
-        .btn { background: #e1e1e1; border: 1px solid #777; padding: 7px 14px; cursor: pointer; font-size: 12px; font-weight: 600; border-radius: 4px; transition: 0.2s; }
-        .btn:hover { background: #ccc; }
-        .btn-admin { background: #ffcc00; border-color: #998800; }
-        .btn-danger { background: #ff4444; color: white; border: none; }
+        .btn { background: #e1e1e1; border: 1px solid #777; padding: 4px 8px; cursor: pointer; font-size: 11px; font-family: Verdana; }
+        .btn:active { background: #ccc; }
+        .btn-admin { background: #ffcc00; font-weight: bold; }
+        .btn-danger { background: #ff4444; color: white; }
         
         .hidden { display: none !important; }
 
-        #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 100; justify-content: center; align-items: center; }
-        .profile-card { background: white; padding: 25px; border-radius: 12px; width: 350px; text-align: center; }
+        #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 100; justify-content: center; align-items: center; }
+        .profile-card { background: white; padding: 20px; border: 2px solid #555; width: 350px; text-align: center; box-shadow: 5px 5px 0px #000; }
         
-        #ban-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #ff0000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #ban-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #900; color: #fff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: 'Arial Black', sans-serif; }
     </style>
 </head>
 <body>
 
 <div id="ban-view" class="hidden">
-    <h1 style="font-size: 50px;">ACCESS DENIED</h1>
-    <p id="ban-reason" style="font-size: 24px; color: white;"></p>
-    <p id="ban-expiry" style="font-size: 16px; opacity: 0.6; color: white;"></p>
+    <h1>BANNED</h1>
+    <p id="ban-reason" style="font-size: 20px;"></p>
+    <p id="ban-expiry" style="font-size: 14px; opacity: 0.8;"></p>
 </div>
 
 <div id="announcement-banner"></div>
 
 <header>
-    <div style="font-weight:bold; font-size: 22px; letter-spacing: -0.5px;">THE ROBLOXIANS FORUM</div>
-    <div id="user-display" style="font-size: 12px; color: #aaa;">Guest</div>
+    <div style="font-weight:bold; font-size: 18px;">THE ROBLOXIANS FORUM</div>
+    <div id="user-display" style="font-size: 11px; color: #ccc;">Guest</div>
 </header>
 
 <div id="profile-overlay">
     <div class="profile-card">
-        <h2 id="p-name" style="margin-top: 0;">User Profile</h2>
-        <p id="p-gender" style="color: #666; font-weight: bold;"></p>
+        <h2 id="p-name" style="margin: 0; font-size: 18px;">User Profile</h2>
+        <p id="p-gender" style="color: #666; font-size: 12px;"></p>
         <hr>
-        <div style="text-align: left; max-height: 120px; overflow-y: auto;">
-            <strong>Friends:</strong><div id="p-friends" style="font-size: 13px;"></div>
+        <div style="text-align: left; max-height: 100px; overflow-y: auto; font-size: 12px;">
+            <strong>Friends:</strong><div id="p-friends"></div>
         </div>
         <hr>
-        <div style="display: flex; gap: 5px; justify-content: center;">
-            <button class="btn" id="addFriendBtn">Add Friend</button>
-            <button class="btn btn-danger" id="reportBtn">Report</button>
-        </div>
-        <br>
+        <button class="btn" id="addFriendBtn">Add Friend</button>
+        <button class="btn btn-danger" id="reportBtn">Report</button>
         <button class="btn" onclick="document.getElementById('profile-overlay').style.display='none'">Close</button>
     </div>
 </div>
@@ -98,56 +93,49 @@
 <div class="main-wrapper">
     <div id="logged-out-view" class="hidden">
         <div class="auth-card">
-            <h2 style="margin-top:0;">Join the Community</h2>
-            <input type="text" id="reg-username" placeholder="Choose Username">
-            <input type="email" id="auth-email" placeholder="Email Address">
+            <h3 style="margin-top:0;">Login / Signup</h3>
+            <input type="text" id="reg-username" placeholder="Username">
+            <input type="email" id="auth-email" placeholder="Email">
             <input type="password" id="auth-password" placeholder="Password">
             <select id="reg-gender"><option value="Boy">Boy</option><option value="Girl">Girl</option></select>
-            <div style="margin-top:20px;">
+            <div style="margin-top:15px;">
                 <button class="btn" id="loginBtn">Login</button>
-                <button class="btn" style="background:#0055ff; color:white; border:none;" id="signupBtn">Create Account</button>
+                <button class="btn" id="signupBtn">Sign Up</button>
             </div>
         </div>
     </div>
 
     <div id="logged-in-view" class="hidden">
-        <div style="background: #f4f4f4; padding: 12px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-            <span id="welcome-text" style="font-weight: bold;">Loading...</span>
+        <div style="background: #eee; padding: 8px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center;">
+            <span id="welcome-text" style="font-size: 11px; font-weight: bold;">Syncing...</span>
             <div>
-                <button class="btn btn-admin hidden" id="adminBtn">Admin Tools</button>
+                <button class="btn btn-admin hidden" id="adminBtn">Admin Panel</button>
                 <button class="btn" id="logoutBtn">Logout</button>
             </div>
         </div>
 
-        <div id="admin-panel" class="hidden" style="border: 3px solid #ffcc00; padding: 20px; margin: 15px; background: #fffdf0; border-radius: 8px;">
-            <h3 style="margin-top:0; color:#e67e22;">Administrator Console</h3>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="admin-msg-input" placeholder="Enter Global Announcement..." style="flex:1;">
-                <button class="btn btn-admin" id="updateAnnouncement">Update Banner</button>
-            </div>
+        <div id="admin-panel" class="hidden" style="border: 2px dashed orange; padding: 15px; margin: 15px; background: #fffdf0;">
+            <strong style="color: #e67e22; font-size: 12px;">Admin Controls</strong><br>
+            <input type="text" id="admin-msg-input" placeholder="Banner text..." style="width: 60%;">
+            <button class="btn" id="updateAnnouncement">Set Banner</button>
             <hr>
-            <div style="display: flex; gap: 20px;">
-                <div style="flex:1;">
-                    <strong>Active Reports:</strong>
-                    <div id="report-list" style="font-size: 12px; background:white; padding:10px; border:1px solid #ccc; margin-top:5px; height:150px; overflow-y:auto;"></div>
-                </div>
-                <div style="flex:1;">
-                    <strong>Ban Management:</strong><br>
-                    <input type="text" id="ban-uid" placeholder="Target User ID" style="width:90%;">
-                    <input type="text" id="ban-reason-input" placeholder="Ban Reason..." style="width:90%;">
-                    <input type="number" id="ban-days" placeholder="Days (0 = Permanent)" style="width:90%;">
-                    <button class="btn btn-danger" id="applyBan" style="width:96%; margin-top:10px;">Execute Ban</button>
-                </div>
+            <div style="font-size: 11px;">
+                <strong>Reports:</strong><div id="report-list" style="margin-bottom: 10px; max-height: 100px; overflow-y: auto; background: #fff; border: 1px solid #ddd;"></div>
+                <strong>Ban User:</strong><br>
+                <input type="text" id="ban-uid" placeholder="UID" style="width: 30%;">
+                <input type="text" id="ban-reason-input" placeholder="Reason" style="width: 30%;">
+                <input type="number" id="ban-days" placeholder="Days (0=Perm)" style="width: 20%;">
+                <button class="btn btn-danger" id="applyBan">Apply Ban</button>
             </div>
         </div>
 
-        <div style="padding: 20px;">
-            <div class="forum-header">Share your thoughts</div>
-            <div style="padding: 15px; border: 1px solid #ccc; border-top: none; background:#fff;">
-                <textarea id="post-input" placeholder="What are you thinking about?" style="height: 80px;"></textarea>
-                <button class="btn" id="submitPost" style="margin-top:10px; background: #0055ff; color: white; border: none; width: 100%; font-size: 14px;">Post Message</button>
+        <div style="padding: 15px;">
+            <div class="forum-header">General Discussion</div>
+            <div style="padding: 10px; border: 1px solid #ccc; border-top: none; background: #fff;">
+                <textarea id="post-input" placeholder="Write a post..." style="height: 50px;"></textarea>
+                <button class="btn" id="submitPost" style="margin-top:5px; font-weight: bold;">Post Message</button>
             </div>
-            <div id="thread-display" style="margin-top:10px;"></div>
+            <div id="thread-display" style="margin-top: 10px; border: 1px solid #ccc; border-top: none;"></div>
         </div>
     </div>
 </div>
@@ -182,8 +170,8 @@
                 const b = banSnap.val();
                 if(b.expiry === 0 || b.expiry > Date.now()){
                     document.getElementById('ban-view').classList.remove('hidden');
-                    document.getElementById('ban-reason').innerText = "REASON: " + b.reason;
-                    document.getElementById('ban-expiry').innerText = b.expiry === 0 ? "STATUS: PERMANENT" : "EXPIRES: " + new Date(b.expiry).toLocaleString();
+                    document.getElementById('ban-reason').innerText = "Reason: " + b.reason;
+                    document.getElementById('ban-expiry').innerText = b.expiry === 0 ? "Length: PERMANENT" : "Expires: " + new Date(b.expiry).toLocaleString();
                     return;
                 }
             }
@@ -213,16 +201,12 @@
         const p = document.getElementById('auth-password').value;
         const g = document.getElementById('reg-gender').value;
 
-        if(!u || !e || !p) return alert("All fields are required!");
+        if(!u || !e || !p) return alert("Fill all fields.");
 
         try {
             const userQuery = query(ref(db, 'users'), orderByChild('username'), equalTo(u));
             const snapshot = await get(userQuery);
-
-            if (snapshot.exists()) {
-                alert("This username is taken! Please choose another one.");
-                return;
-            }
+            if (snapshot.exists()) return alert("This username is taken!");
 
             const res = await createUserWithEmailAndPassword(auth, e, p);
             await set(ref(db, 'users/' + res.user.uid), { username: u, gender: g, email: e });
@@ -232,11 +216,10 @@
 
     function loadReports() {
         onValue(ref(db, 'reports'), (s) => {
-            const list = document.getElementById('report-list');
-            list.innerHTML = "";
+            const list = document.getElementById('report-list'); list.innerHTML = "";
             s.forEach(c => {
                 const r = c.val();
-                list.innerHTML += `<div style="border-bottom:1px solid #eee; padding:5px;">⚠️ ${r.reason}<br><small>UID: ${r.reported}</small> <button class="btn" style="padding:2px 5px; font-size:10px;" onclick="document.getElementById('ban-uid').value='${r.reported}'">Select</button></div>`;
+                list.innerHTML += `<div style="padding:3px; border-bottom:1px solid #eee;">⚠️ ${r.reason} (ID: ${r.reported}) <button class="btn" style="padding:1px 3px; font-size:9px;" onclick="document.getElementById('ban-uid').value='${r.reported}'">Select</button></div>`;
             });
         });
     }
@@ -245,10 +228,9 @@
         const uid = document.getElementById('ban-uid').value;
         const reason = document.getElementById('ban-reason-input').value;
         const days = parseInt(document.getElementById('ban-days').value);
-        if(!uid || !reason) return alert("Enter UID and Reason");
         const expiry = days === 0 ? 0 : Date.now() + (days * 24 * 60 * 60 * 1000);
         set(ref(db, `bans/${uid}`), { reason, expiry });
-        alert("Ban Applied Successfully.");
+        alert("Ban Applied.");
     };
 
     window.openProfile = async (uid) => {
@@ -260,7 +242,7 @@
             document.getElementById('profile-overlay').style.display = 'flex';
             onValue(ref(db, `friends/${uid}`), (s) => {
                 const list = document.getElementById('p-friends');
-                list.innerHTML = s.exists() ? "" : "No friends yet.";
+                list.innerHTML = s.exists() ? "" : "None";
                 s.forEach(f => { list.innerHTML += `<div>⭐ ${f.val().name}</div>`; });
             });
         }
@@ -269,11 +251,8 @@
     document.getElementById('addFriendBtn').onclick = () => set(ref(db, `friends/${auth.currentUser.uid}/${viewingUid}`), { name: document.getElementById('p-name').innerText });
     
     document.getElementById('reportBtn').onclick = () => {
-        const r = prompt("Why are you reporting this user?");
-        if(r) {
-            push(ref(db, 'reports'), { reported: viewingUid, reason: r, by: auth.currentUser.uid });
-            alert("Report sent to Admin.");
-        }
+        const r = prompt("Reason?");
+        if(r) push(ref(db, 'reports'), { reported: viewingUid, reason: r, by: auth.currentUser.uid });
     };
 
     function loadThreads(isAdmin) {
@@ -281,15 +260,15 @@
             const d = document.getElementById('thread-display'); d.innerHTML = "";
             s.forEach(c => {
                 const p = c.val();
-                const del = (p.uid === auth.currentUser.uid || isAdmin) ? `<button class="btn btn-danger" style="padding:2px 8px;" onclick="remove(ref(db,'threads/${c.key}'))">Delete</button>` : "";
-                d.insertAdjacentHTML('afterbegin', `<div class="thread-row"><div><span class="clickable-name" onclick="openProfile('${p.uid}')">${p.author}</span><br><span style="font-size:15px;">${p.message}</span></div>${del}</div>`);
+                const del = (p.uid === auth.currentUser.uid || isAdmin) ? `<button class="btn" onclick="remove(ref(db,'threads/${c.key}'))" style="color:red; border:none; background:none;">[x]</button>` : "";
+                d.insertAdjacentHTML('afterbegin', `<div class="thread-row"><div><span class="clickable-name" onclick="openProfile('${p.uid}')">${p.author}</span>: <span>${p.message}</span></div>${del}</div>`);
             });
         });
     }
 
     document.getElementById('submitPost').onclick = () => {
         const msg = document.getElementById('post-input').value;
-        if(msg) push(ref(db, 'threads'), { message: msg, author: currentUsername, uid: auth.currentUser.uid, time: Date.now() });
+        if(msg) push(ref(db, 'threads'), { message: msg, author: currentUsername, uid: auth.currentUser.uid });
         document.getElementById('post-input').value = "";
     };
 
@@ -297,7 +276,6 @@
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
     document.getElementById('updateAnnouncement').onclick = () => set(ref(db, 'site_settings/announcement'), document.getElementById('admin-msg-input').value);
-    
     onValue(ref(db, 'site_settings/announcement'), (s) => {
         const b = document.getElementById('announcement-banner');
         if(s.exists() && s.val() !== "") { b.innerText = s.val(); b.style.display = "block"; } else { b.style.display = "none"; }
