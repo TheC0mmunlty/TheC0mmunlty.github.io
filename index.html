@@ -13,20 +13,48 @@
             background-size: cover; 
             background-position: center; 
         }
-        header { background: #000; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #555; }
-        .main-wrapper { width: 900px; margin: 30px auto; background: #fff; border: 1px solid #888; min-height: 800px; box-shadow: 0px 0px 20px rgba(0,0,0,0.5); position: relative; }
+
+        header { 
+            background: #000; 
+            color: white; 
+            padding: 10px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 3px solid #555; 
+        }
+
+        .main-wrapper { 
+            width: 900px; 
+            margin: 30px auto; 
+            background: #fff; 
+            border: 1px solid #888; 
+            min-height: 800px; 
+            box-shadow: 0px 0px 20px rgba(0,0,0,0.5); 
+            position: relative; 
+        }
+
         #announcement-banner { background: #FF8C00; border-bottom: 2px solid #CC7000; padding: 10px; text-align: center; font-size: 13px; font-weight: bold; color: white; display: none; }
+        
         .auth-card { width: 400px; margin: 80px auto; border: 1px solid #0055ff; background: #f0f5ff; padding: 20px; text-align: center; }
+        
         input, select, textarea { width: 90%; padding: 6px; margin: 5px 0; border: 1px solid #999; font-family: Verdana; font-size: 12px; }
+        
         .forum-header { background: #ccc; color: #000; padding: 8px; font-weight: bold; margin-top: 15px; font-size: 13px; border: 1px solid #999; border-left: none; border-right: none; }
+        
         .thread-row { border-bottom: 1px solid #eee; padding: 12px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 12px; background: #fff; }
+        
         .clickable-name { color: #0055ff; cursor: pointer; text-decoration: underline; font-weight: bold; }
+        
         .btn { background: #e1e1e1; border: 1px solid #777; padding: 4px 10px; cursor: pointer; font-size: 11px; font-family: Verdana; }
         .btn-admin { background: #ffcc00; font-weight: bold; border-color: #b89600; }
         .btn-danger { background: #ff4444; color: white; border: 1px solid #800; }
+        
         .hidden { display: none !important; }
+
         #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 100; justify-content: center; align-items: center; }
         .profile-card { background: white; padding: 20px; border: 2px solid #555; width: 350px; text-align: center; box-shadow: 5px 5px 0px #000; }
+        
         #ban-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #900; color: #fff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
     </style>
 </head>
@@ -134,7 +162,7 @@
     const OWNER_EMAIL = "fahid.001x@gmail.com"; 
     let currentUsername = "";
 
-    // FILTER LOGIC
+    // --- FULL SWEAR FILTER ---
     const badWords = ["fuck", "shit", "ass", "bitch", "crap", "nigger", "retard", "faggot", "cum", "kys", "kill yourself", "porn", "gooner", "nigga", "asshole", "shitting", "groom", "rape", "raped","dick", "xnxx", "faggoter", "cock", "fag", "dounche", "dounchebag"];
     const filterText = (text) => {
         let clean = text;
@@ -147,6 +175,7 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            // Check if user is banned
             const banSnap = await get(child(ref(db), `bans/${user.uid}`));
             if(banSnap.exists()){
                 document.getElementById('ban-view').classList.remove('hidden');
@@ -157,13 +186,13 @@
             const snap = await get(child(ref(db), `users/${user.uid}`));
             let userData = snap.val();
 
-            // OWNER AUTO-ID SETTER
+            // FORCE OWNER TO BE ID #1
             if(user.email.toLowerCase() === OWNER_EMAIL.toLowerCase() && (!userData || userData.player_id !== 1)) {
                 await update(ref(db, `users/${user.uid}`), { player_id: 1, rank: "admin" });
                 userData = (await get(child(ref(db), `users/${user.uid}`))).val();
             }
 
-            currentUsername = userData ? userData.username : user.email;
+            currentUsername = userData ? userData.username : "Member";
             document.getElementById('welcome-text').innerText = "Welcome, " + currentUsername;
             document.getElementById('logged-in-view').classList.remove('hidden');
             document.getElementById('logged-out-view').classList.add('hidden');
@@ -177,12 +206,31 @@
         }
     });
 
-    document.getElementById('submitPost').onclick = () => {
-        const msg = document.getElementById('post-input').value.trim();
-        if(msg) push(ref(db, 'threads'), { message: filterText(msg), author: currentUsername, uid: auth.currentUser.uid });
-        document.getElementById('post-input').value = "";
+    // SIGNUP LOGIC WITH NUMERIC ID
+    document.getElementById('signupBtn').onclick = async () => {
+        const u = document.getElementById('reg-username').value.trim();
+        const e = document.getElementById('auth-email').value.trim();
+        const p = document.getElementById('auth-password').value;
+        const g = document.getElementById('reg-gender').value;
+
+        if(!u || !e || !p) return alert("Fill all fields");
+
+        try {
+            const idRef = ref(db, 'global_id_counter');
+            const result = await runTransaction(idRef, (c) => (c || 0) + 1);
+            const newId = result.snapshot.val();
+
+            const res = await createUserWithEmailAndPassword(auth, e, p);
+            await set(ref(db, 'users/' + res.user.uid), { 
+                username: u, gender: g, email: e, rank: "member", player_id: newId 
+            });
+            location.reload();
+        } catch(err) { 
+            alert("Permission Denied or Error: " + err.message); 
+        }
     };
 
+    // THREAD LOADING AND FILTERING
     function loadThreads(isAdmin) {
         onValue(ref(db, 'threads'), (s) => {
             const d = document.getElementById('thread-display'); d.innerHTML = "";
@@ -203,12 +251,13 @@
         });
     }
 
-    document.getElementById('updateAnnouncement').onclick = () => set(ref(db, 'site_settings/announcement'), document.getElementById('admin-msg-input').value);
-    onValue(ref(db, 'site_settings/announcement'), (s) => {
-        const b = document.getElementById('announcement-banner');
-        if(s.exists() && s.val() !== "") { b.innerText = s.val(); b.style.display = "block"; } else { b.style.display = "none"; }
-    });
+    document.getElementById('submitPost').onclick = () => {
+        const msg = document.getElementById('post-input').value.trim();
+        if(msg) push(ref(db, 'threads'), { message: filterText(msg), author: currentUsername, uid: auth.currentUser.uid });
+        document.getElementById('post-input').value = "";
+    };
 
+    // PROFILE OVERLAY
     window.openProfile = async (uid) => {
         const snap = await get(child(ref(db), `users/${uid}`));
         if(snap.exists()) {
@@ -221,23 +270,17 @@
         }
     };
 
+    // ADMIN TOOLS
+    document.getElementById('updateAnnouncement').onclick = () => set(ref(db, 'site_settings/announcement'), document.getElementById('admin-msg-input').value);
+    onValue(ref(db, 'site_settings/announcement'), (s) => {
+        const b = document.getElementById('announcement-banner');
+        if(s.exists() && s.val() !== "") { b.innerText = s.val(); b.style.display = "block"; } else { b.style.display = "none"; }
+    });
+
     document.getElementById('applyRank').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { rank: "admin" });
     document.getElementById('removeRank').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { rank: "member" });
     document.getElementById('applyBan').onclick = () => set(ref(db, `bans/${document.getElementById('target-uid').value}`), { reason: "Admin Action" });
 
-    document.getElementById('signupBtn').onclick = async () => {
-        const u = document.getElementById('reg-username').value.trim();
-        const e = document.getElementById('auth-email').value.trim();
-        const p = document.getElementById('auth-password').value;
-        const g = document.getElementById('reg-gender').value;
-        try {
-            const idRef = ref(db, 'global_id_counter');
-            const result = await runTransaction(idRef, (c) => (c || 0) + 1);
-            const res = await createUserWithEmailAndPassword(auth, e, p);
-            await set(ref(db, 'users/' + res.user.uid), { username: u, gender: g, email: e, rank: "member", player_id: result.snapshot.val() });
-            location.reload();
-        } catch(err) { alert(err.message); }
-    };
     document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value);
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
