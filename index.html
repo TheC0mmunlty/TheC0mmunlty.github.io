@@ -2,98 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Robloxians - 2012 Legacy</title>
     <style>
-        body { 
-            font-family: "MS Sans Serif", Geneva, sans-serif; 
-            margin: 0; 
-            background-image: url('https://wallpapercave.com/wp/wp9084955.jpg'); 
-            background-attachment: fixed; 
-            background-size: cover; 
-        }
-        
-        header { 
-            background: #0055ff; 
-            color: white; 
-            padding: 8px 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 4px solid #0033aa;
-        }
-
-        #announcement-container { 
-            background: #ff9800; 
-            border-bottom: 2px solid #cc7a00; 
-            color: #fff; 
-            padding: 12px; 
-            font-weight: bold; 
-            text-align: center;
-            display: none; 
-            font-size: 14px;
-        }
-
-        .main-wrapper { 
-            width: 950px; 
-            margin: 20px auto; 
-            background: rgba(238, 238, 238, 0.95); 
-            border: 1px solid #888; 
-            min-height: 700px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.4);
-        }
-
-        .forum-header { 
-            background: #ddd; 
-            color: #333; 
-            padding: 8px; 
-            font-weight: bold;
-            border: 1px solid #bbb;
-        }
-
-        textarea#post-input { 
-            width: 100%; 
-            box-sizing: border-box;
-            height: 100px; 
-            border: 1px solid #ccc; 
-            padding: 10px;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .btn { 
-            background: #e1e1e1; 
-            border: 1px solid #777; 
-            padding: 5px 15px; 
-            cursor: pointer; 
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
+        body { font-family: "MS Sans Serif", Geneva, sans-serif; margin: 0; background-image: url('https://wallpapercave.com/wp/wp9084955.jpg'); background-attachment: fixed; background-size: cover; }
+        header { background: #0055ff; color: white; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #0033aa; }
+        #announcement-container { background: #ff9800; border-bottom: 2px solid #cc7a00; color: #fff; padding: 12px; font-weight: bold; text-align: center; display: none; font-size: 14px; }
+        .main-wrapper { width: 950px; margin: 20px auto; background: rgba(238, 238, 238, 0.95); border: 1px solid #888; min-height: 600px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.4); }
+        .auth-box { text-align: center; padding: 40px; }
+        .auth-box input { display: block; margin: 10px auto; padding: 8px; width: 250px; border: 1px solid #777; }
+        .forum-header { background: #ddd; color: #333; padding: 8px; font-weight: bold; border: 1px solid #bbb; }
+        textarea#post-input { width: 100%; box-sizing: border-box; height: 100px; border: 1px solid #ccc; padding: 10px; font-size: 14px; margin-bottom: 10px; }
+        .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-submit { background: #ffcc00; border-color: #ccaa00; }
-        .btn-admin { background: #ffff00; color: #000; border: 1px solid #777; } /* Admin Dashboard Yellow */
-        .btn-danger { background: #ff4444; color: white; border: none; }
-
-        .thread-row { 
-            border-bottom: 1px solid #ddd; 
-            padding: 12px; 
-            background: #fff; 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-        }
-
-        .clickable-name { font-weight: bold; cursor: pointer; color: #0055ff; }
-        #admin-panel { border: 2px solid #0055ff; padding: 15px; margin-bottom: 15px; background: #fff; }
+        .btn-admin { background: #ffff00; color: #000; border: 1px solid #777; } 
+        .btn-danger { background: #ff4444; color: white; border: 1px solid #aa0000; }
+        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
         .hidden { display: none !important; }
-
-        #profile-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); display: none; 
-            z-index: 1000; justify-content: center; align-items: center; 
-        }
-        .profile-card { background: #fff; border: 5px solid #0055ff; padding: 30px; width: 400px; text-align: center; }
+        #admin-panel { border: 2px solid #0055ff; padding: 15px; margin-bottom: 15px; background: #fff; }
     </style>
 </head>
 <body>
@@ -103,14 +29,25 @@
     <div id="user-display" style="font-size: 12px;">Guest</div>
 </header>
 
-<div id="announcement-container">
-    <span id="announcement-display"></span>
-</div>
+<div id="announcement-container"><span id="announcement-display"></span></div>
 
 <div class="main-wrapper">
+    <div id="auth-view">
+        <div class="auth-box">
+            <h2 style="color:#0055ff;">Sign in to The Robloxians</h2>
+            <input type="text" id="reg-user" placeholder="Username (New accounts only)">
+            <input type="email" id="auth-email" placeholder="Email Address">
+            <input type="password" id="auth-pass" placeholder="Password">
+            <div style="margin-top:15px;">
+                <button class="btn" id="loginBtn">Login</button>
+                <button class="btn btn-submit" id="signupBtn">Create Account</button>
+            </div>
+        </div>
+    </div>
+
     <div id="logged-in-view" class="hidden">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-            <span id="welcome-text" style="font-weight: bold; font-size: 16px;"></span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;">
+            <span id="welcome-text" style="font-weight: bold; font-size: 18px;"></span>
             <div>
                 <button class="btn btn-admin hidden" id="adminBtn">Admin Dashboard</button>
                 <button class="btn btn-danger" id="logoutBtn">Logout</button>
@@ -118,48 +55,26 @@
         </div>
 
         <div id="admin-panel" class="hidden">
-            <strong>Admin Dashboard</strong><br>
-            <input type="text" id="announce-text" placeholder="Type banner message..." style="width:70%; padding:5px;">
+            <strong>Admin Dashboard</strong><br><br>
+            Banner: <input type="text" id="announce-text" placeholder="Global message..." style="width:60%;">
             <button class="btn btn-submit" id="postAnnounce">Save Banner</button>
             <hr>
-            Target UID: <input type="text" id="target-uid" style="width:150px; padding:5px;">
-            <button class="btn" id="applyAdmin">Make Admin</button>
-            <button class="btn" id="removeAdmin">Unrank</button>
-            <br><br>
-            Ban Days: <input type="number" id="ban-days" placeholder="0 = Perm" style="width:100px; padding:5px;">
-            <button class="btn" id="applyBan" style="color:red;">Apply Ban</button>
-            <button class="btn" id="applyUnban">Unban</button>
-            <hr>
-            <div id="admin-logs" style="height: 80px; overflow-y: auto; background: #000; color: #0f0; padding: 8px; font-family: monospace; font-size: 11px;"></div>
+            User UID: <input type="text" id="target-uid" placeholder="Paste UID here...">
+            <button class="btn" id="applyBan" style="color:red;">Ban User</button>
+            <button class="btn" id="applyUnban">Unban User</button>
         </div>
 
         <div class="forum-header">Community Feed</div>
-        <textarea id="post-input" placeholder="Type here..."></textarea><br>
+        <textarea id="post-input" placeholder="What's on your mind?"></textarea><br>
         <button class="btn btn-submit" id="submitPost">Submit Post</button>
-        
         <div id="thread-display" style="margin-top: 15px;"></div>
-    </div>
-</div>
-
-<div id="profile-overlay">
-    <div class="profile-card">
-        <h2 id="p-name"></h2>
-        <div id="p-bio" style="background:#f9f9f9; padding:15px; border:1px solid #ccc; text-align:left;"></div>
-        <div id="p-uid-display" style="font-size: 11px; color: #888; margin: 10px 0;"></div>
-        <div id="decoration-options" class="hidden">
-            <hr>
-            Color: <input type="color" id="theme-picker">
-            <button class="btn" id="save-theme-btn">Update</button>
-        </div>
-        <br>
-        <button class="btn" onclick="document.getElementById('profile-overlay').style.display='none'">Close</button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, get, child, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, set, push, onValue, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU",
@@ -175,149 +90,99 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
     const OWNER_EMAIL = "fahid.001x@gmail.com";
-    let isStaff = false;
+
+    // AUTH ACTIONS
+    document.getElementById('signupBtn').onclick = () => {
+        const email = document.getElementById('auth-email').value;
+        const pass = document.getElementById('auth-pass').value;
+        const user = document.getElementById('reg-user').value;
+        if(!user) return alert("Enter a username!");
+        createUserWithEmailAndPassword(auth, email, pass).then((res) => {
+            set(ref(db, `users/${res.user.uid}`), { username: user, email: email, rank: "member", banned: false });
+        }).catch(err => alert(err.message));
+    };
+
+    document.getElementById('loginBtn').onclick = () => {
+        signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).catch(err => alert(err.message));
+    };
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const snap = await get(child(ref(db), `users/${user.uid}`));
-            const uD = snap.val();
-
-            if(uD && uD.banned) {
-                const now = Date.now();
-                if(uD.banUntil === 0 || now < uD.banUntil) {
-                    alert("ACCOUNT SUSPENDED.");
-                    signOut(auth).then(() => location.reload());
-                    return;
+            // Ban Watcher
+            onValue(ref(db, `users/${user.uid}/banned`), (snapshot) => {
+                if (snapshot.val() === true) { 
+                    alert("Account Banned."); 
+                    signOut(auth).then(() => location.reload()); 
                 }
-            }
+            });
 
+            // Show Forum, Hide Login
+            document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('logged-in-view').classList.remove('hidden');
-            document.getElementById('welcome-text').innerText = "Logged in as: " + (uD ? uD.username : "User");
             
-            if(user.email.toLowerCase() === OWNER_EMAIL || (uD && uD.rank === "admin")) {
-                isStaff = true;
+            const snap = await get(child(ref(db), `users/${user.uid}`));
+            const userData = snap.val() || {};
+            document.getElementById('welcome-text').innerText = "Hello, " + (userData.username || "User") + "!";
+            
+            if(user.email.toLowerCase() === OWNER_EMAIL || userData.rank === "admin") {
                 document.getElementById('adminBtn').classList.remove('hidden');
-                loadLogs();
             }
 
-            // FIXED ANNOUNCEMENT SYNC
-            onValue(ref(db, 'announcement'), (s) => {
-                const display = document.getElementById('announcement-display');
-                if(s.exists() && s.val().text) {
-                    display.innerText = s.val().text;
+            // Banner Logic
+            onValue(ref(db, 'announcement/text'), (snapshot) => {
+                if(snapshot.exists() && snapshot.val() !== "") {
+                    document.getElementById('announcement-display').innerText = snapshot.val();
                     document.getElementById('announcement-container').style.display = 'block';
                 } else {
                     document.getElementById('announcement-container').style.display = 'none';
                 }
             });
-            loadThreads();
+
+            // Load Chat
+            onValue(ref(db, 'threads'), (snapshot) => {
+                const displayArea = document.getElementById('thread-display');
+                displayArea.innerHTML = "";
+                snapshot.forEach(child => {
+                    const post = child.val();
+                    const row = document.createElement('div');
+                    row.className = 'thread-row';
+                    row.innerHTML = `<div><strong>${post.author}</strong>: ${post.message}</div>`;
+                    displayArea.prepend(row);
+                });
+            });
+        } else {
+            // LOGGED OUT STATE: Show login, hide everything else
+            document.getElementById('auth-view').classList.remove('hidden');
+            document.getElementById('logged-in-view').classList.add('hidden');
+            document.getElementById('user-display').innerText = "Guest";
         }
     });
 
-    async function loadThreads() {
-        onValue(ref(db, 'threads'), async (snapshot) => {
-            const displayArea = document.getElementById('thread-display');
-            displayArea.innerHTML = ""; 
-            const usersSnap = await get(child(ref(db), 'users'));
-            const allUsers = usersSnap.val() || {};
-            
-            let threads = [];
-            snapshot.forEach(c => { threads.push({ id: c.key, ...c.val() }); });
-            threads.reverse().forEach(post => {
-                const uD = allUsers[post.uid] || {};
-                let color = uD.themeColor || (uD.email === OWNER_EMAIL ? "#FF0000" : "#0055ff");
-
-                const row = document.createElement('div');
-                row.className = 'thread-row';
-                row.innerHTML = `
-                    <div><span class="clickable-name" style="color:${color}" data-uid="${post.uid}">${post.author}</span>: ${post.message}</div>
-                    ${isStaff ? `<button class="btn btn-danger" style="padding:2px 6px; font-size:10px;" onclick="deletePost('${post.id}', '${post.author}', \`${post.message}\`)">DEL</button>` : ""}
-                `;
-                displayArea.appendChild(row);
-            });
-
-            document.querySelectorAll('.clickable-name').forEach(el => {
-                el.onclick = () => openProfile(el.getAttribute('data-uid'));
-            });
-        });
-    }
-
-    // FIXED SUBMIT POST
+    // POSTING
     document.getElementById('submitPost').onclick = async () => {
-        const m = document.getElementById('post-input').value;
-        if(!m || !auth.currentUser) return;
-        const uSnap = await get(child(ref(db), `users/${auth.currentUser.uid}`));
-        const user = uSnap.val();
-        
-        // Pushing to Firebase correctly
-        push(ref(db, 'threads'), { 
-            message: m, 
-            author: user.username, 
-            uid: auth.currentUser.uid 
-        }).then(() => {
-            document.getElementById('post-input').value = "";
-        });
+        const msg = document.getElementById('post-input').value;
+        if(!msg) return;
+        const snap = await get(child(ref(db), `users/${auth.currentUser.uid}`));
+        push(ref(db, 'threads'), { message: msg, author: snap.val().username, uid: auth.currentUser.uid });
+        document.getElementById('post-input').value = "";
     };
 
-    // FIXED ANNOUNCEMENT BUTTON
-    document.getElementById('postAnnounce').onclick = () => {
-        const txt = document.getElementById('announce-text').value;
-        set(ref(db, 'announcement'), { text: txt });
+    // ADMIN TOOLS
+    document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement/text'), document.getElementById('announce-text').value);
+    
+    document.getElementById('applyUnban').onclick = () => {
+        const uid = document.getElementById('target-uid').value.trim();
+        if(uid) update(ref(db, `users/${uid}`), { banned: false }).then(() => alert("Unbanned!"));
     };
-
-    window.deletePost = (pid, author, msg) => {
-        if(confirm("Delete this?")) {
-            push(ref(db, 'admin_logs'), { 
-                time: new Date().toLocaleTimeString(), 
-                msg: `ERASED (${author}): "${msg}"` 
-            });
-            remove(ref(db, `threads/${pid}`));
-        }
-    };
-
-    window.openProfile = async (uid) => {
-        const snap = await get(child(ref(db), `users/${uid}`));
-        if(snap.exists()) {
-            const d = snap.val();
-            document.getElementById('p-name').innerText = d.username;
-            document.getElementById('p-bio').innerText = d.bio || "No status set.";
-            document.getElementById('p-uid-display').innerText = "UID: " + uid;
-            document.getElementById('profile-overlay').style.display = 'flex';
-            if(isStaff) document.getElementById('target-uid').value = uid;
-            if(uid === auth.currentUser.uid) {
-                document.getElementById('decoration-options').classList.remove('hidden');
-                document.getElementById('save-theme-btn').onclick = () => {
-                    update(ref(db, `users/${uid}`), { themeColor: document.getElementById('theme-picker').value });
-                    alert("Profile updated.");
-                };
-            }
-        }
-    };
-
-    function loadLogs() {
-        onValue(ref(db, 'admin_logs'), (s) => {
-            const logBox = document.getElementById('admin-logs'); 
-            logBox.innerHTML = "";
-            s.forEach(c => {
-                const item = document.createElement('div');
-                item.innerText = `[${c.val().time}] ${c.val().msg}`;
-                logBox.prepend(item);
-            });
-        });
-    }
 
     document.getElementById('applyBan').onclick = () => {
-        const uid = document.getElementById('target-uid').value;
-        const days = parseInt(document.getElementById('ban-days').value) || 0;
-        const expiry = days === 0 ? 0 : Date.now() + (days * 24 * 60 * 60 * 1000);
-        update(ref(db, `users/${uid}`), { banned: true, banUntil: expiry });
+        const uid = document.getElementById('target-uid').value.trim();
+        if(uid) update(ref(db, `users/${uid}`), { banned: true }).then(() => alert("Banned!"));
     };
-    document.getElementById('applyUnban').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { banned: false, banUntil: 0 });
-    document.getElementById('removeAdmin').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { rank: "member" });
-    document.getElementById('applyAdmin').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { rank: "admin" });
 
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
 </script>
+
 </body>
 </html>
