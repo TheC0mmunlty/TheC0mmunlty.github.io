@@ -28,6 +28,7 @@
         
         .ceo-glow { outline: 3px solid gold !important; box-shadow: 0 0 15px gold; }
         .ceo-badge { background: gold; color: black; font-weight: bold; padding: 2px 5px; font-size: 10px; border: 1px solid #000; display: inline-block; }
+        .user-id-tag { font-size: 10px; color: #666; margin-left: 5px; }
 
         .auth-box { text-align: center; padding: 40px; }
         .auth-box input { display: block; margin: 10px auto; padding: 8px; width: 250px; border: 1px solid #777; }
@@ -89,7 +90,10 @@
                 <div class="profile-large" id="profile-render"></div>
                 <div style="margin-left: 100px;">
                     <h2 id="view-username">User</h2>
-                    <div id="ceo-tag" class="hidden ceo-badge">CEO</div>
+                    <div style="margin-bottom:10px;">
+                        <span id="view-id" class="user-id-tag">ID: 0</span>
+                        <div id="ceo-tag" class="hidden ceo-badge">CEO</div>
+                    </div>
                     <p id="view-bio">Loading...</p>
                     
                     <div id="customizer" class="hidden">
@@ -122,7 +126,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, get, child, update, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU",
@@ -137,8 +141,10 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
+    
     const OWNER_EMAIL = "fahid.001x@gmail.com";
     const CEO_UID = "oJm6Z87yVpMe5YgO7G4H0vU7T9m2";
+    const PROTECTED_NAMES = ["fahid", "guest 1337", "solong", "admin", "roblox"];
 
     function createAvatarHTML(colors, isCEO) {
         let torsoColor = colors.t;
@@ -168,7 +174,7 @@
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             onValue(ref(db, `users/${user.uid}/banned`), (snap) => {
-                if(snap.val() === true) { alert("Banned."); signOut(auth).then(()=>location.reload()); }
+                if(snap.val() === true) { signOut(auth).then(()=>location.reload()); }
             });
 
             document.getElementById('auth-view').classList.add('hidden');
@@ -177,7 +183,7 @@
             
             const uSnap = await get(child(ref(db), `users/${user.uid}`));
             const uData = uSnap.val() || {};
-            document.getElementById('welcome-text').innerText = "Logged in as: " + uData.username;
+            document.getElementById('welcome-text').innerText = "Hello, " + uData.username;
             document.getElementById('user-display').innerText = uData.username;
 
             onValue(ref(db, 'threads'), async (s) => {
@@ -189,13 +195,14 @@
                     const p = c.val();
                     const authorData = allUsers[p.uid] || {};
                     const isBanned = authorData.banned === true;
-                    const displayName = isBanned ? "[ Content Deleted ]" : (authorData.username || p.author);
+                    const displayName = isBanned ? "[ Content Deleted ]" : (authorData.username || "Guest");
                     const div = document.createElement('div');
                     div.className = 'thread-row';
                     const av = createAvatarHTML(authorData.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, p.uid === CEO_UID);
                     div.innerHTML = `${av} <div style="margin-left:20px;">
-                        <strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${displayName}</strong><br>
-                        ${isBanned ? '<i style="color:gray;">This message was removed.</i>' : p.message}
+                        <strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${displayName}</strong> 
+                        <span class="user-id-tag">#${authorData.id || '?'}</span><br>
+                        ${isBanned ? '<i style="color:gray;">[Removed]</i>' : p.message}
                     </div>`;
                     display.prepend(div);
                 });
@@ -208,46 +215,55 @@
                     banner.style.display = 'block';
                 } else banner.style.display = 'none';
             });
-        } else {
-            showView('auth-view');
-            document.getElementById('user-display').innerText = "Guest";
-        }
+        } else { showView('auth-view'); }
     });
 
-    document.getElementById('signupBtn').onclick = () => {
+    document.getElementById('signupBtn').onclick = async () => {
+        const desiredUser = document.getElementById('reg-user').value.trim();
         const email = document.getElementById('auth-email').value;
         const pass = document.getElementById('auth-pass').value;
-        const user = document.getElementById('reg-user').value;
-        if(!user) return alert("Enter a username!");
+
+        if(!desiredUser || !email || !pass) return alert("Fill in everything!");
+
+        // 1. Check Protected Names
+        if(PROTECTED_NAMES.includes(desiredUser.toLowerCase())) {
+            return alert("This username is reserved!");
+        }
+
+        // 2. Check if Username is Already Taken
+        const allUsersSnap = await get(child(ref(db), 'users'));
+        const allUsers = allUsersSnap.val() || {};
+        const nameExists = Object.values(allUsers).some(u => u.username && u.username.toLowerCase() === desiredUser.toLowerCase());
+
+        if(nameExists) {
+            return alert("This username is taken! Try something else.");
+        }
+        
+        // 3. Create Account if Unique
+        const countSnap = await get(child(ref(db), 'user_count'));
+        let newId = (countSnap.val() || 0) + 1;
+
         createUserWithEmailAndPassword(auth, email, pass).then((res) => {
             set(ref(db, `users/${res.user.uid}`), { 
-                username: user, 
-                email: email, 
+                username: desiredUser, 
+                id: newId,
                 banned: false, 
-                bio: "New to the community!", 
                 colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'} 
             });
+            set(ref(db, 'user_count'), newId);
         }).catch(err => alert(err.message));
-    };
-
-    document.getElementById('loginBtn').onclick = () => {
-        signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).catch(err => alert(err.message));
     };
 
     window.loadProfile = async (uid) => {
         showView('profile-view');
         const snap = await get(child(ref(db), `users/${uid}`));
         const d = snap.val();
-        const isBanned = d.banned === true;
-        document.getElementById('view-username').innerText = isBanned ? "[ Content Deleted ]" : d.username;
-        document.getElementById('view-bio').innerText = isBanned ? "Account Suspended." : (d.bio || "No bio.");
+        document.getElementById('view-username').innerText = d.banned ? "[ Content Deleted ]" : d.username;
+        document.getElementById('view-id').innerText = "ID: " + (d.id || "0");
         document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, uid === CEO_UID);
         if(uid === CEO_UID) document.getElementById('ceo-tag').classList.remove('hidden');
         else document.getElementById('ceo-tag').classList.add('hidden');
-        if(auth.currentUser && auth.currentUser.uid === uid) {
-            document.getElementById('customizer').classList.remove('hidden');
-            document.getElementById('edit-bio').value = d.bio || "";
-        } else document.getElementById('customizer').classList.add('hidden');
+        if(auth.currentUser?.uid === uid) document.getElementById('customizer').classList.remove('hidden');
     };
 
     window.updateColor = (part, color) => {
@@ -258,22 +274,14 @@
         });
     };
 
-    document.getElementById('saveProfile').onclick = () => {
-        update(ref(db, `users/${auth.currentUser.uid}`), { bio: document.getElementById('edit-bio').value }).then(() => alert("Saved!"));
-    };
-
+    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
+    document.getElementById('submitPost').onclick = () => push(ref(db, 'threads'), { message: document.getElementById('post-input').value, uid: auth.currentUser.uid });
+    document.getElementById('myProfileBtn').onclick = () => loadProfile(auth.currentUser.uid);
+    document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
     document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement/text'), document.getElementById('announce-text').value);
     document.getElementById('applyBan').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: true }).then(()=>alert("Banned."));
     document.getElementById('applyUnban').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: false }).then(()=>alert("Unbanned."));
-    document.getElementById('submitPost').onclick = async () => {
-        const msg = document.getElementById('post-input').value;
-        if(!msg) return;
-        push(ref(db, 'threads'), { message: msg, uid: auth.currentUser.uid });
-        document.getElementById('post-input').value = "";
-    };
-    document.getElementById('myProfileBtn').onclick = () => loadProfile(auth.currentUser.uid);
-    document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
 </script>
 </body>
 </html>
