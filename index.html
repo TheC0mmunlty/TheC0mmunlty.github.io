@@ -6,22 +6,33 @@
     <style>
         body { font-family: Verdana, Arial; background-color: #E1E1E1; margin: 0; padding: 0; }
         header { background: #000; color: white; padding: 12px; display: flex; justify-content: space-between; border-bottom: 3px solid #555; }
-        #announcement-banner { background: #FFF6CF; border: 1px solid #E6DB55; padding: 10px; text-align: center; font-size: 13px; font-weight: bold; color: #555; display: none; }
+        
+        /* THE ORANGE BANNER */
+        #announcement-banner { 
+            background: #FF8C00; 
+            border-bottom: 2px solid #CC7000; 
+            padding: 12px; 
+            text-align: center; 
+            font-size: 14px; 
+            font-weight: bold; 
+            color: white; 
+            display: none; /* Hidden by default until data arrives */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
         .main-wrapper { width: 950px; margin: 0 auto; background: white; border: 1px solid #888; min-height: 800px; box-shadow: 4px 4px 0px #888; position: relative; }
         .auth-card { width: 400px; margin: 100px auto; border: 1px solid #0055ff; background: #f0f5ff; padding: 20px; text-align: center; }
         input, select, textarea { width: 90%; padding: 8px; margin: 5px 0; border: 1px solid #999; font-family: Verdana; font-size: 12px; }
         .forum-header { background: #ccc; border: 1px solid #999; padding: 8px; font-weight: bold; margin-top: 15px; font-size: 13px; }
         .thread-row { border-bottom: 1px solid #eee; padding: 12px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 12px; }
         .clickable-name { color: #0055ff; cursor: pointer; text-decoration: underline; font-weight: bold; }
-        .clickable-name:hover { color: #ff0000; }
         
-        /* PROFILE MODAL */
+        /* MODALS */
         #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 100; justify-content: center; align-items: center; }
         .profile-card { background: white; padding: 20px; border: 2px solid #555; width: 350px; text-align: center; box-shadow: 5px 5px 0px #000; }
-        .friend-item { font-size: 11px; background: #f9f9f9; padding: 4px; margin: 2px; border: 1px solid #ddd; }
-
+        
         .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 10px; cursor: pointer; font-size: 11px; }
-        .btn-red { background: #ff4444; color: white; border-color: #aa0000; font-weight: bold; }
+        .btn-admin { background: #ffcc00; font-weight: bold; border: 1px solid #998800; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -45,7 +56,7 @@
         </div>
         <hr>
         <button class="btn" id="addFriendBtn">Add Friend</button>
-        <button class="btn btn-red" id="reportBtn">Report User</button>
+        <button class="btn" id="reportBtn" style="background:#ff4444; color:white;">Report User</button>
         <button class="btn" onclick="document.getElementById('profile-overlay').style.display='none'">Close</button>
     </div>
 </div>
@@ -69,15 +80,17 @@
         <div style="background: #eee; padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between;">
             <span id="welcome-text" style="font-weight: bold;">Loading...</span>
             <div>
-                <button class="btn hidden" id="adminBtn" style="background:#ffcc00">Admin</button>
+                <button class="btn btn-admin hidden" id="adminBtn">Admin Panel</button>
                 <button class="btn" id="logoutBtn">Logout</button>
             </div>
         </div>
 
         <div style="padding: 20px;">
-            <div id="admin-panel" class="hidden" style="border: 2px dashed red; padding: 10px; margin-bottom: 10px;">
-                <strong>Admin Tool:</strong> <input type="text" id="admin-msg-input" placeholder="Banner text">
-                <button class="btn" id="updateAnnouncement">Update Banner</button>
+            <div id="admin-panel" class="hidden" style="border: 2px dashed orange; padding: 15px; margin-bottom: 15px; background: #fffdf0;">
+                <strong style="color: #e67e22;">Admin: Announcement Control</strong><br>
+                <input type="text" id="admin-msg-input" placeholder="Type new banner message here..." style="width: 70%;">
+                <button class="btn" id="updateAnnouncement" style="background: #FF8C00; color: white;">Update Banner</button>
+                <button class="btn" id="clearAnnouncement">Clear</button>
             </div>
 
             <div class="forum-header">General Discussion - Post Message</div>
@@ -115,18 +128,27 @@
     let currentUsername = "";
     let viewingUid = "";
 
-    // --- UPDATED SWEAR FILTER (FIXED SYNTAX) ---
+    // --- SWEAR FILTER ---
     const badWords = ["fuck", "shit", "ass", "bitch", "crap", "nigger", "retard", "faggot", "cum", "kys", "kill yourself", "porn", "gooner", "nigga", "asshole", "shitting", "groom", "rape", "raped","dick", "xnxx", "faggoter", "cock", "fag", "dounche", "dounchebag"]; 
-
     const censor = (text) => {
         let cleaned = text;
         badWords.forEach(word => {
-            // This regex handles phrases and single words
             const regex = new RegExp("\\b" + word + "\\b", "gi");
             cleaned = cleaned.replace(regex, "#".repeat(word.length));
         });
         return cleaned;
     };
+
+    // --- BANNER SYNC (Visible to everyone) ---
+    onValue(ref(db, 'site_settings/announcement'), (s) => {
+        const banner = document.getElementById('announcement-banner');
+        if(s.exists() && s.val() !== "") {
+            banner.innerText = s.val();
+            banner.style.display = "block";
+        } else {
+            banner.style.display = "none";
+        }
+    });
 
     // --- AUTH ACTIONS ---
     document.getElementById('signupBtn').onclick = async () => {
@@ -143,32 +165,25 @@
     };
 
     document.getElementById('loginBtn').onclick = () => {
-        const e = document.getElementById('auth-email').value;
-        const p = document.getElementById('auth-password').value;
-        signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+        signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value).catch(err => alert(err.message));
     };
-
     document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
     // --- POSTING ---
     document.getElementById('submitPost').onclick = async () => {
         let rawMsg = document.getElementById('post-input').value;
         if(!rawMsg) return;
-        
         const cleanMsg = censor(rawMsg);
-
         try {
             await push(ref(db, 'threads'), {
-                message: cleanMsg,
-                author: currentUsername,
-                uid: auth.currentUser.uid,
+                message: cleanMsg, author: currentUsername, uid: auth.currentUser.uid,
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             });
             document.getElementById('post-input').value = "";
         } catch(err) { alert(err.message); }
     };
 
-    // --- PROFILE LOGIC ---
+    // --- PROFILE & ADMIN ---
     window.openProfile = async (uid) => {
         viewingUid = uid;
         const snap = await get(child(ref(db), `users/${uid}`));
@@ -177,44 +192,44 @@
             document.getElementById('p-name').innerText = data.username;
             document.getElementById('p-gender').innerText = data.gender;
             document.getElementById('profile-overlay').style.display = 'flex';
-            
-            // Show friends
             onValue(ref(db, `friends/${uid}`), (s) => {
                 const list = document.getElementById('p-friends');
                 list.innerHTML = s.exists() ? "" : "No friends yet.";
-                s.forEach(child => {
-                    list.innerHTML += `<div class="friend-item">⭐ ${child.val().name}</div>`;
-                });
+                s.forEach(child => { list.innerHTML += `<div style="font-size:11px; padding:2px;">⭐ ${child.val().name}</div>`; });
             });
         }
     };
 
     document.getElementById('addFriendBtn').onclick = async () => {
-        if(viewingUid === auth.currentUser.uid) return alert("You're already your own best friend!");
-        const targetName = document.getElementById('p-name').innerText;
-        await set(ref(db, `friends/${auth.currentUser.uid}/${viewingUid}`), { name: targetName });
-        alert("Added " + targetName + " to your friend list!");
+        if(viewingUid === auth.currentUser.uid) return alert("Can't friend yourself!");
+        await set(ref(db, `friends/${auth.currentUser.uid}/${viewingUid}`), { name: document.getElementById('p-name').innerText });
+        alert("Friend added!");
     };
 
-    document.getElementById('reportBtn').onclick = () => {
-        const reason = prompt("Report reason:");
-        if(reason) {
-            push(ref(db, 'reports'), { reported: viewingUid, reason: reason, by: auth.currentUser.uid });
-            alert("Report sent.");
-        }
+    document.getElementById('updateAnnouncement').onclick = () => {
+        const msg = document.getElementById('admin-msg-input').value;
+        set(ref(db, 'site_settings/announcement'), msg).then(() => {
+            alert("Banner Updated!");
+            document.getElementById('admin-msg-input').value = "";
+        });
     };
 
-    window.deletePost = (id) => { if(confirm("Delete this?")) remove(ref(db, 'threads/'+id)); };
+    document.getElementById('clearAnnouncement').onclick = () => {
+        set(ref(db, 'site_settings/announcement'), "");
+    };
+
+    window.deletePost = (id) => { if(confirm("Delete?")) remove(ref(db, 'threads/'+id)); };
 
     // --- AUTH OBSERVER ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             document.getElementById('logged-out-view').classList.add('hidden');
             document.getElementById('logged-in-view').classList.remove('hidden');
-            
+            document.getElementById('user-display').innerText = user.email;
+
             const snap = await get(child(ref(db), `users/${user.uid}`));
             currentUsername = snap.exists() ? snap.val().username : user.email;
-            document.getElementById('welcome-text').innerText = "Welcome back, " + currentUsername;
+            document.getElementById('welcome-text').innerText = "Welcome, " + currentUsername;
 
             const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
             if(isAdmin) document.getElementById('adminBtn').classList.remove('hidden');
@@ -225,17 +240,11 @@
                 s.forEach((childSnap) => {
                     const post = childSnap.val();
                     const id = childSnap.key;
-                    const canDelete = (post.uid === user.uid || isAdmin);
-                    const delBtn = canDelete ? `<button class="btn" onclick="deletePost('${id}')" style="color:red; border:none; background:none; cursor:pointer;">[x]</button>` : "";
-                    
+                    const del = (post.uid === user.uid || isAdmin) ? `<button class="btn" onclick="deletePost('${id}')" style="color:red; border:none; background:none;">[x]</button>` : "";
                     display.insertAdjacentHTML('afterbegin', `
                         <div class="thread-row">
-                            <div>
-                                <span class="clickable-name" onclick="openProfile('${post.uid}')">${post.author}</span>: 
-                                <span>${post.message}</span>
-                                <div style="font-size:10px; color:#999">${post.time}</div>
-                            </div>
-                            ${delBtn}
+                            <div><span class="clickable-name" onclick="openProfile('${post.uid}')">${post.author}</span>: <span>${post.message}</span></div>
+                            ${del}
                         </div>`);
                 });
             });
@@ -246,7 +255,6 @@
     });
 
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
-    document.getElementById('updateAnnouncement').onclick = () => set(ref(db, 'site_settings/announcement'), document.getElementById('admin-msg-input').value);
 </script>
 </body>
 </html>
