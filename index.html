@@ -7,11 +7,15 @@
         body { font-family: Verdana, sans-serif; margin: 0; background-color: #000; background-image: url('https://wallpapercave.com/wp/wp9084955.jpg'); background-attachment: fixed; background-size: cover; background-position: center; }
         header { background: #000; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #555; }
         .main-wrapper { width: 900px; margin: 30px auto; background: #fff; border: 1px solid #888; min-height: 800px; box-shadow: 0px 0px 20px rgba(0,0,0,0.5); position: relative; }
-        #announcement-banner { background: #FF8C00; border-bottom: 2px solid #CC7000; padding: 10px; text-align: center; font-size: 13px; font-weight: bold; color: white; display: none; }
+        
+        /* Rank Styles */
+        .owner-name { color: #FF0000 !important; font-weight: bold; text-shadow: 0px 0px 2px rgba(255,0,0,0.3); }
+        .rank-icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 4px; }
+        
         .auth-card { width: 400px; margin: 80px auto; border: 1px solid #0055ff; background: #f0f5ff; padding: 20px; text-align: center; }
         input, select, textarea { width: 90%; padding: 6px; margin: 5px 0; border: 1px solid #999; font-size: 12px; }
-        .forum-header { background: #ccc; padding: 8px; font-weight: bold; margin-top: 15px; font-size: 13px; border: 1px solid #999; border-left: none; border-right: none; }
-        .thread-row { border-bottom: 1px solid #eee; padding: 12px; display: flex; justify-content: space-between; font-size: 12px; background: #fff; }
+        .forum-header { background: #ccc; padding: 8px; font-weight: bold; margin-top: 15px; font-size: 13px; border: 1px solid #999; }
+        .thread-row { border-bottom: 1px solid #eee; padding: 12px; display: flex; justify-content: space-between; font-size: 12px; background: #fff; align-items: center; }
         .clickable-name { color: #0055ff; cursor: pointer; text-decoration: underline; font-weight: bold; }
         .btn { background: #e1e1e1; border: 1px solid #777; padding: 4px 10px; cursor: pointer; font-size: 11px; }
         .btn-admin { background: #ffcc00; font-weight: bold; border-color: #b89600; }
@@ -29,8 +33,6 @@
     <p id="ban-reason-text" style="font-size: 20px;"></p>
 </div>
 
-<div id="announcement-banner"></div>
-
 <header>
     <div style="font-weight:bold; font-size: 18px;">THE ROBLOXIANS FORUM</div>
     <div id="user-display" style="font-size: 11px; color: #ccc;">Guest</div>
@@ -41,8 +43,8 @@
         <h2 id="p-name">User Profile</h2>
         <p id="p-id" style="font-size: 12px; color: #d00; font-weight: bold;"></p> 
         <p id="p-gender" style="color: #666; font-size: 12px;"></p>
-        <p id="p-uid-hidden" style="font-size: 10px; color: #aaa;"></p> <hr>
-        <button class="btn btn-danger" id="reportBtn">Report</button>
+        <p id="p-uid-hidden" style="font-size: 10px; color: #aaa;"></p>
+        <hr>
         <button class="btn" onclick="document.getElementById('profile-overlay').style.display='none'">Close</button>
     </div>
 </div>
@@ -72,18 +74,9 @@
         </div>
 
         <div id="admin-panel" class="hidden" style="border: 2px dashed orange; padding: 15px; margin: 15px; background: #fffdf0;">
-            <strong style="color: #e67e22; font-size: 12px;">Admin Management</strong><br>
-            <div style="margin-top:10px;">
-                <input type="text" id="admin-msg-input" placeholder="Banner message..." style="width: 70%;">
-                <button class="btn" id="updateAnnouncement">Set Banner</button>
-            </div>
-            <hr>
-            <div style="font-size: 11px;">
-                <strong>User Control (Click a profile to get UID):</strong><br>
-                <input type="text" id="target-uid" placeholder="Target UID" style="width: 80%;"><br>
-                <button class="btn btn-admin" id="applyRank">Rank Admin</button>
-                <button class="btn btn-danger" id="applyBan">Ban User</button>
-            </div>
+            <strong>Admin Tools</strong><br>
+            <input type="text" id="target-uid" placeholder="User UID" style="width: 80%;"><br>
+            <button class="btn btn-admin" id="applyBan">Ban User</button>
         </div>
 
         <div style="padding: 15px;">
@@ -92,8 +85,7 @@
                 <textarea id="post-input" placeholder="No swearing!"></textarea><br>
                 <button class="btn" id="submitPost" style="margin-top:8px; font-weight: bold;">Post Message</button>
             </div>
-            <div class="forum-header" style="margin-top:20px;">Thread List</div>
-            <div id="thread-display" style="border: 1px solid #ccc; background: #fff;"></div>
+            <div id="thread-display"></div>
         </div>
     </div>
 </div>
@@ -118,6 +110,10 @@
     const db = getDatabase(app);
     const OWNER_EMAIL = "fahid.001x@gmail.com"; 
 
+    // --- PASTE YOUR IMAGE LINKS HERE ---
+    const OWNER_ICON = "https://i.imgur.com/your_owner_image.png"; 
+    const ADMIN_ICON = "https://i.imgur.com/your_admin_image.png";
+
     const badWords = ["fuck", "shit", "ass", "bitch", "crap", "nigger", "retard", "faggot", "cum", "kys", "kill yourself", "porn", "gooner", "nigga", "asshole", "shitting", "groom", "rape", "raped","dick", "xnxx", "faggoter", "cock", "fag", "dounche", "dounchebag"];
     const filterText = (text) => {
         let clean = text;
@@ -130,18 +126,12 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const banSnap = await get(child(ref(db), `bans/${user.uid}`));
-            if(banSnap.exists()){
-                document.getElementById('ban-view').classList.remove('hidden');
-                document.getElementById('ban-reason-text').innerText = "Reason: " + banSnap.val().reason;
-                return;
-            }
-
             const snap = await get(child(ref(db), `users/${user.uid}`));
             let userData = snap.val();
 
+            // Fix Owner ID
             if(user.email.toLowerCase() === OWNER_EMAIL.toLowerCase() && (!userData || userData.player_id !== 1)) {
-                await update(ref(db, `users/${user.uid}`), { player_id: 1, rank: "admin" });
+                await update(ref(db, `users/${user.uid}`), { player_id: 1, rank: "owner" });
                 userData = (await get(child(ref(db), `users/${user.uid}`))).val();
             }
 
@@ -149,46 +139,45 @@
             document.getElementById('logged-in-view').classList.remove('hidden');
             document.getElementById('logged-out-view').classList.add('hidden');
 
-            if(user.email.toLowerCase() === OWNER_EMAIL.toLowerCase() || (userData && userData.rank === "admin")) {
-                document.getElementById('adminBtn').classList.remove('hidden');
-            }
-            loadThreads(userData && userData.rank === "admin");
+            const isStaff = user.email.toLowerCase() === OWNER_EMAIL.toLowerCase() || (userData && (userData.rank === "admin" || userData.rank === "owner"));
+            if(isStaff) document.getElementById('adminBtn').classList.remove('hidden');
+            
+            loadThreads(isStaff);
         } else {
             document.getElementById('logged-out-view').classList.remove('hidden');
-            document.getElementById('logged-in-view').classList.add('hidden');
         }
     });
 
-    document.getElementById('signupBtn').onclick = async () => {
-        const u = document.getElementById('reg-username').value.trim();
-        const e = document.getElementById('auth-email').value.trim();
-        const p = document.getElementById('auth-password').value;
-        const g = document.getElementById('reg-gender').value;
-        try {
-            const result = await runTransaction(ref(db, 'global_id_counter'), (c) => (c || 0) + 1);
-            const res = await createUserWithEmailAndPassword(auth, e, p);
-            await set(ref(db, 'users/' + res.user.uid), { username: u, gender: g, email: e, rank: "member", player_id: result.snapshot.val() });
-            location.reload();
-        } catch(err) { alert(err.message); }
-    };
-
-    function loadThreads(isAdmin) {
-        onValue(ref(db, 'threads'), (s) => {
+    function loadThreads(isStaff) {
+        onValue(ref(db, 'threads'), async (s) => {
             const d = document.getElementById('thread-display'); d.innerHTML = "";
-            s.forEach(c => {
-                const p = c.val();
+            const threads = [];
+            s.forEach(c => threads.push({id: c.key, ...c.val()}));
+
+            for (const p of threads.reverse()) {
+                const userSnap = await get(child(ref(db), `users/${p.uid}`));
+                const userD = userSnap.val();
+                
+                let nameClass = "";
+                let iconHtml = "";
+
+                if (userD && userD.rank === "owner") {
+                    nameClass = "owner-name";
+                    iconHtml = `<img src="${OWNER_ICON}" class="rank-icon">`;
+                } else if (userD && userD.rank === "admin") {
+                    iconHtml = `<img src="${ADMIN_ICON}" class="rank-icon">`;
+                }
+
                 const row = document.createElement('div');
                 row.className = 'thread-row';
                 row.innerHTML = `
-                    <div><span class="clickable-name" onclick="openProfile('${p.uid}')">${p.author}</span>: <span>${p.message}</span></div>
-                    ${(p.uid === auth.currentUser.uid || isAdmin) ? `<button class="btn" onclick="deletePost('${c.key}')" style="color:red; border:none; background:none;">[x]</button>` : ""}
+                    <div>${iconHtml}<span class="clickable-name ${nameClass}" onclick="openProfile('${p.uid}')">${p.author}</span>: <span>${p.message}</span></div>
+                    ${(p.uid === auth.currentUser.uid || isStaff) ? `<button class="btn" onclick="deletePost('${p.id}')" style="color:red; border:none; background:none;">[x]</button>` : ""}
                 `;
-                d.prepend(row);
-            });
+                d.appendChild(row);
+            }
         });
     }
-
-    window.deletePost = (id) => { if(confirm("Delete this?")) remove(ref(db, `threads/${id}`)); };
 
     window.openProfile = async (uid) => {
         const snap = await get(child(ref(db), `users/${uid}`));
@@ -199,19 +188,7 @@
             document.getElementById('p-gender').innerText = "Gender: " + d.gender;
             document.getElementById('p-uid-hidden').innerText = "UID: " + uid;
             document.getElementById('profile-overlay').style.display = 'flex';
-            // Auto-fill UID for Admin
-            if(!document.getElementById('adminBtn').classList.contains('hidden')) {
-                document.getElementById('target-uid').value = uid;
-            }
-        }
-    };
-
-    document.getElementById('applyBan').onclick = () => {
-        const uid = document.getElementById('target-uid').value;
-        const reason = prompt("Enter Ban Reason:");
-        if(uid && reason) {
-            set(ref(db, `bans/${uid}`), { reason: reason });
-            alert("User Banned!");
+            if(!document.getElementById('adminBtn').classList.contains('hidden')) document.getElementById('target-uid').value = uid;
         }
     };
 
@@ -221,15 +198,27 @@
         document.getElementById('post-input').value = "";
     };
 
-    document.getElementById('updateAnnouncement').onclick = () => set(ref(db, 'site_settings/announcement'), document.getElementById('admin-msg-input').value);
-    onValue(ref(db, 'site_settings/announcement'), (s) => {
-        const b = document.getElementById('announcement-banner');
-        if(s.exists() && s.val() !== "") { b.innerText = s.val(); b.style.display = "block"; } else { b.style.display = "none"; }
-    });
+    document.getElementById('applyBan').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        const reason = prompt("Enter Ban Reason:");
+        if(uid && reason) { set(ref(db, `bans/${uid}`), { reason: reason }); alert("Banned!"); }
+    };
+
+    document.getElementById('signupBtn').onclick = async () => {
+        const u = document.getElementById('reg-username').value.trim();
+        const e = document.getElementById('auth-email').value.trim();
+        const p = document.getElementById('auth-password').value;
+        const g = document.getElementById('reg-gender').value;
+        const result = await runTransaction(ref(db, 'global_id_counter'), (c) => (c || 0) + 1);
+        const res = await createUserWithEmailAndPassword(auth, e, p);
+        await set(ref(db, 'users/' + res.user.uid), { username: u, gender: g, email: e, rank: "member", player_id: result.snapshot.val() });
+        location.reload();
+    };
 
     document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value);
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
+    window.deletePost = (id) => remove(ref(db, `threads/${id}`));
 </script>
 </body>
 </html>
