@@ -10,7 +10,7 @@
         #announcement-container { background: #ff9800; border-bottom: 2px solid #cc7a00; color: #fff; padding: 12px; font-weight: bold; text-align: center; display: none; font-size: 14px; }
         .main-wrapper { width: 950px; margin: 20px auto; background: rgba(238, 238, 238, 0.95); border: 1px solid #888; min-height: 600px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.4); }
         .hidden { display: none !important; }
-        .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-size: 12px; font-weight: bold; margin: 2px; }
         .btn-submit { background: #ffcc00; border-color: #ccaa00; }
         .btn-danger { background: #ff4444; color: white; border: 1px solid #aa0000; }
         .btn-admin { background: #ffff00; color: #000; border: 1px solid #777; }
@@ -26,11 +26,11 @@
         .arm-r { right: -16px; transform: rotate(-5deg); }
         .char-leg { width: 18px; height: 40px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
         
-        /* CEO & BANNED STYLES */
         .ceo-glow { outline: 3px solid gold !important; box-shadow: 0 0 15px gold; }
         .ceo-badge { background: gold; color: black; font-weight: bold; padding: 2px 5px; font-size: 10px; border: 1px solid #000; display: inline-block; }
-        .banned-text { color: red; font-weight: bold; }
 
+        .auth-box { text-align: center; padding: 40px; }
+        .auth-box input { display: block; margin: 10px auto; padding: 8px; width: 250px; border: 1px solid #777; }
         .color-picker { display: flex; gap: 5px; margin: 10px 0; }
         .color-dot { width: 20px; height: 20px; border: 1px solid #000; cursor: pointer; }
         #admin-panel { border: 2px solid #0055ff; padding: 15px; background: #fff; margin-bottom: 15px; }
@@ -46,12 +46,14 @@
 <div id="announcement-container"><span id="announcement-display"></span></div>
 
 <div class="main-wrapper">
-    <div id="auth-view">
-        <div style="text-align:center; padding: 50px;">
-            <h2>Sign In</h2>
-            <input type="email" id="auth-email" placeholder="Email"><br><br>
-            <input type="password" id="auth-pass" placeholder="Password"><br><br>
-            <button class="btn btn-submit" id="loginBtn">Login</button>
+    <div id="auth-view" class="auth-box">
+        <h2 style="color:#0055ff;">Sign in to The Robloxians</h2>
+        <input type="text" id="reg-user" placeholder="Username (New users only)">
+        <input type="email" id="auth-email" placeholder="Email Address">
+        <input type="password" id="auth-pass" placeholder="Password">
+        <div style="margin-top:15px;">
+            <button class="btn" id="loginBtn">Login</button>
+            <button class="btn btn-submit" id="signupBtn">Create Account</button>
         </div>
     </div>
 
@@ -119,7 +121,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, set, push, onValue, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
@@ -140,7 +142,7 @@
 
     function createAvatarHTML(colors, isCEO) {
         let torsoColor = colors.t;
-        if (colors.h === colors.t) torsoColor = "#0d5f97"; // Anti-Naked Rule
+        if (colors.h === colors.t) torsoColor = "#0d5f97"; 
         return `
             <div class="avatar-frame ${isCEO ? 'ceo-glow' : ''}">
                 <div class="char-head" style="background:${colors.h}"></div>
@@ -156,13 +158,15 @@
     }
 
     window.showView = (id) => {
-        ['forum-home', 'profile-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
+        ['forum-home', 'profile-view', 'auth-view'].forEach(v => {
+            const el = document.getElementById(v);
+            if(el) el.classList.add('hidden');
+        });
         document.getElementById(id).classList.remove('hidden');
     };
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // Ban Check
             onValue(ref(db, `users/${user.uid}/banned`), (snap) => {
                 if(snap.val() === true) { alert("Banned."); signOut(auth).then(()=>location.reload()); }
             });
@@ -174,28 +178,21 @@
             const uSnap = await get(child(ref(db), `users/${user.uid}`));
             const uData = uSnap.val() || {};
             document.getElementById('welcome-text').innerText = "Logged in as: " + uData.username;
+            document.getElementById('user-display').innerText = uData.username;
 
-            // Load Forum
             onValue(ref(db, 'threads'), async (s) => {
                 const display = document.getElementById('thread-display');
                 display.innerHTML = "";
-                
-                // Get all users to check ban status for shadow delete/name change
                 const allUsersSnap = await get(child(ref(db), 'users'));
                 const allUsers = allUsersSnap.val() || {};
-
                 s.forEach(c => {
                     const p = c.val();
                     const authorData = allUsers[p.uid] || {};
-                    
-                    // Shadow Deletion Check: If user is banned, skip rendering (or show deleted)
                     const isBanned = authorData.banned === true;
                     const displayName = isBanned ? "[ Content Deleted ]" : (authorData.username || p.author);
-
                     const div = document.createElement('div');
                     div.className = 'thread-row';
                     const av = createAvatarHTML(authorData.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, p.uid === CEO_UID);
-                    
                     div.innerHTML = `${av} <div style="margin-left:20px;">
                         <strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${displayName}</strong><br>
                         ${isBanned ? '<i style="color:gray;">This message was removed.</i>' : p.message}
@@ -204,7 +201,6 @@
                 });
             });
 
-            // Banner Logic
             onValue(ref(db, 'announcement/text'), (s) => {
                 const banner = document.getElementById('announcement-container');
                 if(s.exists() && s.val() !== "") {
@@ -212,30 +208,46 @@
                     banner.style.display = 'block';
                 } else banner.style.display = 'none';
             });
+        } else {
+            showView('auth-view');
+            document.getElementById('user-display').innerText = "Guest";
         }
     });
+
+    document.getElementById('signupBtn').onclick = () => {
+        const email = document.getElementById('auth-email').value;
+        const pass = document.getElementById('auth-pass').value;
+        const user = document.getElementById('reg-user').value;
+        if(!user) return alert("Enter a username!");
+        createUserWithEmailAndPassword(auth, email, pass).then((res) => {
+            set(ref(db, `users/${res.user.uid}`), { 
+                username: user, 
+                email: email, 
+                banned: false, 
+                bio: "New to the community!", 
+                colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'} 
+            });
+        }).catch(err => alert(err.message));
+    };
+
+    document.getElementById('loginBtn').onclick = () => {
+        signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).catch(err => alert(err.message));
+    };
 
     window.loadProfile = async (uid) => {
         showView('profile-view');
         const snap = await get(child(ref(db), `users/${uid}`));
         const d = snap.val();
-        
         const isBanned = d.banned === true;
         document.getElementById('view-username').innerText = isBanned ? "[ Content Deleted ]" : d.username;
-        document.getElementById('view-bio').innerText = isBanned ? "This user is suspended." : (d.bio || "No bio.");
+        document.getElementById('view-bio').innerText = isBanned ? "Account Suspended." : (d.bio || "No bio.");
         document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, uid === CEO_UID);
-        
         if(uid === CEO_UID) document.getElementById('ceo-tag').classList.remove('hidden');
         else document.getElementById('ceo-tag').classList.add('hidden');
-
-        if(auth.currentUser.uid === uid) {
+        if(auth.currentUser && auth.currentUser.uid === uid) {
             document.getElementById('customizer').classList.remove('hidden');
             document.getElementById('edit-bio').value = d.bio || "";
         } else document.getElementById('customizer').classList.add('hidden');
-    };
-
-    document.getElementById('saveProfile').onclick = () => {
-        update(ref(db, `users/${auth.currentUser.uid}`), { bio: document.getElementById('edit-bio').value }).then(() => alert("Saved!"));
     };
 
     window.updateColor = (part, color) => {
@@ -246,21 +258,18 @@
         });
     };
 
-    // Admin Tools
+    document.getElementById('saveProfile').onclick = () => {
+        update(ref(db, `users/${auth.currentUser.uid}`), { bio: document.getElementById('edit-bio').value }).then(() => alert("Saved!"));
+    };
+
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
     document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement/text'), document.getElementById('announce-text').value);
     document.getElementById('applyBan').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: true }).then(()=>alert("Banned."));
     document.getElementById('applyUnban').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: false }).then(()=>alert("Unbanned."));
-
-    document.getElementById('loginBtn').onclick = () => {
-        signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
-    };
     document.getElementById('submitPost').onclick = async () => {
         const msg = document.getElementById('post-input').value;
         if(!msg) return;
-        const snap = await get(child(ref(db), `users/${auth.currentUser.uid}`));
-        const u = snap.val();
-        push(ref(db, 'threads'), { message: msg, author: u.username, uid: auth.currentUser.uid });
+        push(ref(db, 'threads'), { message: msg, uid: auth.currentUser.uid });
         document.getElementById('post-input').value = "";
     };
     document.getElementById('myProfileBtn').onclick = () => loadProfile(auth.currentUser.uid);
