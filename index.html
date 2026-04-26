@@ -11,45 +11,28 @@
         }
         header { background: #000; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #555; }
         
-        /* 2012 ORANGE BANNER */
-        #announcement-container { 
-            background-color: #ff9800; border: 2px solid #000; border-left:none; border-right:none;
-            width: 100%; padding: 6px 0; text-align: center; display: none; 
-        }
-        .announcement-text { font-family: Arial, sans-serif; font-weight: bold; font-size: 14px; color: #fff; }
+        #announcement-container { background-color: #ff9800; border-bottom: 2px solid #b36b00; width: 100%; padding: 6px 0; text-align: center; display: none; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .announcement-text { font-family: 'Arial Black', Gadget, sans-serif; font-size: 14px; color: #fff; text-transform: uppercase; }
 
-        .main-wrapper { width: 900px; margin: 20px auto; background: #fff; border: 1px solid #888; min-height: 800px; box-shadow: 0px 0px 20px rgba(0,0,0,0.5); }
+        .main-wrapper { width: 900px; margin: 20px auto; background: #fff; border: 1px solid #888; min-height: 800px; box-shadow: 0px 0px 20px rgba(0,0,0,0.5); position: relative; }
         
-        /* AUTH SECTION */
-        #logged-out-view {
-            background-image: url('https://cdn.discordapp.com/attachments/1395984013587386390/1497797311466569758/login_sign_up.png?ex=69eed3f2&is=69ed8272&hm=5763e511b207221de6dde3aa5ec39e6d79a9fc946c7e120fd94a3119fa121bc5'); 
-            background-size: cover; background-position: center; min-height: 800px; display: flex; align-items: center; justify-content: center;
-        }
         .auth-card { width: 380px; border: 4px solid #0055ff; background: rgba(255, 255, 255, 0.95); padding: 25px; text-align: center; border-radius: 15px; }
         input, select, textarea { width: 90%; padding: 8px; margin: 6px 0; border: 1px solid #999; font-size: 13px; border-radius: 4px; }
-        
-        /* FORUM CONTENT */
         .forum-header { background: #ccc; padding: 8px; font-weight: bold; margin-top: 15px; font-size: 13px; border: 1px solid #999; }
-        .thread-row { border-bottom: 1px solid #eee; padding: 12px; display: flex; justify-content: space-between; font-size: 13px; background: #fff; align-items: center; }
         
-        /* NAMES */
+        .thread-row { border-bottom: 1px solid #eee; padding: 12px; display: flex; justify-content: space-between; font-size: 12px; background: #fff; align-items: center; }
         .clickable-name { cursor: pointer; text-decoration: underline; font-weight: bold; }
-        .owner-name { color: #FF0000 !important; } /* THE RED NAME */
         
         .btn { background: #e1e1e1; border: 1px solid #777; padding: 6px 14px; cursor: pointer; font-size: 12px; border-radius: 4px; }
         .btn-admin { background: #ffcc00; font-weight: bold; }
         .btn-danger { background: #ff4444; color: white; }
         
         .hidden { display: none !important; }
-        
-        /* ADMIN PANEL */
-        #admin-panel { border: 2px dashed orange; padding: 15px; margin: 15px; background: #fffdf0; }
-        #admin-logs { height: 120px; overflow-y: auto; background: #111; color: #0f0; border: 1px solid #555; font-size: 10px; padding: 5px; margin-top: 10px; font-family: monospace; }
+        #admin-logs { height: 120px; overflow-y: auto; background: #111; color: #0f0; border: 1px solid #999; font-size: 10px; padding: 5px; margin-top: 10px; font-family: monospace; }
 
-        /* PROFILE */
         #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 100; justify-content: center; align-items: center; }
         .profile-card { background: white; padding: 20px; border: 2px solid #555; width: 350px; text-align: center; border-radius: 8px; }
-        .bio-box { background: #f4f4f4; border: 1px solid #ddd; padding: 10px; margin: 10px 0; font-size: 12px; text-align: left; min-height: 50px; }
+        .bio-box { background: #f4f4f4; border: 1px solid #ddd; padding: 10px; margin: 10px 0; font-size: 12px; color: #333; text-align: left; border-radius: 4px; min-height: 50px; }
     </style>
 </head>
 <body>
@@ -62,7 +45,7 @@
 </header>
 
 <div class="main-wrapper">
-    <div id="logged-out-view" class="hidden">
+    <div id="logged-out-view" class="hidden" style="min-height: 800px; display: flex; align-items: center; justify-content: center; background-image: url('https://cdn.discordapp.com/attachments/1395984013587386390/1497797311466569758/login_sign_up.png?ex=69eed3f2&is=69ed8272&hm=5763e511b207221de6dde3aa5ec39e6d79a9fc946c7e120fd94a3119fa121bc5'); background-size: cover;">
         <div class="auth-card">
             <h2>The Robloxians</h2>
             <input type="text" id="reg-username" placeholder="Username">
@@ -81,18 +64,17 @@
             </div>
         </div>
 
-        <div id="admin-panel" class="hidden">
-            <strong>Admin Controls</strong><br>
-            <input type="text" id="announce-text" placeholder="Announcement Text">
-            <button class="btn btn-admin" id="postAnnounce">Post Notice</button>
-            <button class="btn btn-danger" id="clearAnnounce">Clear</button>
+        <div id="admin-panel" class="hidden" style="border: 2px dashed orange; padding: 15px; margin: 15px; background: #fffdf0;">
+            <strong>Staff Controls</strong><br>
+            <input type="text" id="announce-text" placeholder="Global Banner Message">
+            <button class="btn btn-admin" id="postAnnounce">Update Banner</button>
             <hr>
-            <input type="text" id="target-uid" placeholder="Target User UID">
+            <input type="text" id="target-uid" placeholder="Target UID">
             <button class="btn btn-danger" id="applyBan">Ban</button>
             <button class="btn btn-admin" id="applyAdmin">Promote Admin</button>
-            <button class="btn" id="applyUnrank">Unrank</button>
+            <button class="btn" id="applyUnrank">Remove Rank</button>
             <hr>
-            <strong>Shadow Logs (Chat History):</strong>
+            <strong>Shadow Deletion Log:</strong>
             <div id="admin-logs"></div>
         </div>
 
@@ -110,9 +92,9 @@
         <h2 id="p-name">Profile</h2>
         <div id="p-bio" class="bio-box"></div>
         <div id="decoration-options" class="hidden">
-            <label style="font-size: 10px;">Username Color:</label>
-            <input type="color" id="theme-picker" value="#0055ff">
-            <button class="btn" id="save-theme-btn">Save</button>
+            <label style="font-size: 10px;">Pick Theme Color:</label>
+            <input type="color" id="theme-picker" style="width: 40px; height: 25px; padding: 0;">
+            <button class="btn" id="save-theme-btn">Save Decoration</button>
         </div>
         <button id="edit-bio-btn" class="btn hidden">Edit Bio</button>
         <div id="p-uid-display" style="font-size: 9px; color: #999; margin-top: 10px; word-break: break-all;"></div>
@@ -146,7 +128,7 @@
         if (user) {
             const banSnap = await get(child(ref(db), `bans/${user.uid}`));
             if(banSnap.exists()){
-                document.body.innerHTML = `<div style="background:black; color:white; height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; font-family:Impact;"><h1>BANNED</h1><p>${banSnap.val().reason}</p></div>`;
+                document.body.innerHTML = `<div style="background:black; color:white; height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; font-family:Impact;"><h1>ACCESS DENIED</h1><p>REASON: ${banSnap.val().reason}</p></div>`;
                 return;
             }
             document.getElementById('logged-in-view').classList.remove('hidden');
@@ -156,18 +138,21 @@
             const userData = snap.val();
             document.getElementById('welcome-text').innerText = "Logged in: " + (userData ? userData.username : "User");
             
+            // FIX: Ensure you ALWAYS have access if you are the owner
             if(user.email.toLowerCase() === OWNER_EMAIL || (userData && userData.rank === "admin")) {
                 isStaff = true;
                 document.getElementById('adminBtn').classList.remove('hidden');
-                loadShadowLogs();
+                loadLogs();
             }
 
             onValue(ref(db, 'announcement'), (s) => {
-                const container = document.getElementById('announcement-container');
                 const display = document.getElementById('announcement-display');
                 if(s.exists() && s.val().text) {
-                    display.innerText = s.val().text; container.style.display = "block";
-                } else { container.style.display = "none"; }
+                    display.innerText = s.val().text;
+                    document.getElementById('announcement-container').style.display = 'block';
+                } else {
+                    document.getElementById('announcement-container').style.display = 'none';
+                }
             });
 
             loadThreads();
@@ -177,28 +162,36 @@
         }
     });
 
-    // BUG FIX: Full screen clear and reload
-    function loadThreads() {
+    function loadLogs() {
+        onValue(ref(db, 'admin_logs'), (s) => {
+            const logBox = document.getElementById('admin-logs'); logBox.innerHTML = "";
+            s.forEach(c => {
+                const item = document.createElement('div');
+                item.innerText = `[${c.val().time}] ${c.val().msg}`;
+                logBox.prepend(item);
+            });
+        });
+    }
+
+    async function loadThreads() {
         onValue(ref(db, 'threads'), async (s) => {
-            const d = document.getElementById('thread-display');
-            d.innerHTML = "";
-            let threads = [];
-            s.forEach(c => { threads.push({id: c.key, ...c.val()}); });
+            const d = document.getElementById('thread-display'); d.innerHTML = "";
+            let threads = []; s.forEach(c => { threads.push({id: c.key, ...c.val()}); });
             threads.reverse();
 
             for (let p of threads) {
                 const uSnap = await get(child(ref(db), `users/${p.uid}`));
                 const uD = uSnap.val();
                 
-                // Color logic: Red if owner email, otherwise custom theme color
-                let nameClass = (uD && uD.email && uD.email.toLowerCase() === OWNER_EMAIL) ? "owner-name" : "";
-                let nameColor = (uD && uD.themeColor) ? uD.themeColor : "#0055ff";
-                if(nameClass === "owner-name") nameColor = "#FF0000";
+                // COLOR LOGIC FIX: Check saved theme color first, fallback to Red for owner, then Blue.
+                let displayColor = "#0055ff";
+                if(uD && uD.themeColor) displayColor = uD.themeColor;
+                else if(uD && uD.email && uD.email.toLowerCase() === OWNER_EMAIL) displayColor = "#FF0000";
 
                 const row = document.createElement('div');
                 row.className = 'thread-row';
                 row.innerHTML = `
-                    <div><span class="clickable-name ${nameClass}" style="color:${nameColor}" onclick="openProfile('${p.uid}')">${p.author}</span>: ${p.message}</div>
+                    <div><span class="clickable-name" style="color:${displayColor}" onclick="openProfile('${p.uid}')">${p.author}</span>: ${p.message}</div>
                     ${isStaff ? `<button class="btn-danger" style="padding:2px 5px; font-size:9px;" onclick="deletePost('${p.id}', '${p.author}', '${p.message}')">DEL</button>` : ""}
                 `;
                 d.appendChild(row);
@@ -206,20 +199,9 @@
         });
     }
 
-    function loadShadowLogs() {
-        onValue(ref(db, 'shadow_logs'), (s) => {
-            const logBox = document.getElementById('admin-logs'); logBox.innerHTML = "";
-            s.forEach(c => {
-                const line = document.createElement('div');
-                line.innerText = `[${c.val().time}] ${c.val().msg}`;
-                logBox.prepend(line);
-            });
-        });
-    }
-
     window.deletePost = (pid, author, msg) => {
-        if(confirm("Delete post?")) {
-            push(ref(db, 'shadow_logs'), { time: new Date().toLocaleTimeString(), msg: `DELETED ${author}: ${msg}` });
+        if(confirm("Delete this?")) {
+            push(ref(db, 'admin_logs'), { time: new Date().toLocaleTimeString(), msg: `DELETED ${author}: "${msg}"` });
             remove(ref(db, `threads/${pid}`));
         }
     };
@@ -229,7 +211,7 @@
         if(snap.exists()) {
             const d = snap.val();
             document.getElementById('p-name').innerText = d.username;
-            document.getElementById('p-bio').innerText = d.bio || "No bio.";
+            document.getElementById('p-bio').innerText = d.bio || "No bio set.";
             document.getElementById('p-uid-display').innerText = "UID: " + uid;
             document.getElementById('profile-overlay').style.display = 'flex';
             if(isStaff) document.getElementById('target-uid').value = uid;
@@ -239,7 +221,7 @@
                 document.getElementById('decoration-options').classList.remove('hidden');
                 document.getElementById('save-theme-btn').onclick = () => {
                     update(ref(db, `users/${uid}`), { themeColor: document.getElementById('theme-picker').value });
-                    alert("Color saved!");
+                    alert("Decoration Saved!");
                 };
             } else {
                 document.getElementById('edit-bio-btn').classList.add('hidden');
@@ -248,25 +230,29 @@
         }
     };
 
+    // ADMIN PANEL ACTIONS
     document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement'), { text: document.getElementById('announce-text').value });
-    document.getElementById('clearAnnounce').onclick = () => remove(ref(db, 'announcement'));
-    document.getElementById('applyBan').onclick = () => set(ref(db, `bans/${document.getElementById('target-uid').value}`), { reason: "Banned by Admin" });
+    document.getElementById('applyBan').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        if(uid) set(ref(db, `bans/${uid}`), { reason: "Banned by Staff" });
+    };
     document.getElementById('applyAdmin').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { rank: "admin" });
     document.getElementById('applyUnrank').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { rank: "member" });
 
     document.getElementById('submitPost').onclick = async () => {
-        const txt = document.getElementById('post-input').value;
-        if(!txt) return;
+        const m = document.getElementById('post-input').value;
+        if(!m) return;
         const uSnap = await get(child(ref(db), `users/${auth.currentUser.uid}`));
-        push(ref(db, 'threads'), { message: txt, author: uSnap.val().username, uid: auth.currentUser.uid });
+        push(ref(db, 'threads'), { message: m, author: uSnap.val().username, uid: auth.currentUser.uid });
         document.getElementById('post-input').value = "";
     };
 
+    document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value);
     document.getElementById('signupBtn').onclick = async () => {
         const res = await createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value);
-        await set(ref(db, 'users/' + res.user.uid), { username: document.getElementById('reg-username').value, email: auth.currentUser.email, rank: "member", bio: "" });
+        await set(ref(db, 'users/' + res.user.uid), { username: document.getElementById('reg-username').value, email: document.getElementById('auth-email').value, rank: "member", bio: "" });
         location.reload();
     };
 </script>
