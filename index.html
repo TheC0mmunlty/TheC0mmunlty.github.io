@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>The Robloxians</title>
+    <title>The Robloxians - 2012 Legacy</title>
     <style>
-        /* SCALED UP GUI & RESTORED CLASSIC FONTS */
         body { 
             font-family: "MS Sans Serif", Geneva, sans-serif; 
             margin: 0; 
@@ -23,7 +22,6 @@
             border-bottom: 4px solid #0033aa;
         }
 
-        /* FIXED PERSISTENT BANNER */
         #announcement-container { 
             background: #ff9800; 
             border-bottom: 2px solid #cc7a00; 
@@ -36,7 +34,7 @@
         }
 
         .main-wrapper { 
-            width: 950px; /* BIGGER GUI */
+            width: 950px; 
             margin: 20px auto; 
             background: rgba(238, 238, 238, 0.95); 
             border: 1px solid #888; 
@@ -51,10 +49,8 @@
             padding: 8px; 
             font-weight: bold;
             border: 1px solid #bbb;
-            font-size: 14px;
         }
 
-        /* WIDE CHAT INPUT */
         textarea#post-input { 
             width: 100%; 
             box-sizing: border-box;
@@ -63,7 +59,6 @@
             padding: 10px;
             font-size: 14px;
             margin-bottom: 10px;
-            font-family: Arial, sans-serif;
         }
 
         .btn { 
@@ -72,12 +67,11 @@
             padding: 5px 15px; 
             cursor: pointer; 
             font-size: 12px;
-            font-family: "MS Sans Serif", sans-serif;
             font-weight: bold;
         }
         
         .btn-submit { background: #ffcc00; border-color: #ccaa00; }
-        .btn-admin { background: #ffcc00; border: 1px solid #777; } /* Admin Dashboard Yellow */
+        .btn-admin { background: #ffff00; color: #000; border: 1px solid #777; } /* Admin Dashboard Yellow */
         .btn-danger { background: #ff4444; color: white; border: none; }
 
         .thread-row { 
@@ -91,7 +85,6 @@
         }
 
         .clickable-name { font-weight: bold; cursor: pointer; color: #0055ff; }
-
         #admin-panel { border: 2px solid #0055ff; padding: 15px; margin-bottom: 15px; background: #fff; }
         .hidden { display: none !important; }
 
@@ -126,23 +119,22 @@
 
         <div id="admin-panel" class="hidden">
             <strong>Admin Dashboard</strong><br>
-            <input type="text" id="announce-text" placeholder="New Global Banner Text..." style="width:70%; padding:5px;">
+            <input type="text" id="announce-text" placeholder="Type banner message..." style="width:70%; padding:5px;">
             <button class="btn btn-submit" id="postAnnounce">Save Banner</button>
             <hr>
             Target UID: <input type="text" id="target-uid" style="width:150px; padding:5px;">
             <button class="btn" id="applyAdmin">Make Admin</button>
             <button class="btn" id="removeAdmin">Unrank</button>
             <br><br>
-            Ban Duration: <input type="number" id="ban-days" placeholder="Days (0 = Perm)" style="width:100px; padding:5px;">
+            Ban Days: <input type="number" id="ban-days" placeholder="0 = Perm" style="width:100px; padding:5px;">
             <button class="btn" id="applyBan" style="color:red;">Apply Ban</button>
-            <button class="btn" id="applyUnban">Unban User</button>
+            <button class="btn" id="applyUnban">Unban</button>
             <hr>
-            <strong>Shadow Logs:</strong>
-            <div id="admin-logs" style="height: 80px; overflow-y: auto; background: #000; color: #0f0; padding: 8px; font-family: monospace; font-size: 11px; margin-top: 5px;"></div>
+            <div id="admin-logs" style="height: 80px; overflow-y: auto; background: #000; color: #0f0; padding: 8px; font-family: monospace; font-size: 11px;"></div>
         </div>
 
         <div class="forum-header">Community Feed</div>
-        <textarea id="post-input" placeholder="Post a message to the board..."></textarea><br>
+        <textarea id="post-input" placeholder="Type here..."></textarea><br>
         <button class="btn btn-submit" id="submitPost">Submit Post</button>
         
         <div id="thread-display" style="margin-top: 15px;"></div>
@@ -152,12 +144,12 @@
 <div id="profile-overlay">
     <div class="profile-card">
         <h2 id="p-name"></h2>
-        <div id="p-bio" style="background:#f9f9f9; padding:15px; border:1px solid #ccc; text-align:left; font-size:14px;"></div>
+        <div id="p-bio" style="background:#f9f9f9; padding:15px; border:1px solid #ccc; text-align:left;"></div>
         <div id="p-uid-display" style="font-size: 11px; color: #888; margin: 10px 0;"></div>
         <div id="decoration-options" class="hidden">
             <hr>
-            Name Color: <input type="color" id="theme-picker">
-            <button class="btn" id="save-theme-btn">Update Profile</button>
+            Color: <input type="color" id="theme-picker">
+            <button class="btn" id="save-theme-btn">Update</button>
         </div>
         <br>
         <button class="btn" onclick="document.getElementById('profile-overlay').style.display='none'">Close</button>
@@ -208,6 +200,7 @@
                 loadLogs();
             }
 
+            // FIXED ANNOUNCEMENT SYNC
             onValue(ref(db, 'announcement'), (s) => {
                 const display = document.getElementById('announcement-display');
                 if(s.exists() && s.val().text) {
@@ -249,8 +242,31 @@
         });
     }
 
+    // FIXED SUBMIT POST
+    document.getElementById('submitPost').onclick = async () => {
+        const m = document.getElementById('post-input').value;
+        if(!m || !auth.currentUser) return;
+        const uSnap = await get(child(ref(db), `users/${auth.currentUser.uid}`));
+        const user = uSnap.val();
+        
+        // Pushing to Firebase correctly
+        push(ref(db, 'threads'), { 
+            message: m, 
+            author: user.username, 
+            uid: auth.currentUser.uid 
+        }).then(() => {
+            document.getElementById('post-input').value = "";
+        });
+    };
+
+    // FIXED ANNOUNCEMENT BUTTON
+    document.getElementById('postAnnounce').onclick = () => {
+        const txt = document.getElementById('announce-text').value;
+        set(ref(db, 'announcement'), { text: txt });
+    };
+
     window.deletePost = (pid, author, msg) => {
-        if(confirm("Confirm deletion?")) {
+        if(confirm("Delete this?")) {
             push(ref(db, 'admin_logs'), { 
                 time: new Date().toLocaleTimeString(), 
                 msg: `ERASED (${author}): "${msg}"` 
@@ -278,7 +294,18 @@
         }
     };
 
-    document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement'), { text: document.getElementById('announce-text').value });
+    function loadLogs() {
+        onValue(ref(db, 'admin_logs'), (s) => {
+            const logBox = document.getElementById('admin-logs'); 
+            logBox.innerHTML = "";
+            s.forEach(c => {
+                const item = document.createElement('div');
+                item.innerText = `[${c.val().time}] ${c.val().msg}`;
+                logBox.prepend(item);
+            });
+        });
+    }
+
     document.getElementById('applyBan').onclick = () => {
         const uid = document.getElementById('target-uid').value;
         const days = parseInt(document.getElementById('ban-days').value) || 0;
@@ -287,14 +314,7 @@
     };
     document.getElementById('applyUnban').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { banned: false, banUntil: 0 });
     document.getElementById('removeAdmin').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { rank: "member" });
-    
-    document.getElementById('submitPost').onclick = async () => {
-        const m = document.getElementById('post-input').value;
-        if(!m) return;
-        const uSnap = await get(child(ref(db), `users/${auth.currentUser.uid}`));
-        push(ref(db, 'threads'), { message: m, author: uSnap.val().username, uid: auth.currentUser.uid });
-        document.getElementById('post-input').value = "";
-    };
+    document.getElementById('applyAdmin').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { rank: "admin" });
 
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
