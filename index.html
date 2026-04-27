@@ -14,7 +14,7 @@
         .btn-submit { background: #ffcc00; border-color: #ccaa00; }
         .btn-danger { background: #ff4444; color: white; border: 1px solid #aa0000; }
         .btn-admin { background: #ffff00; color: #000; border: 1px solid #777; }
-        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; }
+        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; position: relative; }
         
         .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(0.8); }
         .char-head { width: 20px; height: 20px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; }
@@ -31,6 +31,9 @@
         .auth-box { text-align: center; padding: 40px; }
         .auth-box input { display: block; margin: 10px auto; padding: 8px; width: 250px; border: 1px solid #777; }
         #admin-panel { border: 2px solid #0055ff; padding: 15px; background: #fff; margin-bottom: 15px; }
+        
+        .delete-btn { position: absolute; right: 10px; top: 10px; font-size: 10px; padding: 2px 5px; color: red; border: 1px solid red; background: none; cursor: pointer; }
+        .delete-btn:hover { background: #ffeeee; }
     </style>
 </head>
 <body>
@@ -120,7 +123,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, get, child, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU",
@@ -138,6 +141,18 @@
     
     const OWNER_EMAIL = "fahid.001x@gmail.com";
     const CEO_UID = "oJm6Z87yVpMe5YgO7G4H0vU7T9m2";
+    let currentUserRank = 0;
+
+    const BAD_WORDS = ["badword1", "badword2", "badword3"]; 
+
+    function filterText(text) {
+        let clean = text;
+        BAD_WORDS.forEach(word => {
+            const regex = new RegExp(word, "gi");
+            clean = clean.replace(regex, "####");
+        });
+        return clean;
+    }
 
     function createAvatarHTML(colors, isCEO) {
         return `<div class="avatar-frame ${isCEO ? 'ceo-glow' : ''}"><div class="char-head" style="background:${colors.h}"></div><div class="char-torso" style="background:${colors.t}"><div class="char-arm arm-l" style="background:${colors.h}"></div><div class="char-arm arm-r" style="background:${colors.h}"></div></div><div style="display:flex;"><div class="char-leg" style="background:${colors.l}"></div><div class="char-leg" style="background:${colors.l}"></div></div></div>`;
@@ -149,7 +164,6 @@
                 const data = snap.val();
                 if(!data) return;
 
-                // Ban Check
                 if(data.banned === true) {
                     const now = Date.now();
                     if(data.banExpires === "perm" || now < data.banExpires) {
@@ -160,11 +174,10 @@
                     }
                 }
 
-                // Rank Check
-                const rank = data.rank || 0;
-                if(rank >= 1 || user.email === OWNER_EMAIL) {
+                currentUserRank = data.rank || 0;
+                if(currentUserRank >= 1 || user.email === OWNER_EMAIL) {
                     document.getElementById('adminBtn').classList.remove('hidden');
-                    if(rank >= 2 || user.email === OWNER_EMAIL) {
+                    if(currentUserRank >= 2 || user.email === OWNER_EMAIL) {
                         document.getElementById('admin-only-section').classList.remove('hidden');
                     }
                 }
@@ -176,21 +189,33 @@
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('logged-in-view').classList.remove('hidden');
 
-            // Forum Thread Rendering
+            // THREAD RENDERING
             onValue(ref(db, 'threads'), async (s) => {
                 const display = document.getElementById('thread-display');
                 display.innerHTML = "";
                 const usersSnap = await get(child(ref(db), 'users'));
                 const allUsers = usersSnap.val() || {};
+                
                 s.forEach(c => {
+                    const postId = c.key;
                     const p = c.val();
                     const author = allUsers[p.uid] || {};
                     const div = document.createElement('div');
                     div.className = 'thread-row';
-                    div.innerHTML = `${createAvatarHTML(author.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, p.uid === CEO_UID)} <div style="margin-left:20px;">
-                        <strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${author.banned ? '[ Content Deleted ]' : author.username}</strong><br>
-                        ${author.banned ? '<i>[Post Removed]</i>' : p.message}
-                    </div>`;
+                    
+                    // Show Delete button if: User is Staff OR User is Author (and author isn't CEO)
+                    const canDelete = (currentUserRank >= 1) || (p.uid === auth.currentUser.uid);
+                    const isProtected = (p.uid === CEO_UID && auth.currentUser.uid !== CEO_UID);
+                    
+                    const deleteBtnHtml = (canDelete && !isProtected) ? `<button class="delete-btn" onclick="deletePost('${postId}')">Delete</button>` : "";
+
+                    div.innerHTML = `
+                        ${createAvatarHTML(author.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, p.uid === CEO_UID)} 
+                        <div style="margin-left:20px;">
+                            <strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${author.banned ? '[ Content Deleted ]' : author.username}</strong><br>
+                            ${author.banned ? '<i>[Post Removed]</i>' : p.message}
+                        </div>
+                        ${deleteBtnHtml}`;
                     display.prepend(div);
                 });
             });
@@ -205,49 +230,55 @@
         } else { showView('auth-view'); }
     });
 
-    // ACTION: Apply Ban
-    document.getElementById('applyBan').onclick = () => {
-        const uid = document.getElementById('target-uid').value.trim();
-        const reason = document.getElementById('ban-reason-input').value.trim();
-        const days = document.getElementById('ban-duration').value;
-
-        if(uid === CEO_UID) return alert("Nice try! You cannot ban the Owner.");
-
-        let expiry = "perm";
-        if(days !== "perm") expiry = Date.now() + (parseInt(days) * 86400000);
-        
-        update(ref(db, `users/${uid}`), { 
-            banned: true, 
-            banExpires: expiry, 
-            banReason: reason || "Violation of rules" 
-        }).then(()=>alert("User Banned."));
+    // GLOBAL DELETE FUNCTION
+    window.deletePost = (id) => {
+        if(confirm("Are you sure you want to remove this message?")) {
+            remove(ref(db, `threads/${id}`)).then(() => alert("Message Deleted."));
+        }
     };
 
-    // ACTION: Apply Rank
+    document.getElementById('applyBan').onclick = () => {
+        const uid = document.getElementById('target-uid').value.trim();
+        const reason = filterText(document.getElementById('ban-reason-input').value.trim());
+        const days = document.getElementById('ban-duration').value;
+        if(uid === CEO_UID) return alert("Error: Target is immune to moderation.");
+        let expiry = "perm";
+        if(days !== "perm") expiry = Date.now() + (parseInt(days) * 86400000);
+        update(ref(db, `users/${uid}`), { banned: true, banExpires: expiry, banReason: reason || "Violation of rules" }).then(()=>alert("User Banned."));
+    };
+
     document.getElementById('applyRank').onclick = () => {
         const uid = document.getElementById('rank-uid').value.trim();
         const newRank = parseInt(document.getElementById('rank-select').value);
-
-        if(uid === CEO_UID) return alert("You cannot change the Owner's rank.");
-
+        if(uid === CEO_UID) return alert("Error: Target rank is locked.");
         update(ref(db, `users/${uid}`), { rank: newRank }).then(()=>alert("Rank updated."));
     };
 
-    document.getElementById('applyUnban').onclick = () => {
-        update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: false }).then(()=>alert("Unbanned."));
-    };
-
-    document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement/text'), document.getElementById('announce-text').value);
-    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
     document.getElementById('signupBtn').onclick = () => {
         const user = document.getElementById('reg-user').value.trim();
+        if(filterText(user).includes("####")) return alert("Username contains blocked words!");
         createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then((res) => {
             set(ref(db, `users/${res.user.uid}`), { username: user, rank: 0, banned: false, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'} });
         });
     };
+
+    document.getElementById('postAnnounce').onclick = () => {
+        const cleanBanner = filterText(document.getElementById('announce-text').value);
+        set(ref(db, 'announcement/text'), cleanBanner);
+    };
+
+    document.getElementById('submitPost').onclick = () => {
+        const cleanMsg = filterText(document.getElementById('post-input').value);
+        if(!cleanMsg) return;
+        push(ref(db, 'threads'), { message: cleanMsg, uid: auth.currentUser.uid });
+        document.getElementById('post-input').value = "";
+    };
+
+    document.getElementById('applyUnban').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value.trim()}`), { banned: false });
+    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
-    document.getElementById('submitPost').onclick = () => push(ref(db, 'threads'), { message: document.getElementById('post-input').value, uid: auth.currentUser.uid });
+    document.getElementById('myProfileBtn').onclick = () => loadProfile(auth.currentUser.uid);
     window.showView = (id) => { document.getElementById('forum-home').classList.add('hidden'); document.getElementById('profile-view').classList.add('hidden'); document.getElementById(id).classList.remove('hidden'); };
     window.loadProfile = async (uid) => { showView('profile-view'); const snap = await get(child(ref(db), `users/${uid}`)); const d = snap.val(); document.getElementById('view-username').innerText = d.username; document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, uid === CEO_UID); };
 </script>
