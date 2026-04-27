@@ -3,64 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Robloxians - Legacy Fix</title>
+    <title>The Robloxians - 2012 Legacy</title>
     <style>
         body { font-family: "MS Sans Serif", Geneva, sans-serif; margin: 0; background: #ccc url('https://wallpapercave.com/wp/wp9084955.jpg') fixed center; background-size: cover; }
         header { background: #0055ff; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #0033aa; }
+        .header-meta { font-size: 11px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
         .main-wrapper { width: 950px; margin: 20px auto; background: rgba(238, 238, 238, 0.95); border: 1px solid #888; min-height: 600px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.4); }
         .hidden { display: none !important; }
         .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-size: 12px; font-weight: bold; margin: 2px; }
         .btn-submit { background: #ffcc00; border-color: #ccaa00; }
+        .btn-danger { background: #ff4444; color: white; border: 1px solid #aa0000; }
+        .btn-admin { background: #aa0000; color: gold; border: 2px solid gold; }
         
-        /* CHARACTER RENDERING - 2012 BLOCKY STYLE */
-        .avatar-frame { width: 100px; height: 130px; position: relative; background: #d0d0d0; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 10px;}
-        .char-head { width: 24px; height: 24px; border: 1px solid rgba(0,0,0,0.3); z-index: 5; position: relative; margin-bottom: 2px;}
-        .char-torso { width: 48px; height: 48px; border: 1px solid rgba(0,0,0,0.3); position: relative; z-index: 4;}
-        .char-arm { width: 22px; height: 46px; border: 1px solid rgba(0,0,0,0.3); position: absolute; top: 0; }
-        .arm-l { left: -24px; } .arm-r { right: -24px; }
-        .char-legs-container { display: flex; gap: 2px; margin-top: 2px; }
-        .char-leg { width: 23px; height: 48px; border: 1px solid rgba(0,0,0,0.3); }
-        
-        /* HAT FIXES */
-        .hat-domino { width: 30px; height: 8px; background: #111; position: absolute; top: -6px; left: -4px; border: 1px solid #fff; box-shadow: 0 0 2px black; }
-        .hat-domino::before { content: '...'; color: white; font-size: 14px; position: absolute; top: -7px; left: 5px; letter-spacing: 1px; }
-        .hat-tophat { width: 28px; height: 4px; background: #000; position: absolute; top: -4px; left: -3px; }
-        .hat-tophat::after { content: ''; width: 18px; height: 18px; background: #000; position: absolute; top: -18px; left: 5px; border: 1px solid #333; }
+        .tabs { margin-bottom: 10px; display: flex; gap: 5px; align-items: center; border-bottom: 1px solid #999; padding-bottom: 5px; }
+        .tab { padding: 5px 12px; background: #ddd; border: 1px solid #999; cursor: pointer; font-size: 11px; }
+        .tab.active { background: #fff; border-bottom: 1px solid #fff; font-weight: bold; margin-bottom: -1px; }
 
-        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; }
-        #notif-toast { position: fixed; bottom: 20px; right: 20px; background: #0055ff; color: white; padding: 15px; border: 2px solid white; opacity: 0; transition: 0.5s; pointer-events: none; z-index: 9999; }
+        #notif-toast { position: fixed; bottom: 20px; right: 20px; background: #0055ff; color: white; padding: 15px; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 1000; transition: opacity 0.5s; opacity: 0; pointer-events: none; }
         #notif-toast.show { opacity: 1; }
+
+        .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(1.1); margin-top: 15px; }
+        .char-head { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; position: relative; margin-top: 10px; }
+        .char-torso { width: 44px; height: 44px; border: 1px solid rgba(0,0,0,0.2); position: relative; }
+        .char-arm { width: 16px; height: 42px; border: 1px solid rgba(0,0,0,0.2); position: absolute; top: 0; }
+        .arm-l { left: -17px; } .arm-r { right: -17px; }
+        .char-leg { width: 20px; height: 44px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
+        
+        /* FIXED HATS */
+        .hat-domino { width: 26px; height: 6px; background: #111; position: absolute; top: -5px; left: -3px; border: 1px solid #fff; }
+        .hat-domino::before { content: '...'; color: white; font-size: 12px; position: absolute; top: -6px; left: 4px; letter-spacing: 1px; }
+        .hat-tophat { width: 30px; height: 3px; background: #000; position: absolute; top: -3px; left: -5px; }
+        .hat-tophat::after { content: ''; width: 16px; height: 16px; background: #000; position: absolute; top: -16px; left: 7px; border: 1px solid #333; }
+
+        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; position: relative; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-weight:bold; font-size: 18px;">The Robloxians</div>
-    <div id="user-display">Connecting...</div>
+    <div>
+        <div style="font-weight:bold; font-size: 18px;">The Robloxians</div>
+        <div id="rank-indicator" class="header-meta">GUEST ACCESS</div>
+    </div>
+    <div id="user-display">Welcome, Visitor</div>
 </header>
 
 <div id="notif-toast"></div>
 
 <div class="main-wrapper">
     <div id="auth-view" style="text-align:center; padding:40px;">
-        <h2>Login / Sign Up</h2>
+        <h2>Login to Legacy</h2>
         <input type="text" id="reg-user" placeholder="Username" style="display:block; margin:10px auto; padding:8px;">
         <input type="email" id="auth-email" placeholder="Email" style="display:block; margin:10px auto; padding:8px;">
         <input type="password" id="auth-pass" placeholder="Password" style="display:block; margin:10px auto; padding:8px;">
         <button class="btn btn-submit" id="loginBtn">Login</button>
-        <button class="btn" id="signupBtn">Create Account</button>
+        <button class="btn" id="signupBtn">Sign Up</button>
     </div>
 
     <div id="logged-in-view" class="hidden">
-        <div style="margin-bottom: 20px;">
-            <button class="btn" onclick="showView('forum-home')">Forum Feed</button>
-            <button class="btn" id="myProfileBtn">View My Profile</button>
-            <button class="btn" style="background:#ff4444; color:white;" id="logoutBtn">Logout</button>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <div style="font-weight:bold;">Level: <span id="level-display">1</span></div>
+            <div>
+                <button class="btn" onclick="showView('forum-home')">Forum</button>
+                <button class="btn" id="myProfileBtn">My Profile</button>
+                <button class="btn btn-admin hidden" id="adminBtn">STAFF TOOLS</button>
+                <button class="btn btn-danger" id="logoutBtn">Logout</button>
+            </div>
         </div>
 
         <div id="forum-home">
-            <textarea id="post-input" placeholder="Say something to the world..." style="width:100%; height: 50px;"></textarea>
-            <button class="btn btn-submit" id="submitPost">Post to Feed</button>
+            <div class="tabs">
+                <div class="tab active" data-cat="General">General</div>
+                <div class="tab" data-cat="Help">Help</div>
+                <div class="tab" data-cat="Feedback">Feedback</div>
+                <div class="tab" data-cat="Bug Report">Bug Report</div>
+                <div class="tab" data-cat="Debate">Debate</div>
+                <div style="margin-left:auto;">
+                    <input type="text" id="search-user" placeholder="Find User..." style="padding:3px; font-size:11px;">
+                    <button class="btn btn-submit" id="searchBtn">Search</button>
+                </div>
+            </div>
+            <textarea id="post-input" placeholder="Type here..." style="width:100%; height: 50px;"></textarea>
+            <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                <select id="category-select">
+                    <option value="General">Post to General</option>
+                    <option value="Help">Post to Help</option>
+                    <option value="Feedback">Post to Feedback</option>
+                    <option value="Bug Report">Post to Bug Report</option>
+                    <option value="Debate">Post to Debate</option>
+                </select>
+                <button class="btn btn-submit" id="submitPost">Submit Post</button>
+            </div>
             <div id="thread-display" style="margin-top: 20px;"></div>
         </div>
 
@@ -69,27 +102,21 @@
                 <div id="profile-render"></div>
                 <div style="flex-grow: 1;">
                     <h2 id="view-username" style="margin:0;">User</h2>
-                    <p id="view-bio" style="background:#f0f0f0; padding:10px; border:1px solid #ddd;">No bio.</p>
-                    
+                    <div id="view-id" style="font-size: 10px; color:#999; margin-bottom: 5px;">UID: 0</div>
+                    <p id="view-bio" style="background:#f0f0f0; padding:10px; border:1px solid #ddd;">...</p>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">
                         <div>
                             <strong>Private Inbox</strong>
-                            <div id="inbox-list" style="height:150px; overflow-y:auto; background:#fff; border:1px solid #ccc; padding:5px; font-size:11px; margin-bottom:5px;"></div>
-                            <input type="text" id="pm-input" placeholder="Reply..." style="width:65%;">
+                            <div id="inbox-list" style="height:120px; overflow-y:auto; background:#fff; border:1px solid #ccc; padding:5px; font-size:11px; margin-bottom: 5px;"></div>
+                            <input type="text" id="pm-input" placeholder="Message..." style="width:65%;">
                             <button class="btn btn-submit" id="sendPmBtn">Send</button>
                         </div>
                         <div id="customizer-box" class="hidden">
-                            <strong>Edit Avatar & Bio</strong><br>
-                            Bio: <input type="text" id="edit-bio" style="width:90%;"><br>
-                            Hat: <select id="hat-select">
-                                <option value="none">None</option>
-                                <option value="domino">Domino Crown</option>
-                                <option value="tophat">Top Hat</option>
-                            </select><br>
-                            Head Color: <input type="color" id="color-h"><br>
-                            Torso Color: <input type="color" id="color-t"><br>
-                            Legs Color: <input type="color" id="color-l"><br>
-                            <button class="btn btn-submit" id="saveProfile" style="width:100%; margin-top:10px;">Update Profile</button>
+                             <strong>Customizer</strong><br>
+                             Bio: <input type="text" id="edit-bio" style="width:90%;"><br>
+                             Hat: <select id="hat-select"><option value="none">None</option><option value="domino">Domino Crown</option><option value="tophat">Top Hat</option></select><br>
+                             Colors: <input type="color" id="color-h"> <input type="color" id="color-t"> <input type="color" id="color-l">
+                             <button class="btn btn-submit" id="saveProfile" style="width:100%; margin-top:10px;">Update</button>
                         </div>
                     </div>
                 </div>
@@ -117,27 +144,17 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
     let currentUserData = null;
+    let selectedCategory = 'General';
     let sessionStartTime = Date.now();
 
     function createAvatarHTML(colors, hat) {
-        // HAT LOGIC FIX: Explicitly checks for none
-        let hatHtml = '';
-        if (hat === 'domino') hatHtml = `<div class="hat-domino"></div>`;
-        if (hat === 'tophat') hatHtml = `<div class="hat-tophat"></div>`;
-        
+        let hatHtml = (hat === 'domino') ? `<div class="hat-domino"></div>` : (hat === 'tophat' ? `<div class="hat-tophat"></div>` : '');
         const c = colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
-        return `
-            <div class="avatar-frame">
-                <div class="char-head" style="background:${c.h}">${hatHtml}</div>
-                <div class="char-torso" style="background:${c.t}">
-                    <div class="char-arm arm-l" style="background:${c.h}"></div>
-                    <div class="char-arm arm-r" style="background:${c.h}"></div>
-                </div>
-                <div class="char-legs-container">
-                    <div class="char-leg" style="background:${c.l}"></div>
-                    <div class="char-leg" style="background:${c.l}"></div>
-                </div>
-            </div>`;
+        return `<div class="avatar-frame">
+            <div class="char-head" style="background:${c.h}">${hatHtml}</div>
+            <div class="char-torso" style="background:${c.t}"><div class="char-arm arm-l" style="background:${c.h}"></div><div class="char-arm arm-r" style="background:${c.h}"></div></div>
+            <div style="display:flex;"><div class="char-leg" style="background:${c.l}"></div><div class="char-leg" style="background:${c.l}"></div></div>
+        </div>`;
     }
 
     onAuthStateChanged(auth, (user) => {
@@ -145,25 +162,26 @@
             sessionStartTime = Date.now();
             onValue(ref(db, `users/${user.uid}`), (snap) => {
                 currentUserData = snap.val();
-                if (currentUserData) {
-                    document.getElementById('user-display').innerText = "Logged in as: " + currentUserData.username;
-                    // Sync the inputs to match the current data
-                    document.getElementById('edit-bio').value = currentUserData.bio || "";
-                    document.getElementById('hat-select').value = currentUserData.hat || "none";
-                    document.getElementById('color-h').value = currentUserData.colors?.h || "#f5cd30";
-                    document.getElementById('color-t').value = currentUserData.colors?.t || "#0d5f97";
-                    document.getElementById('color-l').value = currentUserData.colors?.l || "#a06110";
+                if(currentUserData) {
+                    document.getElementById('level-display').innerText = Math.floor((currentUserData.posts || 0) / 5) + 1;
+                    document.getElementById('user-display').innerText = "Hello, " + currentUserData.username;
+                    // RESTORED RANK INDICATOR
+                    document.getElementById('rank-indicator').innerText = (currentUserData.rank || "MEMBER").toUpperCase();
+                    // RESTORED ADMIN PANEL LOGIC
+                    if(currentUserData.rank === 'Admin' || currentUserData.rank === 'Staff') {
+                        document.getElementById('adminBtn').classList.remove('hidden');
+                    }
                 }
             });
 
             onValue(ref(db, `inbox/${user.uid}`), (snap) => {
-                let newestMsg = null;
-                snap.forEach(m => { newestMsg = m.val(); });
-                if(newestMsg && newestMsg.timestamp > sessionStartTime) {
+                let hasNew = false;
+                snap.forEach(m => { if(m.val().timestamp > sessionStartTime) hasNew = true; });
+                if(hasNew) {
                     const toast = document.getElementById('notif-toast');
-                    toast.innerText = "New Message: " + newestMsg.msg;
+                    toast.innerText = "New Message Received!";
                     toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 5000);
+                    setTimeout(() => toast.classList.remove('show'), 4000);
                 }
             });
 
@@ -173,6 +191,15 @@
         }
     });
 
+    // RESTORED SEARCH LOGIC
+    document.getElementById('searchBtn').onclick = async () => {
+        const query = document.getElementById('search-user').value.toLowerCase();
+        const usersSnap = await get(child(ref(db), 'users'));
+        usersSnap.forEach(u => {
+            if(u.val().username.toLowerCase() === query) window.loadProfile(u.key);
+        });
+    };
+
     const renderForum = () => {
         onValue(ref(db, 'threads'), async (s) => {
             const display = document.getElementById('thread-display'); display.innerHTML = "";
@@ -180,17 +207,36 @@
             const allUsers = usersSnap.val() || {};
             s.forEach(c => {
                 const p = c.val();
-                const author = allUsers[p.uid] || {username: "Unknown"};
-                const div = document.createElement('div'); div.className = 'thread-row';
-                div.innerHTML = `
-                    <div style="margin-right:15px; transform: scale(0.5); width:60px;">${createAvatarHTML(author.colors, author.hat)}</div>
-                    <div>
-                        <strong style="color:#0055ff; cursor:pointer;" onclick="window.loadProfile('${p.uid}')">${author.username}</strong>
-                        <div style="font-size:13px;">${p.message}</div>
-                    </div>`;
-                display.prepend(div);
+                if (p.category === selectedCategory) {
+                    const author = allUsers[p.uid] || {username: "Unknown"};
+                    const div = document.createElement('div'); div.className = 'thread-row';
+                    div.innerHTML = `<div style="transform:scale(0.5); width:50px;">${createAvatarHTML(author.colors, author.hat)}</div>
+                        <div style="margin-left:20px;">
+                            <strong style="color:#0055ff; cursor:pointer;" onclick="window.loadProfile('${p.uid}')">${author.username}</strong>
+                            <div style="margin-top:5px; font-size:13px;">${p.message}</div>
+                        </div>`;
+                    display.prepend(div);
+                }
             });
         });
+    };
+
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.onclick = () => {
+            selectedCategory = tab.getAttribute('data-cat');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            renderForum();
+        };
+    });
+
+    document.getElementById('submitPost').onclick = () => {
+        const msg = document.getElementById('post-input').value;
+        const cat = document.getElementById('category-select').value;
+        if(!msg.trim()) return;
+        update(ref(db, `users/${auth.currentUser.uid}`), { posts: (currentUserData.posts || 0) + 1 });
+        push(ref(db, 'threads'), { message: msg, category: cat, uid: auth.currentUser.uid, timestamp: Date.now() });
+        document.getElementById('post-input').value = "";
     };
 
     window.loadProfile = async (uid) => {
@@ -200,6 +246,7 @@
         const d = snap.val();
         document.getElementById('view-username').innerText = d.username;
         document.getElementById('view-bio').innerText = d.bio || "No bio.";
+        document.getElementById('view-id').innerText = "UID: " + uid;
         document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors, d.hat);
         
         onValue(ref(db, `inbox/${uid}`), (s) => {
@@ -210,27 +257,15 @@
         document.getElementById('customizer-box').classList.toggle('hidden', uid !== auth.currentUser.uid);
     };
 
-    // FIXED SEND PM: Ensures we have a valid username before sending
     document.getElementById('sendPmBtn').onclick = () => {
         const msg = document.getElementById('pm-input').value;
-        if(!msg.trim()) return;
-        
-        // Wait for user data to avoid "undefined"
-        const myName = currentUserData ? currentUserData.username : "Member";
-        
+        if(!msg.trim() || !currentUserData) return;
         push(ref(db, `inbox/${window.currentViewingUid}`), { 
-            from: myName, 
+            from: currentUserData.username, 
             msg: msg,
             timestamp: Date.now() 
         });
         document.getElementById('pm-input').value = "";
-    };
-
-    document.getElementById('submitPost').onclick = () => {
-        const msg = document.getElementById('post-input').value;
-        if(!msg.trim()) return;
-        push(ref(db, 'threads'), { message: msg, uid: auth.currentUser.uid, timestamp: Date.now() });
-        document.getElementById('post-input').value = "";
     };
 
     window.showView = (id) => {
@@ -243,26 +278,17 @@
     document.getElementById('signupBtn').onclick = () => {
         const u = document.getElementById('reg-user').value;
         createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then((r) => {
-            set(ref(db, `users/${r.user.uid}`), { username: u, bio: 'New Member', colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
+            set(ref(db, `users/${r.user.uid}`), { username: u, posts: 0, bio: 'New Member', rank: 'Member', colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
         });
     };
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
     document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
-    
     document.getElementById('saveProfile').onclick = () => {
-        const updates = {
+        update(ref(db, `users/${auth.currentUser.uid}`), {
             bio: document.getElementById('edit-bio').value,
             hat: document.getElementById('hat-select').value,
-            colors: { 
-                h: document.getElementById('color-h').value, 
-                t: document.getElementById('color-t').value, 
-                l: document.getElementById('color-l').value 
-            }
-        };
-        update(ref(db, `users/${auth.currentUser.uid}`), updates).then(() => {
-            alert("Profile Updated!");
-            window.loadProfile(auth.currentUser.uid);
-        });
+            colors: { h: document.getElementById('color-h').value, t: document.getElementById('color-t').value, l: document.getElementById('color-l').value }
+        }).then(() => alert("Profile Updated!"));
     };
 </script>
 </body>
