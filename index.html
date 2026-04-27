@@ -3,50 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Robloxians - Staff Edition</title>
+    <title>The Robloxians</title>
     <style>
-        /* RETRO PIXEL FONT */
-        * { font-family: "MS Sans Serif", Geneva, sans-serif; -webkit-font-smoothing: none; }
+        * { font-family: "MS Sans Serif", Geneva, sans-serif; -webkit-font-smoothing: none; box-sizing: border-box; }
         body { margin: 0; background: #ccc url('https://wallpapercave.com/wp/wp9084955.jpg') fixed center; background-size: cover; }
         
-        /* FIXED BANNER: ORANGE BACKGROUND, WHITE TEXT */
-        #announcement-banner { 
-            background: #ff9800; 
-            color: white; 
-            padding: 10px; 
-            text-align: center; 
-            font-weight: bold; 
-            border-bottom: 2px solid #e68a00; 
-            display: none; 
-            font-size: 13px;
-        }
+        /* ORANGE GLOBAL BANNER */
+        #announcement-banner { background: #ff9800; color: white; padding: 10px; text-align: center; font-weight: bold; border-bottom: 2px solid #e68a00; display: none; font-size: 14px; width: 100%; }
 
         header { background: #0055ff; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #0033aa; }
-        .header-meta { font-size: 11px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
+        .header-meta { font-size: 11px; font-weight: bold; color: #ffd700; text-transform: uppercase; }
+        
+        /* NOTIFICATION PING (Discord Style) */
+        .nav-btn-container { position: relative; display: inline-block; }
+        .ping-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #ff4444; border: 2px solid white; border-radius: 50%; display: none; }
+
         .main-wrapper { width: 950px; margin: 20px auto; background: rgba(238, 238, 238, 0.95); border: 1px solid #888; min-height: 600px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.4); position: relative; }
         .hidden { display: none !important; }
         
-        /* BUTTONS */
-        .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-size: 12px; font-weight: bold; margin: 2px; box-shadow: inset 1px 1px #fff, inset -1px -1px #999; }
-        .btn-ceo { background: #ff4444; color: white; border: 1px solid #aa0000; }
-        .btn-staff { background: #ffcc00; color: black; border: 1px solid #ccaa00; }
+        /* UI COMPONENTS */
+        .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 12px; cursor: pointer; font-size: 12px; font-weight: bold; margin: 2px; }
+        .btn-submit { background: #ffcc00; border-color: #ccaa00; }
+        .btn-danger { background: #ff4444; color: white; border: 1px solid #aa0000; }
+        .id-tag { color: #666; font-size: 10px; margin-left: 5px; }
 
-        /* CHARACTER RENDER - FIXED */
-        .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(1.1); margin-top: 25px; margin-bottom: 20px; }
+        /* AVATAR SYSTEM */
+        .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(1.1); margin: 20px 0; }
         .char-head { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; position: relative; margin-top: 10px; }
         .char-torso { width: 44px; height: 44px; border: 1px solid rgba(0,0,0,0.2); position: relative; }
-        .char-arm { width: 16px; height: 42px; border: 1px solid rgba(0,0,0,0.2); position: absolute; top: 0; }
+        .char-arm { width: 16px; height: 42px; border: 1px solid rgba(0,0,0,0.2); position: absolute; top: 0; background: inherit; }
         .arm-l { left: -17px; } .arm-r { right: -17px; }
         .char-leg { width: 20px; height: 44px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
-        
         .hat-domino { width: 28px; height: 8px; background: #000; position: absolute; top: -6px; left: -4px; border: 1.5px solid #fff; z-index: 10; }
         .hat-tophat { width: 32px; height: 4px; background: #111; position: absolute; top: -4px; left: -6px; z-index: 10; }
         .hat-tophat::after { content: ''; width: 18px; height: 18px; background: #111; position: absolute; top: -18px; left: 7px; border: 1px solid #333; }
 
-        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; position: relative; }
-        .shadow-deleted { opacity: 0.5; background: #ffebeb !important; border: 1px dashed red; }
-
-        #ban-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); color: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        /* LISTS & ROWS */
+        .thread-row, .msg-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; position: relative; }
+        .shadow-deleted { opacity: 0.4; background: #ffebeb !important; border: 1px dashed red; }
+        
+        #ban-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: #000; color: #ff4444; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
     </style>
 </head>
 <body>
@@ -56,80 +52,84 @@
 <header>
     <div>
         <div style="font-weight:bold; font-size: 18px;">The Robloxians</div>
-        <div id="rank-indicator" class="header-meta">GUEST ACCESS</div>
+        <div id="rank-indicator" class="header-meta">GUEST</div>
     </div>
     <div id="user-display">Welcome, Visitor</div>
 </header>
 
 <div class="main-wrapper">
     <div id="ban-screen" class="hidden">
-        <h1 style="color: #ff4444;">ACCESS DENIED</h1>
-        <p id="ban-reason-text" style="font-size: 18px;"></p>
-        <p id="ban-expiry-text" style="color: #ccc;"></p>
-        <button class="btn btn-ceo" onclick="location.reload()">Retry Login</button>
+        <h1 style="font-size: 40px;">BANNED</h1>
+        <p id="ban-reason-text"></p>
+        <button class="btn btn-danger" onclick="location.reload()">Retry</button>
     </div>
 
     <div id="auth-view" style="text-align:center; padding:40px;">
-        <h2>Login to Legacy</h2>
-        <input type="text" id="reg-user" placeholder="Username" style="display:block; margin:10px auto; padding:8px;">
-        <input type="email" id="auth-email" placeholder="Email" style="display:block; margin:10px auto; padding:8px;">
-        <input type="password" id="auth-pass" placeholder="Password" style="display:block; margin:10px auto; padding:8px;">
-        <button class="btn btn-staff" id="loginBtn">Login</button>
+        <h2>Login</h2>
+        <input type="text" id="reg-user" placeholder="Username" style="display:block; margin:10px auto;">
+        <input type="email" id="auth-email" placeholder="Email" style="display:block; margin:10px auto;">
+        <input type="password" id="auth-pass" placeholder="Password" style="display:block; margin:10px auto;">
+        <button class="btn btn-submit" id="loginBtn">Login</button>
         <button class="btn" id="signupBtn">Sign Up</button>
     </div>
 
     <div id="logged-in-view" class="hidden">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <div style="font-weight:bold;">Level: <span id="level-display">1</span></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
             <div>
                 <button class="btn" onclick="showView('forum-home')">Forum</button>
-                <button class="btn" id="myProfileBtn">My Profile</button>
-                <button class="btn btn-ceo hidden" id="adminBtn" onclick="showView('admin-view')">ADMIN PANEL</button>
+                <div class="nav-btn-container">
+                    <button class="btn" onclick="showView('inbox-view')">Inbox</button>
+                    <div id="msg-ping" class="ping-dot"></div>
+                </div>
+                <button class="btn" id="myProfileBtn">Profile</button>
+            </div>
+            <div>
+                <button class="btn btn-danger hidden" id="adminBtn" onclick="showView('admin-view')">Staff</button>
                 <button class="btn" id="logoutBtn">Logout</button>
             </div>
         </div>
 
         <div id="forum-home">
-            <textarea id="post-input" placeholder="Type here..." style="width:100%; height: 50px;"></textarea>
-            <button class="btn btn-staff" id="submitPost" style="width:100%; margin-top:5px;">Submit Post</button>
+            <textarea id="post-input" placeholder="What's on your mind?" style="width:100%; height: 50px;"></textarea>
+            <button class="btn btn-submit" id="submitPost" style="width:100%;">Post</button>
             <div id="thread-display" style="margin-top: 20px;"></div>
         </div>
 
-        <div id="admin-view" class="hidden">
-            <div style="background:#fff; border:2px solid #aa0000; padding:20px;">
-                <h2 style="margin-top:0;">Staff Control Console</h2>
-                <input type="text" id="target-uid" placeholder="Target User UID" style="width:80%; padding:5px;">
-                <div style="margin-top:10px;">
-                    <button class="btn btn-ceo" onclick="setRank(2)">Make CEO</button>
-                    <button class="btn btn-staff" onclick="setRank(1)">Make Staff</button>
-                    <button class="btn" onclick="setRank(0)">Reset Rank</button>
-                </div>
-                <hr>
-                <h3>Ban Management</h3>
-                <input type="text" id="ban-reason" placeholder="Reason">
-                <input type="number" id="ban-hours" placeholder="Hours">
-                <button class="btn btn-ceo" onclick="executeBan()">BAN USER</button>
-                <hr>
-                <h3>Global Banner</h3>
-                <input type="text" id="banner-input" placeholder="Banner Message..." style="width:70%;">
-                <button class="btn btn-staff" onclick="updateBanner()">Set Banner</button>
-                <button class="btn" onclick="updateBanner('')">Clear</button>
-            </div>
+        <div id="inbox-view" class="hidden">
+            <h3>Your Messages</h3>
+            <div id="message-list"></div>
         </div>
 
         <div id="profile-view" class="hidden">
             <div style="display:flex; background:white; padding:20px; border:1px solid #ccc; gap:30px;">
                 <div id="profile-render"></div>
                 <div style="flex-grow: 1;">
-                    <h2 id="view-username" style="margin:0;">User</h2>
-                    <p id="view-bio" style="background:#f9f9f9; padding:10px; border:1px solid #ddd;">...</p>
+                    <h2 style="margin:0;"><span id="view-username">User</span> <span id="view-id" class="id-tag"></span></h2>
+                    <p id="view-bio">No bio set.</p>
+                    <div id="social-actions">
+                        <button class="btn btn-submit" id="friendBtn">Add Friend</button>
+                        <button class="btn" id="msgBtn">Send Message</button>
+                    </div>
                     <div id="customizer-box" class="hidden">
-                         <strong>Avatar Customizer</strong><br>
-                         Hat: <select id="hat-select"><option value="none">None</option><option value="domino">Domino Crown</option><option value="tophat">Top Hat</option></select><br>
-                         Colors: <input type="color" id="color-h"> <input type="color" id="color-t"> <input type="color" id="color-l">
-                         <button class="btn btn-staff" id="saveProfile" style="width:100%; margin-top:10px;">Update Profile</button>
+                        <hr>
+                        <strong>Settings</strong><br>
+                        Hat: <select id="hat-select"><option value="none">None</option><option value="domino">Domino Crown</option><option value="tophat">Top Hat</option></select><br>
+                        Notifications: <input type="checkbox" id="notif-toggle" checked> Enable Pings<br>
+                        <button class="btn btn-submit" id="saveProfile" style="width:100%; margin-top:10px;">Save Changes</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div id="admin-view" class="hidden">
+            <div style="background:#fff; border:2px solid #ff9800; padding:20px;">
+                <h3>Staff Tools</h3>
+                <input type="text" id="target-uid" placeholder="User UID" style="width:70%;"><br><br>
+                <input type="text" id="ban-reason" placeholder="Reason">
+                <button class="btn btn-danger" onclick="executeBan()">BAN</button>
+                <hr>
+                <input type="text" id="banner-input" placeholder="Banner Text">
+                <button class="btn btn-submit" onclick="updateBanner()">Update Banner</button>
             </div>
         </div>
     </div>
@@ -138,36 +138,30 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, get, child, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, get, child, update, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU", authDomain: "testingforum-669a9.firebaseapp.com", databaseURL: "https://testingforum-669a9-default-rtdb.firebaseio.com", projectId: "testingforum-669a9", storageBucket: "testingforum-669a9.firebasestorage.app", messagingSenderId: "685025117821", appId: "1:685025117821:web:c3340c8d5475e33eded314" };
-    const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getDatabase(app);
-    let userData = null;
+    const cfg = { apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU", authDomain: "testingforum-669a9.firebaseapp.com", databaseURL: "https://testingforum-669a9-default-rtdb.firebaseio.com", projectId: "testingforum-669a9", storageBucket: "testingforum-669a9.firebasestorage.app", messagingSenderId: "685025117821", appId: "1:685025117821:web:c3340c8d5475e33eded314" };
+    const app = initializeApp(cfg); const auth = getAuth(app); const db = getDatabase(app);
+    let me = null;
 
-    // FIXED AVATAR DRAWING
-    function createAvatarHTML(colors, hat) {
-        let hatHtml = '';
-        if (hat === 'domino') hatHtml = `<div class="hat-domino"></div>`;
-        else if (hat === 'tophat') hatHtml = `<div class="hat-tophat"></div>`;
-        const c = colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
-        return `<div class="avatar-frame"><div class="char-head" style="background:${c.h}">${hatHtml}</div><div class="char-torso" style="background:${c.t}"><div class="char-arm arm-l" style="background:${c.h}"></div><div class="char-arm arm-r" style="background:${c.h}"></div></div><div style="display:flex;"><div class="char-leg" style="background:${c.l}"></div><div class="char-leg" style="background:${c.l}"></div></div></div>`;
+    function draw(c, h) {
+        let hat = h === 'domino' ? '<div class="hat-domino"></div>' : (h === 'tophat' ? '<div class="hat-tophat"></div>' : '');
+        const cl = c || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
+        return `<div class="avatar-frame"><div class="char-head" style="background:${cl.h}">${hat}</div><div class="char-torso" style="background:${cl.t}"><div class="char-arm arm-l" style="background:${cl.h}"></div><div class="char-arm arm-r" style="background:${cl.h}"></div></div><div style="display:flex;"><div class="char-leg" style="background:${cl.l}"></div><div class="char-leg" style="background:${cl.l}"></div></div></div>`;
     }
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            onValue(ref(db, `users/${user.uid}`), (snap) => {
-                userData = snap.val(); if(!userData) return;
-                if(userData.isBanned && userData.banExpiry > Date.now()) {
+    onAuthStateChanged(auth, (u) => {
+        if (u) {
+            onValue(ref(db, `users/${u.uid}`), (s) => {
+                me = s.val(); if(!me) return;
+                if(me.isBanned && me.banExpiry > Date.now()) {
                     document.getElementById('ban-screen').classList.remove('hidden');
-                    document.getElementById('ban-reason-text').innerText = "Reason: " + userData.banReason;
-                    document.getElementById('ban-expiry-text').innerText = "Remaining: " + Math.ceil((userData.banExpiry - Date.now()) / 3600000) + " hours";
+                    document.getElementById('ban-reason-text').innerText = me.banReason;
                     return;
                 }
-                document.getElementById('user-display').innerText = "Logged in as: " + userData.username;
-                const ind = document.getElementById('rank-indicator');
-                if(userData.rank === 2) { ind.innerText = "CEO / ADMIN"; ind.style.color = "red"; document.getElementById('adminBtn').classList.remove('hidden'); }
-                else if(userData.rank === 1) { ind.innerText = "STAFF / MOD"; ind.style.color = "#00ff00"; document.getElementById('adminBtn').classList.remove('hidden'); }
-                else { ind.innerText = "MEMBER"; ind.style.color = "gold"; }
+                document.getElementById('user-display').innerText = me.username;
+                document.getElementById('adminBtn').classList.toggle('hidden', me.rank < 1);
+                checkNotifications();
             });
             onValue(ref(db, 'settings/banner'), (s) => {
                 const b = document.getElementById('announcement-banner');
@@ -179,16 +173,24 @@
         }
     });
 
-    // STAFF FUNCTIONS
-    window.setRank = (val) => { const uid = document.getElementById('target-uid').value; if(uid) update(ref(db, `users/${uid}`), { rank: val }); };
+    const checkNotifications = () => {
+        onValue(ref(db, `messages/${auth.currentUser.uid}`), (s) => {
+            let unread = false;
+            s.forEach(m => { if(!m.val().read) unread = true; });
+            // DISCORD PING LOGIC
+            const dot = document.getElementById('msg-ping');
+            if (unread && me.notifsEnabled !== false) dot.style.display = 'block';
+            else dot.style.display = 'none';
+        });
+    };
+
     window.executeBan = () => {
         const uid = document.getElementById('target-uid').value;
-        const reason = document.getElementById('ban-reason').value || "Rule Breaking";
-        const hours = parseInt(document.getElementById('ban-hours').value) || 24;
-        if(uid) update(ref(db, `users/${uid}`), { isBanned: true, banReason: reason, banExpiry: Date.now() + (hours * 3600000) });
+        const reason = document.getElementById('ban-reason').value || "Breaking Rules";
+        if(uid) update(ref(db, `users/${uid}`), { isBanned: true, banReason: reason, banExpiry: Date.now() + 86400000 });
     };
-    window.updateBanner = (txt) => { update(ref(db, 'settings'), { banner: txt !== undefined ? txt : document.getElementById('banner-input').value }); };
-    window.shadowDel = (id) => { update(ref(db, `threads/${id}`), { shadowDeleted: true }); };
+
+    window.updateBanner = () => { update(ref(db, 'settings'), { banner: document.getElementById('banner-input').value }); };
 
     const renderForum = () => {
         onValue(ref(db, 'threads'), async (s) => {
@@ -196,50 +198,72 @@
             const users = (await get(child(ref(db), 'users'))).val() || {};
             s.forEach(c => {
                 const p = c.val();
-                if(p.shadowDeleted && userData.rank === 0) return;
+                if(p.shadowDeleted && me.rank === 0) return;
                 const author = users[p.uid] || {username: "Unknown"};
                 const div = document.createElement('div');
                 div.className = 'thread-row' + (p.shadowDeleted ? ' shadow-deleted' : '');
-                div.innerHTML = `<div style="transform:scale(0.5); width:50px;">${createAvatarHTML(author.colors, author.hat)}</div>
-                    <div style="margin-left:20px;">
-                        <strong onclick="window.loadProfile('${p.uid}')" style="color:#0055ff; cursor:pointer;">${author.username}</strong>
+                div.innerHTML = `<div style="transform:scale(0.5); width:40px;">${draw(author.colors, author.hat)}</div>
+                    <div style="margin-left:15px;">
+                        <strong onclick="window.loadProfile('${p.uid}')" style="color:#0055ff; cursor:pointer;">${author.username}</strong> <span class="id-tag">#${author.userNumber || '?' }</span>
                         <div style="font-size:12px;">${p.message}</div>
-                    </div>
-                    ${userData.rank >= 1 ? `<button class="btn btn-ceo" style="font-size:9px; position:absolute; right:10px;" onclick="shadowDel('${c.key}')">SHADOW DEL</button>` : ''}`;
+                    </div>`;
                 display.prepend(div);
             });
         });
     };
 
-    window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
-    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
-    document.getElementById('signupBtn').onclick = () => {
-        const u = document.getElementById('reg-user').value;
-        createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then(r => {
-            set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, bio: 'New Member', hat: 'none', colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'} });
-        });
-    };
-    document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
+    window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if(id==='inbox-view') loadInbox(); };
+    
     window.loadProfile = async (uid) => {
         showView('profile-view');
         const d = (await get(child(ref(db), `users/${uid}`))).val();
         document.getElementById('view-username').innerText = d.username;
-        document.getElementById('view-bio').innerText = d.bio || "No bio.";
-        document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors, d.hat);
+        document.getElementById('view-id').innerText = "#" + (d.userNumber || '0');
+        document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat);
         document.getElementById('customizer-box').classList.toggle('hidden', uid !== auth.currentUser.uid);
+        document.getElementById('social-actions').classList.toggle('hidden', uid === auth.currentUser.uid);
+        document.getElementById('msgBtn').onclick = () => {
+            const txt = prompt("Message to " + d.username + ":");
+            if(txt) push(ref(db, `messages/${uid}`), { from: auth.currentUser.uid, fromName: me.username, text: txt, read: false });
+        };
+    };
+
+    const loadInbox = () => {
+        onValue(ref(db, `messages/${auth.currentUser.uid}`), (s) => {
+            const list = document.getElementById('message-list'); list.innerHTML = "";
+            s.forEach(m => {
+                const data = m.val();
+                const div = document.createElement('div');
+                div.className = 'msg-row';
+                div.innerHTML = `<div><strong>${data.fromName}:</strong> ${data.text}</div>`;
+                div.onclick = () => update(ref(db, `messages/${auth.currentUser.uid}/${m.key}`), {read: true});
+                list.prepend(div);
+            });
+        });
+    };
+
+    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
+    document.getElementById('signupBtn').onclick = async () => {
+        const u = document.getElementById('reg-user').value;
+        const countSnap = await get(ref(db, 'stats/userCount'));
+        const newId = (countSnap.val() || 0) + 1;
+        createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then(r => {
+            set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, userNumber: newId, notifsEnabled: true });
+            update(ref(db, 'stats'), { userCount: increment(1) });
+        });
     };
     document.getElementById('saveProfile').onclick = () => {
         update(ref(db, `users/${auth.currentUser.uid}`), {
             hat: document.getElementById('hat-select').value,
-            colors: { h: document.getElementById('color-h').value, t: document.getElementById('color-t').value, l: document.getElementById('color-l').value }
-        }).then(() => alert("Saved!"));
+            notifsEnabled: document.getElementById('notif-toggle').checked
+        });
     };
     document.getElementById('submitPost').onclick = () => {
-        const msg = document.getElementById('post-input').value; if(!msg.trim()) return;
-        push(ref(db, 'threads'), { message: msg, uid: auth.currentUser.uid });
+        push(ref(db, 'threads'), { message: document.getElementById('post-input').value, uid: auth.currentUser.uid });
         document.getElementById('post-input').value = "";
     };
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
+    document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
 </script>
 </body>
 </html>
