@@ -7,7 +7,6 @@
     <style>
         body { font-family: "MS Sans Serif", Geneva, sans-serif; margin: 0; background: #ccc url('https://wallpapercave.com/wp/wp9084955.jpg') fixed center; background-size: cover; }
         header { background: #0055ff; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #0033aa; }
-        #announcement-banner { background: #ff9800; color: white; padding: 10px; text-align: center; font-weight: bold; border-bottom: 2px solid #e68a00; display: none; }
         .header-meta { font-size: 11px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
         
         /* CEO ANIMATION */
@@ -22,14 +21,17 @@
         .btn-admin { background: #aa0000; color: gold; border: 2px solid gold; animation: glow 2s infinite; }
         @keyframes glow { 0% { box-shadow: 0 0 5px red; } 50% { box-shadow: 0 0 15px red; } 100% { box-shadow: 0 0 5px red; } }
         
-        .tabs { margin-bottom: 10px; display: flex; gap: 5px; align-items: center; border-bottom: 1px solid #999; padding-bottom: 5px; }
+        .tabs { margin-bottom: 10px; display: flex; gap: 5px; border-bottom: 1px solid #999; padding-bottom: 5px; }
         .tab { padding: 5px 12px; background: #ddd; border: 1px solid #999; cursor: pointer; font-size: 11px; }
-        .tab.active { background: #fff; border-bottom: 1px solid #fff; font-weight: bold; margin-bottom: -1px; }
+        .tab.active { background: #fff; border-bottom: 1px solid #fff; font-weight: bold; }
 
-        #ban-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); color: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .admin-panel-ui { background: #fff; border: 2px solid #aa0000; padding: 20px; }
-        .log-box { height: 150px; overflow-y: auto; background: #eee; border: 1px solid #999; padding: 5px; font-family: monospace; font-size: 11px; margin-top: 10px; }
-        
+        /* BADGE STYLES */
+        .badge-container { display: flex; gap: 5px; margin-top: 10px; }
+        .badge { padding: 3px 6px; font-size: 9px; font-weight: bold; border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); text-transform: uppercase; }
+        .badge-ceo { background: #ff0000; color: gold; border-color: gold; }
+        .badge-staff { background: #0055ff; color: white; }
+        .badge-vet { background: #00aa00; color: white; }
+
         /* AVATAR RENDERING */
         .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(1.1); margin-top: 25px; }
         .char-head { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; position: relative; margin-top: 10px; }
@@ -38,10 +40,8 @@
         .arm-l { left: -17px; } .arm-r { right: -17px; }
         .char-leg { width: 20px; height: 44px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
         
-        /* REWORKED HATS */
         .hat-domino { width: 28px; height: 8px; background: linear-gradient(to bottom, #333, #000); position: absolute; top: -7px; left: -4px; border: 1px solid #fff; z-index: 10; }
         .hat-domino::before { content: ''; width: 5px; height: 9px; background: #000; border: 1px solid #fff; position: absolute; top: -7px; left: 3px; box-shadow: 8px 0 0 -1px #000, 8px 0 0 0 #fff, 16px 0 0 -1px #000, 16px 0 0 0 #fff; }
-        
         .hat-tophat { width: 34px; height: 5px; background: #111; position: absolute; top: -4px; left: -7px; z-index: 10; border-radius: 1px; }
         .hat-tophat::after { content: ''; width: 18px; height: 22px; background: #111; position: absolute; top: -22px; left: 8px; border: 1px solid #222; }
 
@@ -53,19 +53,12 @@
 <header>
     <div>
         <div style="font-weight:bold; font-size: 18px;">The Robloxians</div>
-        <div id="rank-indicator" class="header-meta">GUEST ACCESS</div>
+        <div id="rank-indicator" class="header-meta">GUEST</div>
     </div>
-    <div id="user-display">Welcome, Visitor</div>
+    <div id="user-display">Welcome</div>
 </header>
 
 <div class="main-wrapper">
-    <div id="ban-screen" class="hidden">
-        <h1>ACCESS DENIED</h1>
-        <p id="ban-reason-text"></p>
-        <p id="ban-expiry-text"></p>
-        <button class="btn btn-danger" onclick="location.reload()">Retry Login</button>
-    </div>
-
     <div id="auth-view" style="text-align:center; padding:40px;">
         <h2>Login to Legacy</h2>
         <input type="text" id="reg-user" placeholder="Username" style="display:block; margin:10px auto; padding:8px;">
@@ -81,7 +74,7 @@
             <div>
                 <button class="btn" onclick="showView('forum-home')">Forum</button>
                 <button class="btn" id="myProfileBtn">My Profile</button>
-                <button class="btn btn-admin hidden" id="adminBtn" onclick="showView('admin-view')">ADMIN PANEL</button>
+                <button class="btn btn-admin hidden" id="adminBtn" onclick="showView('admin-view')">ADMIN</button>
                 <button class="btn btn-danger" id="logoutBtn">Logout</button>
             </div>
         </div>
@@ -91,7 +84,6 @@
                 <div class="tab active" data-cat="General">General</div>
                 <div class="tab" data-cat="Help">Help</div>
                 <div class="tab" data-cat="Feedback">Feedback</div>
-                <div class="tab" data-cat="Bug Report">Bug Report</div>
             </div>
             <textarea id="post-input" placeholder="Type here..." style="width:100%; height: 50px;"></textarea>
             <div style="display:flex; justify-content:space-between; margin-top:5px;">
@@ -99,37 +91,10 @@
                     <option value="General">Post to General</option>
                     <option value="Help">Post to Help</option>
                     <option value="Feedback">Post to Feedback</option>
-                    <option value="Bug Report">Post to Bug Report</option>
                 </select>
                 <button class="btn btn-submit" id="submitPost">Submit Post</button>
             </div>
             <div id="thread-display" style="margin-top: 20px;"></div>
-        </div>
-
-        <div id="admin-view" class="hidden">
-            <div class="admin-panel-ui">
-                <h2 style="color:#aa0000; margin-top:0;">System Console (CEO Access)</h2>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                    <div style="border:1px solid #ccc; padding:10px;">
-                        <h3>Ban & Immunity Control</h3>
-                        <input type="text" id="admin-target-uid" placeholder="User UID" style="width:90%;"><br>
-                        <input type="text" id="admin-ban-reason" placeholder="Reason" style="width:90%; margin-top:5px;"><br>
-                        <input type="number" id="admin-ban-hours" placeholder="Hours" style="width:90%; margin-top:5px;"><br>
-                        <button class="btn btn-danger" id="banUserBtn">BAN USER</button>
-                        <button class="btn btn-submit" id="unbanUserBtn">UNBAN</button>
-                    </div>
-                    <div style="border:1px solid #ccc; padding:10px;">
-                        <h3>Rank Hierarchy</h3>
-                        <input type="text" id="rank-target-uid" placeholder="User UID" style="width:90%;"><br>
-                        <button class="btn btn-admin" style="background:#000; border-color:gold;" onclick="updateUserRank(3)">Set CEO</button>
-                        <button class="btn btn-admin" onclick="updateUserRank(2)">Set Admin</button>
-                        <button class="btn btn-submit" onclick="updateUserRank(1)">Set Mod</button>
-                        <button class="btn" onclick="updateUserRank(0)">Unrank</button>
-                    </div>
-                </div>
-                <h3>Activity Logs</h3>
-                <div id="staff-logs" class="log-box"></div>
-            </div>
         </div>
 
         <div id="profile-view" class="hidden">
@@ -137,18 +102,21 @@
                 <div id="profile-render"></div>
                 <div style="flex-grow: 1;">
                     <h2 id="view-username" style="margin:0;">User</h2>
-                    <div id="view-id" style="font-size: 10px; color:#999; margin-bottom: 5px;">UID: 0</div>
-                    <p id="view-bio" style="background:#f0f0f0; padding:10px; border:1px solid #ddd;">...</p>
+                    <div id="badge-display" class="badge-container"></div>
+                    <p id="view-bio" style="background:#f0f0f0; padding:10px; border:1px solid #ddd; margin-top:10px;">...</p>
                     <div id="customizer-box" class="hidden">
-                         <strong>Customizer</strong><br>
+                         <strong>Settings</strong><br>
                          Bio: <input type="text" id="edit-bio" style="width:90%;"><br>
                          Hat: <select id="hat-select"><option value="none">None</option><option value="domino">Domino Crown</option><option value="tophat">Top Hat</option></select><br>
                          Colors: <input type="color" id="color-h"> <input type="color" id="color-t"> <input type="color" id="color-l">
-                         <button class="btn btn-submit" id="saveProfile" style="width:100%; margin-top:10px;">Update Profile</button>
+                         <button class="btn btn-submit" id="saveProfile" style="width:100%; margin-top:10px;">Update Data</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div id="admin-view" class="hidden">
+             </div>
     </div>
 </div>
 
@@ -187,65 +155,52 @@
                 currentUserData = snap.val();
                 if(!currentUserData) return;
 
-                if(currentUserData.isBanned) {
-                    const now = Date.now();
-                    if(currentUserData.banExpiry > now) {
-                        document.getElementById('ban-screen').classList.remove('hidden');
-                        document.getElementById('ban-reason-text').innerText = "Reason: " + currentUserData.banReason;
-                        return;
-                    } else { update(ref(db, `users/${user.uid}`), { isBanned: false }); }
-                }
-
+                // PERSISTENT LEVEL LOGIC
+                const level = Math.floor((currentUserData.postCount || 0) / 5) + 1;
+                document.getElementById('level-display').innerText = level;
                 document.getElementById('user-display').innerText = "Hello, " + currentUserData.username;
+
                 const r = currentUserData.rank;
                 const ind = document.getElementById('rank-indicator');
-                ind.className = "header-meta"; 
-                
                 if(r === 3) { ind.innerText = "CHIEF EXECUTIVE OFFICER"; ind.classList.add('ceo-text'); document.getElementById('adminBtn').classList.remove('hidden'); }
-                else if(r === 2) { ind.innerText = "ADMINISTRATOR"; ind.style.color = "red"; document.getElementById('adminBtn').classList.remove('hidden'); }
-                else if(r === 1) { ind.innerText = "MODERATOR"; ind.style.color = "#00ff00"; document.getElementById('adminBtn').classList.remove('hidden'); }
+                else if(r >= 1) { ind.innerText = "STAFF"; ind.style.color = "red"; document.getElementById('adminBtn').classList.remove('hidden'); }
                 else { ind.innerText = "MEMBER"; ind.style.color = "gold"; }
             });
-
-            onValue(ref(db, 'staff_logs'), (snap) => {
-                const box = document.getElementById('staff-logs'); box.innerHTML = "";
-                snap.forEach(l => { box.innerHTML += `<div>[${new Date(l.val().time).toLocaleTimeString()}] ${l.val().msg}</div>`; });
-                box.scrollTop = box.scrollHeight;
-            });
-
             renderForum();
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('logged-in-view').classList.remove('hidden');
         }
     });
 
-    document.getElementById('banUserBtn').onclick = async () => {
-        const uid = document.getElementById('admin-target-uid').value;
-        const targetSnap = await get(child(ref(db), `users/${uid}`));
-        const targetData = targetSnap.val();
+    document.getElementById('submitPost').onclick = async () => {
+        const msg = document.getElementById('post-input').value;
+        const cat = document.getElementById('category-select').value;
+        if(!msg.trim()) return;
 
-        // CEO IMMUNITY Logic
-        if (uid === auth.currentUser.uid || (targetData && targetData.rank >= 2)) {
-            if (currentUserData.rank < 3 || (targetData && targetData.rank === 3)) {
-                alert("ACCESS DENIED: Immunity Active.");
-                return;
-            }
-        }
-        update(ref(db, `users/${uid}`), { isBanned: true, banReason: document.getElementById('admin-ban-reason').value || "Rules", banExpiry: Date.now() + (parseInt(document.getElementById('admin-ban-hours').value || 24) * 3600000) });
-        push(ref(db, 'staff_logs'), { msg: `UID ${uid} BANNED by ${currentUserData.username}`, time: Date.now() });
+        // Save Data: Increase post count in DB
+        const newCount = (currentUserData.postCount || 0) + 1;
+        update(ref(db, `users/${auth.currentUser.uid}`), { postCount: newCount });
+
+        push(ref(db, 'threads'), { message: msg, category: cat, uid: auth.currentUser.uid, timestamp: Date.now() });
+        document.getElementById('post-input').value = "";
     };
 
-    window.updateUserRank = async (rankLevel) => {
-        const uid = document.getElementById('rank-target-uid').value;
-        const targetSnap = await get(child(ref(db), `users/${uid}`));
-        const targetData = targetSnap.val();
+    window.loadProfile = async (uid) => {
+        showView('profile-view');
+        const snap = await get(child(ref(db), `users/${uid}`));
+        const d = snap.val();
+        document.getElementById('view-username').innerText = d.username;
+        document.getElementById('view-bio').innerText = d.bio || "No bio.";
+        document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors, d.hat);
+        
+        // RECODE BADGES
+        const bDisplay = document.getElementById('badge-display');
+        bDisplay.innerHTML = "";
+        if(d.rank === 3) bDisplay.innerHTML += `<span class="badge badge-ceo">CEO</span>`;
+        if(d.rank >= 1 && d.rank < 3) bDisplay.innerHTML += `<span class="badge badge-staff">Staff</span>`;
+        if((d.postCount || 0) >= 10) bDisplay.innerHTML += `<span class="badge badge-vet">Veteran</span>`;
 
-        if (targetData && targetData.rank === 3 && currentUserData.rank < 3) {
-            alert("Insufficient Permissions to modify a CEO.");
-            return;
-        }
-        update(ref(db, `users/${uid}`), { rank: rankLevel });
-        push(ref(db, 'staff_logs'), { msg: `UID ${uid} rank set to ${rankLevel} by ${currentUserData.username}`, time: Date.now() });
+        document.getElementById('customizer-box').classList.toggle('hidden', uid !== auth.currentUser.uid);
     };
 
     const renderForum = () => {
@@ -257,30 +212,20 @@
                 const p = c.val();
                 if (p.category === selectedCategory) {
                     const author = allUsers[p.uid] || {username: "Unknown"};
-                    const isStaff = currentUserData?.rank >= 1;
-                    const delBtn = isStaff ? `<button class="btn btn-danger" style="font-size:9px; position:absolute; right:10px; top:10px;" onclick="deletePost('${c.key}', '${author.username}')">DELETE</button>` : '';
                     const div = document.createElement('div'); div.className = 'thread-row';
                     div.innerHTML = `<div style="transform:scale(0.5); width:50px;">${createAvatarHTML(author.colors, author.hat)}</div>
                         <div style="margin-left:20px;">
                             <strong style="color:#0055ff; cursor:pointer;" onclick="window.loadProfile('${p.uid}')">${author.username}</strong>
                             <div style="margin-top:5px; font-size:13px;">${p.message}</div>
-                        </div>${delBtn}`;
+                        </div>`;
                     display.prepend(div);
                 }
             });
         });
     };
 
-    document.getElementById('submitPost').onclick = () => {
-        const msg = document.getElementById('post-input').value;
-        const cat = document.getElementById('category-select').value; // FIX: Correctly grab category
-        if(!msg.trim()) return;
-        push(ref(db, 'threads'), { message: msg, category: cat, uid: auth.currentUser.uid, timestamp: Date.now() });
-        document.getElementById('post-input').value = "";
-    };
-
     window.showView = (id) => {
-        ['forum-home', 'profile-view', 'admin-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
+        ['forum-home', 'profile-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
     };
 
@@ -288,38 +233,18 @@
     document.getElementById('signupBtn').onclick = () => {
         const u = document.getElementById('reg-user').value;
         createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then((r) => {
-            set(ref(db, `users/${r.user.uid}`), { username: u, posts: 0, bio: 'New Member', rank: 0, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
+            set(ref(db, `users/${r.user.uid}`), { username: u, postCount: 0, bio: 'New Member', rank: 0, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
         });
     };
-    document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
-    document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
     document.getElementById('saveProfile').onclick = () => {
         update(ref(db, `users/${auth.currentUser.uid}`), {
             bio: document.getElementById('edit-bio').value,
             hat: document.getElementById('hat-select').value,
             colors: { h: document.getElementById('color-h').value, t: document.getElementById('color-t').value, l: document.getElementById('color-l').value }
-        }).then(() => alert("Saved!"));
+        }).then(() => alert("Profile Saved!"));
     };
-    window.loadProfile = async (uid) => {
-        showView('profile-view');
-        const snap = await get(child(ref(db), `users/${uid}`));
-        const d = snap.val();
-        document.getElementById('view-username').innerText = d.username;
-        document.getElementById('view-bio').innerText = d.bio || "No bio.";
-        document.getElementById('view-id').innerText = "UID: " + uid;
-        document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors, d.hat);
-        document.getElementById('customizer-box').classList.toggle('hidden', uid !== auth.currentUser.uid);
-    };
-    document.querySelectorAll('.tab').forEach(t => { t.onclick = () => {
-        selectedCategory = t.dataset.cat;
-        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-        t.classList.add('active');
-        renderForum();
-    }});
-    window.deletePost = (postId, authorName) => {
-        if(!confirm("Delete?")) return;
-        remove(ref(db, `threads/${postId}`));
-    };
+    document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
+    document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
 </script>
 </body>
 </html>
