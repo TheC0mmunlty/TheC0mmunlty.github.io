@@ -5,60 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Robloxians - Staff Edition</title>
     <style>
-        body { font-family: "MS Sans Serif", Geneva, sans-serif; margin: 0; background: #ccc url('https://wallpapercave.com/wp/wp9084955.jpg') fixed center; background-size: cover; }
+        /* RETRO FONT OVERRIDE */
+        * { font-family: "MS Sans Serif", Geneva, sans-serif; -webkit-font-smoothing: none; }
+        body { margin: 0; background: #ccc url('https://wallpapercave.com/wp/wp9084955.jpg') fixed center; background-size: cover; }
         header { background: #0055ff; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #0033aa; }
-        .header-meta { font-size: 11px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
         
-        @keyframes ceo-glow { 0% { text-shadow: 0 0 5px gold; color: gold; } 50% { text-shadow: 0 0 20px gold, 0 0 30px red; color: #ff4444; } 100% { text-shadow: 0 0 5px gold; color: gold; } }
-        .ceo-text { animation: ceo-glow 1.5s infinite; font-weight: 900 !important; }
-
+        /* GLOBAL BANNER */
+        #global-banner { background: #aa0000; color: gold; padding: 8px; text-align: center; font-weight: bold; border-bottom: 2px solid #550000; font-size: 12px; display: none; }
+        
+        .header-meta { font-size: 11px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
         .main-wrapper { width: 950px; margin: 20px auto; background: rgba(238, 238, 238, 0.95); border: 1px solid #888; min-height: 600px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.4); position: relative; }
         .hidden { display: none !important; }
-        .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-size: 12px; font-weight: bold; margin: 2px; }
+        .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-size: 12px; font-weight: bold; margin: 2px; box-shadow: inset 1px 1px #fff, inset -1px -1px #999; }
         .btn-submit { background: #ffcc00; border-color: #ccaa00; }
         .btn-danger { background: #ff4444; color: white; border: 1px solid #aa0000; }
-        .btn-admin { background: #aa0000; color: gold; border: 2px solid gold; animation: glow 2s infinite; }
-        @keyframes glow { 0% { box-shadow: 0 0 5px red; } 50% { box-shadow: 0 0 15px red; } 100% { box-shadow: 0 0 5px red; } }
         
-        .tabs { margin-bottom: 10px; display: flex; gap: 5px; border-bottom: 1px solid #999; padding-bottom: 5px; }
-        .tab { padding: 5px 12px; background: #ddd; border: 1px solid #999; cursor: pointer; font-size: 11px; }
-        .tab.active { background: #fff; border-bottom: 1px solid #fff; font-weight: bold; }
-
-        /* BADGE STYLES */
-        .badge-container { display: flex; gap: 5px; margin-top: 10px; }
-        .badge { padding: 3px 6px; font-size: 9px; font-weight: bold; border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); text-transform: uppercase; }
-        .badge-ceo { background: #ff0000; color: gold; border-color: gold; }
-        .badge-staff { background: #0055ff; color: white; }
-        .badge-vet { background: #00aa00; color: white; }
+        #ban-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: #000; color: #ff4444; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 10px solid #aa0000; box-sizing: border-box; }
+        
+        .tabs { margin-bottom: 10px; display: flex; gap: 5px; align-items: center; border-bottom: 1px solid #999; }
+        .tab { padding: 5px 12px; background: #ddd; border: 1px solid #999; cursor: pointer; font-size: 11px; border-bottom: none; }
+        .tab.active { background: #fff; border-bottom: 1px solid #fff; font-weight: bold; margin-bottom: -1px; }
 
         .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(1.1); margin-top: 25px; }
         .char-head { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; position: relative; margin-top: 10px; }
         .char-torso { width: 44px; height: 44px; border: 1px solid rgba(0,0,0,0.2); position: relative; }
-        .char-arm { width: 16px; height: 42px; border: 1px solid rgba(0,0,0,0.2); position: absolute; top: 0; }
-        .arm-l { left: -17px; } .arm-r { right: -17px; }
         .char-leg { width: 20px; height: 44px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
         
-        .hat-domino { width: 28px; height: 8px; background: #000; position: absolute; top: -7px; left: -4px; border: 1px solid #fff; z-index: 10; }
-        .hat-tophat { width: 34px; height: 5px; background: #111; position: absolute; top: -4px; left: -7px; z-index: 10; }
-        .hat-tophat::after { content: ''; width: 18px; height: 22px; background: #111; position: absolute; top: -22px; left: 8px; border: 1px solid #222; }
+        .hat-domino { width: 28px; height: 8px; background: #000; position: absolute; top: -6px; left: -4px; border: 1.5px solid #fff; z-index: 10; }
+        .hat-tophat { width: 32px; height: 4px; background: #111; position: absolute; top: -4px; left: -6px; z-index: 10; }
+        .hat-tophat::after { content: ''; width: 18px; height: 18px; background: #111; position: absolute; top: -18px; left: 7px; border: 1px solid #333; }
 
-        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; }
-        .log-box { height: 100px; overflow-y: auto; background: #eee; border: 1px solid #999; font-size: 10px; padding: 5px; margin-top: 10px; }
+        .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; position: relative; }
+        .shadow-deleted { opacity: 0.5; background: #ffebeb !important; border: 1px dashed red; }
     </style>
 </head>
 <body>
 
+<div id="global-banner">SYSTEM ALERT: [Message Here]</div>
+
 <header>
     <div>
         <div style="font-weight:bold; font-size: 18px;">The Robloxians</div>
-        <div id="rank-indicator" class="header-meta">GUEST</div>
+        <div id="rank-indicator" class="header-meta">GUEST ACCESS</div>
     </div>
-    <div id="user-display">Welcome</div>
+    <div id="user-display">Welcome, Visitor</div>
 </header>
 
 <div class="main-wrapper">
+    <div id="ban-screen" class="hidden">
+        <h1 style="font-size: 40px;">BANNED</h1>
+        <p id="ban-reason-text" style="font-size: 18px;"></p>
+        <p id="ban-expiry-text" style="color: #999;"></p>
+        <p>If you believe this is a mistake, contact an Admin.</p>
+        <button class="btn btn-submit" onclick="location.reload()">Retry Access</button>
+    </div>
+
     <div id="auth-view" style="text-align:center; padding:40px;">
-        <h2>Login / Sign Up</h2>
+        <h2>Login to Legacy</h2>
         <input type="text" id="reg-user" placeholder="Username" style="display:block; margin:10px auto; padding:8px;">
         <input type="email" id="auth-email" placeholder="Email" style="display:block; margin:10px auto; padding:8px;">
         <input type="password" id="auth-pass" placeholder="Password" style="display:block; margin:10px auto; padding:8px;">
@@ -72,8 +75,8 @@
             <div>
                 <button class="btn" onclick="showView('forum-home')">Forum</button>
                 <button class="btn" id="myProfileBtn">My Profile</button>
-                <button class="btn btn-admin hidden" id="adminBtn" onclick="showView('admin-view')">ADMIN PANEL</button>
-                <button class="btn btn-danger" id="logoutBtn">Logout</button>
+                <button class="btn btn-danger hidden" id="adminBtn" onclick="showView('admin-view')">ADMIN PANEL</button>
+                <button class="btn" id="logoutBtn">Logout</button>
             </div>
         </div>
 
@@ -82,7 +85,7 @@
                 <div class="tab active" data-cat="General">General</div>
                 <div class="tab" data-cat="Help">Help</div>
             </div>
-            <textarea id="post-input" placeholder="What's on your mind?" style="width:100%; height: 50px;"></textarea>
+            <textarea id="post-input" placeholder="Type here..." style="width:100%; height: 50px;"></textarea>
             <div style="display:flex; justify-content:space-between; margin-top:5px;">
                 <select id="category-select"><option value="General">General</option><option value="Help">Help</option></select>
                 <button class="btn btn-submit" id="submitPost">Submit Post</button>
@@ -90,32 +93,35 @@
             <div id="thread-display" style="margin-top: 20px;"></div>
         </div>
 
+        <div id="admin-view" class="hidden">
+            <div style="background:#fff; border:2px solid #aa0000; padding:15px;">
+                <h3 style="color:#aa0000; margin:0;">Staff Control</h3>
+                <hr>
+                <p><strong>Ban User</strong></p>
+                <input type="text" id="admin-target-uid" placeholder="User UID">
+                <input type="text" id="admin-ban-reason" placeholder="Reason">
+                <input type="number" id="admin-ban-hours" placeholder="Hours (e.g. 24)">
+                <button class="btn btn-danger" id="banUserBtn">BAN</button>
+                <hr>
+                <p><strong>Global Banner (Admin Only)</strong></p>
+                <input type="text" id="banner-text" placeholder="Announcement Message..." style="width:70%;">
+                <button class="btn btn-submit" id="setBannerBtn">Set Banner</button>
+                <button class="btn" onclick="removeBanner()">Clear</button>
+            </div>
+        </div>
+
         <div id="profile-view" class="hidden">
             <div style="display:flex; background:white; padding:20px; border:1px solid #ccc; gap:30px;">
                 <div id="profile-render"></div>
                 <div style="flex-grow: 1;">
                     <h2 id="view-username" style="margin:0;">User</h2>
-                    <div id="badge-display" class="badge-container"></div>
-                    <p id="view-bio" style="background:#f0f0f0; padding:10px; border:1px solid #ddd; margin-top:10px;">...</p>
+                    <p id="view-bio">...</p>
                     <div id="customizer-box" class="hidden">
-                         <hr>
-                         Bio: <input type="text" id="edit-bio" style="width:80%;"><br>
-                         Hat: <select id="hat-select"><option value="none">None</option><option value="domino">Domino</option><option value="tophat">Top Hat</option></select><br>
-                         Colors: <input type="color" id="color-h"> <input type="color" id="color-t"> <input type="color" id="color-l">
-                         <button class="btn btn-submit" id="saveProfile" style="width:100%; margin-top:10px;">Save Changes</button>
+                        Hat: <select id="hat-select"><option value="none">None</option><option value="domino">Domino Crown</option><option value="tophat">Top Hat</option></select>
+                        Colors: <input type="color" id="color-h"> <input type="color" id="color-t"> <input type="color" id="color-l">
+                        <button class="btn btn-submit" id="saveProfile">Update</button>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div id="admin-view" class="hidden">
-            <div style="background:white; padding:15px; border:2px solid #aa0000;">
-                <h3>Staff Control Console</h3>
-                <input type="text" id="target-uid" placeholder="Target User UID" style="width:60%;">
-                <button class="btn btn-danger" onclick="setRank(3)">Make CEO</button>
-                <button class="btn btn-submit" onclick="setRank(1)">Make Staff</button>
-                <button class="btn" onclick="setRank(0)">Reset Rank</button>
-                <div id="staff-logs" class="log-box"></div>
             </div>
         </div>
     </div>
@@ -124,76 +130,56 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, get, child, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU",
-        authDomain: "testingforum-669a9.firebaseapp.com",
-        databaseURL: "https://testingforum-669a9-default-rtdb.firebaseio.com",
-        projectId: "testingforum-669a9",
-        storageBucket: "testingforum-669a9.firebasestorage.app",
-        messagingSenderId: "685025117821",
-        appId: "1:685025117821:web:c3340c8d5475e33eded314"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU", authDomain: "testingforum-669a9.firebaseapp.com", databaseURL: "https://testingforum-669a9-default-rtdb.firebaseio.com", projectId: "testingforum-669a9", storageBucket: "testingforum-669a9.firebasestorage.app", messagingSenderId: "685025117821", appId: "1:685025117821:web:c3340c8d5475e33eded314" };
+    const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getDatabase(app);
+    let currentUserData = null; let selectedCategory = 'General';
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    let currentUserData = null;
-
-    function createAvatarHTML(colors, hat) {
-        let h = hat === 'domino' ? '<div class="hat-domino"></div>' : (hat === 'tophat' ? '<div class="hat-tophat"></div>' : '');
-        const c = colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
-        return `<div class="avatar-frame"><div class="char-head" style="background:${c.h}">${h}</div><div class="char-torso" style="background:${c.t}"><div class="char-arm arm-l" style="background:${c.h}"></div><div class="char-arm arm-r" style="background:${c.h}"></div></div><div style="display:flex;"><div class="char-leg" style="background:${c.l}"></div><div class="char-leg" style="background:${c.l}"></div></div></div>`;
+    function draw(c, h) {
+        let hatHtml = h === 'domino' ? '<div class="hat-domino"></div>' : (h === 'tophat' ? '<div class="hat-tophat"></div>' : '');
+        const cl = c || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
+        return `<div class="avatar-frame"><div class="char-head" style="background:${cl.h}">${hatHtml}</div><div class="char-torso" style="background:${cl.t}"></div><div style="display:flex;"><div class="char-leg" style="background:${cl.l}"></div><div class="char-leg" style="background:${cl.l}"></div></div></div>`;
     }
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
             onValue(ref(db, `users/${user.uid}`), (snap) => {
-                currentUserData = snap.val();
-                if(!currentUserData) return;
-                const level = Math.floor((currentUserData.postCount || 0) / 5) + 1;
-                document.getElementById('level-display').innerText = level;
-                document.getElementById('user-display').innerText = "Hello, " + currentUserData.username;
+                currentUserData = snap.val(); if(!currentUserData) return;
+                if(currentUserData.isBanned && currentUserData.banExpiry > Date.now()) {
+                    document.getElementById('ban-screen').classList.remove('hidden');
+                    document.getElementById('ban-reason-text').innerText = "Reason: " + currentUserData.banReason;
+                    document.getElementById('ban-expiry-text').innerText = "Expires in: " + Math.ceil((currentUserData.banExpiry - Date.now()) / 3600000) + " hours";
+                    return;
+                }
+                document.getElementById('user-display').innerText = "User: " + currentUserData.username;
                 const ind = document.getElementById('rank-indicator');
-                ind.className = "header-meta";
-                if(currentUserData.rank === 3) { ind.innerText = "CEO"; ind.classList.add('ceo-text'); document.getElementById('adminBtn').classList.remove('hidden'); }
-                else if(currentUserData.rank >= 1) { ind.innerText = "STAFF"; ind.style.color = "red"; document.getElementById('adminBtn').classList.remove('hidden'); }
-                else { ind.innerText = "MEMBER"; ind.style.color = "gold"; }
+                if(currentUserData.rank >= 1) { 
+                    ind.innerText = currentUserData.rank === 2 ? "ADMIN" : "MODERATOR";
+                    ind.style.color = "red"; document.getElementById('adminBtn').classList.remove('hidden'); 
+                } else { ind.innerText = "MEMBER"; ind.style.color = "gold"; }
             });
-            renderForum();
-            document.getElementById('auth-view').classList.add('hidden');
-            document.getElementById('logged-in-view').classList.remove('hidden');
+            onValue(ref(db, 'settings/banner'), (s) => {
+                const b = document.getElementById('global-banner');
+                if(s.val()) { b.innerText = s.val(); b.style.display = 'block'; } else { b.style.display = 'none'; }
+            });
+            renderForum(); document.getElementById('auth-view').classList.add('hidden'); document.getElementById('logged-in-view').classList.remove('hidden');
         }
     });
 
-    document.getElementById('submitPost').onclick = async () => {
-        const msg = document.getElementById('post-input').value;
-        if(!msg.trim()) return;
-        const newCount = (currentUserData.postCount || 0) + 1;
-        update(ref(db, `users/${auth.currentUser.uid}`), { postCount: newCount });
-        push(ref(db, 'threads'), { message: msg, category: document.getElementById('category-select').value, uid: auth.currentUser.uid });
-        document.getElementById('post-input').value = "";
+    document.getElementById('banUserBtn').onclick = async () => {
+        const uid = document.getElementById('admin-target-uid').value;
+        const reason = document.getElementById('admin-ban-reason').value || "Rule Violation";
+        const hours = parseInt(document.getElementById('admin-ban-hours').value) || 24;
+        if(uid) update(ref(db, `users/${uid}`), { isBanned: true, banReason: reason, banExpiry: Date.now() + (hours * 3600000) });
     };
 
-    window.loadProfile = async (uid) => {
-        showView('profile-view');
-        const d = (await get(child(ref(db), `users/${uid}`))).val();
-        document.getElementById('view-username').innerText = d.username;
-        document.getElementById('view-bio').innerText = d.bio || "No bio.";
-        document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors, d.hat);
-        const b = document.getElementById('badge-display'); b.innerHTML = "";
-        if(d.rank === 3) b.innerHTML += `<span class="badge badge-ceo">CEO</span>`;
-        if(d.rank >= 1 && d.rank < 3) b.innerHTML += `<span class="badge badge-staff">Staff</span>`;
-        if((d.postCount || 0) >= 10) b.innerHTML += `<span class="badge badge-vet">Veteran</span>`;
-        document.getElementById('customizer-box').classList.toggle('hidden', uid !== auth.currentUser.uid);
+    document.getElementById('setBannerBtn').onclick = () => {
+        if(currentUserData.rank === 2) update(ref(db, 'settings'), { banner: document.getElementById('banner-text').value });
     };
 
-    window.setRank = (r) => {
-        const uid = document.getElementById('target-uid').value;
-        if(!uid) return alert("Enter UID");
-        update(ref(db, `users/${uid}`), { rank: r });
-        push(ref(db, 'staff_logs'), { msg: `Rank ${r} set for ${uid}`, time: Date.now() });
+    window.shadowDelete = (id) => {
+        update(ref(db, `threads/${id}`), { shadowDeleted: true });
     };
 
     const renderForum = () => {
@@ -202,32 +188,47 @@
             const users = (await get(child(ref(db), 'users'))).val() || {};
             s.forEach(c => {
                 const p = c.val();
-                const author = users[p.uid] || {username: "Unknown"};
-                const div = document.createElement('div'); div.className = 'thread-row';
-                div.innerHTML = `<div style="transform:scale(0.4); width:40px;">${createAvatarHTML(author.colors, author.hat)}</div><div style="margin-left:20px;"><strong onclick="window.loadProfile('${p.uid}')" style="color:#0055ff; cursor:pointer;">${author.username}</strong><br>${p.message}</div>`;
-                display.prepend(div);
+                if(p.category === selectedCategory) {
+                    const author = users[p.uid] || {username: "Unknown"};
+                    const isStaff = currentUserData?.rank >= 1;
+                    if(p.shadowDeleted && !isStaff) return; // Hide from members
+                    
+                    const div = document.createElement('div');
+                    div.className = 'thread-row' + (p.shadowDeleted ? ' shadow-deleted' : '');
+                    div.innerHTML = `<div style="transform:scale(0.5); width:50px;">${draw(author.colors, author.hat)}</div>
+                        <div style="margin-left:20px;">
+                            <strong onclick="window.loadProfile('${p.uid}')" style="color:#0055ff; cursor:pointer;">${author.username}</strong>
+                            <div style="font-size:12px;">${p.message}</div>
+                        </div>
+                        ${isStaff ? `<button class="btn btn-danger" style="position:absolute; right:10px;" onclick="shadowDelete('${c.key}')">SHADOW DEL</button>` : ''}`;
+                    display.prepend(div);
+                }
             });
         });
     };
 
-    window.showView = (id) => {
-        ['forum-home', 'profile-view', 'admin-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-    };
-
+    window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
     document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
     document.getElementById('signupBtn').onclick = () => {
         const u = document.getElementById('reg-user').value;
-        createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then((r) => {
-            set(ref(db, `users/${r.user.uid}`), { username: u, postCount: 0, rank: 0 });
+        createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then(r => {
+            set(ref(db, `users/${r.user.uid}`), { username: u, posts: 0, rank: 0 });
         });
     };
     document.getElementById('saveProfile').onclick = () => {
-        update(ref(db, `users/${auth.currentUser.uid}`), { bio: document.getElementById('edit-bio').value, hat: document.getElementById('hat-select').value, colors: { h: document.getElementById('color-h').value, t: document.getElementById('color-t').value, l: document.getElementById('color-l').value } });
-        alert("Saved!");
+        update(ref(db, `users/${auth.currentUser.uid}`), { bio: 'Legacy User', hat: document.getElementById('hat-select').value, colors: { h: document.getElementById('color-h').value, t: document.getElementById('color-t').value, l: document.getElementById('color-l').value } });
     };
-    document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
-    document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
+    document.getElementById('submitPost').onclick = () => {
+        const msg = document.getElementById('post-input').value; if(!msg.trim()) return;
+        push(ref(db, 'threads'), { message: msg, category: selectedCategory, uid: auth.currentUser.uid });
+        document.getElementById('post-input').value = "";
+    };
+    window.loadProfile = async (uid) => {
+        showView('profile-view'); const d = (await get(child(ref(db), `users/${uid}`))).val();
+        document.getElementById('view-username').innerText = d.username; document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat);
+        document.getElementById('customizer-box').classList.toggle('hidden', uid !== auth.currentUser.uid);
+    };
+    document.querySelectorAll('.tab').forEach(t => t.onclick = () => { selectedCategory = t.dataset.cat; renderForum(); });
 </script>
 </body>
 </html>
