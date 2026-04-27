@@ -7,6 +7,7 @@
     <style>
         body { font-family: "MS Sans Serif", Geneva, sans-serif; margin: 0; background: #ccc url('https://wallpapercave.com/wp/wp9084955.jpg') fixed center; background-size: cover; }
         header { background: #0055ff; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #0033aa; }
+        #announcement-banner { background: #ff9800; color: white; padding: 10px; text-align: center; font-weight: bold; border-bottom: 2px solid #e68a00; display: none; font-size: 14px; }
         .header-meta { font-size: 11px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
         .main-wrapper { width: 950px; margin: 20px auto; background: rgba(238, 238, 238, 0.95); border: 1px solid #888; min-height: 600px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.4); }
         .hidden { display: none !important; }
@@ -23,21 +24,20 @@
         #notif-toast { position: fixed; bottom: 20px; right: 20px; background: #0055ff; color: white; padding: 15px; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 1000; transition: opacity 0.5s; opacity: 0; pointer-events: none; }
         #notif-toast.show { opacity: 1; }
 
-        /* AVATAR SYSTEM */
-        .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(1.1); margin-top: 15px; margin-bottom: 10px; }
+        .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(1.1); margin-top: 15px; }
         .char-head { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; position: relative; margin-top: 10px; }
         .char-torso { width: 44px; height: 44px; border: 1px solid rgba(0,0,0,0.2); position: relative; }
         .char-arm { width: 16px; height: 42px; border: 1px solid rgba(0,0,0,0.2); position: absolute; top: 0; }
         .arm-l { left: -17px; } .arm-r { right: -17px; }
         .char-leg { width: 20px; height: 44px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
         
-        /* HATS */
         .hat-domino { width: 26px; height: 6px; background: #111; position: absolute; top: -5px; left: -3px; border: 1px solid #fff; }
         .hat-domino::before { content: '...'; color: white; font-size: 12px; position: absolute; top: -6px; left: 4px; letter-spacing: 1px; }
         .hat-tophat { width: 30px; height: 3px; background: #000; position: absolute; top: -3px; left: -5px; }
         .hat-tophat::after { content: ''; width: 16px; height: 16px; background: #000; position: absolute; top: -16px; left: 7px; border: 1px solid #333; }
 
         .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; position: relative; }
+        .admin-panel-ui { background: #fff; border: 2px solid #aa0000; padding: 20px; }
     </style>
 </head>
 <body>
@@ -50,6 +50,7 @@
     <div id="user-display">Welcome, Visitor</div>
 </header>
 
+<div id="announcement-banner"></div>
 <div id="notif-toast"></div>
 
 <div class="main-wrapper">
@@ -68,7 +69,7 @@
             <div>
                 <button class="btn" onclick="showView('forum-home')">Forum</button>
                 <button class="btn" id="myProfileBtn">My Profile</button>
-                <button class="btn btn-admin hidden" id="adminBtn" onclick="alert('Admin Tools Loaded.')">ADMIN PANEL</button>
+                <button class="btn btn-admin hidden" id="adminBtn" onclick="showView('admin-view')">ADMIN PANEL</button>
                 <button class="btn btn-danger" id="logoutBtn">Logout</button>
             </div>
         </div>
@@ -97,6 +98,27 @@
                 <button class="btn btn-submit" id="submitPost">Submit Post</button>
             </div>
             <div id="thread-display" style="margin-top: 20px;"></div>
+        </div>
+
+        <div id="admin-view" class="hidden">
+            <div class="admin-panel-ui">
+                <h2 style="color:#aa0000; margin-top:0;">Staff Control Dashboard</h2>
+                <hr>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    <div>
+                        <h3>Global Announcement</h3>
+                        <input type="text" id="admin-announcement-input" placeholder="Type banner message..." style="width:80%; padding:5px;">
+                        <button class="btn btn-submit" id="postAnnouncementBtn">Update Banner</button>
+                        <button class="btn btn-danger" id="clearAnnouncementBtn">Clear</button>
+                    </div>
+                    <div>
+                        <h3>Server Stats</h3>
+                        <div id="admin-user-list" style="font-size:12px; background:#f9f9f9; padding:10px; border:1px solid #ddd;">
+                            Loading user count...
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="profile-view" class="hidden">
@@ -130,7 +152,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, get, child, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU",
@@ -170,7 +192,6 @@
                     document.getElementById('level-display').innerText = Math.floor((currentUserData.posts || 0) / 5) + 1;
                     document.getElementById('user-display').innerText = "Hello, " + currentUserData.username;
                     
-                    // FIXED RANK LOGIC (Checks for 2, 1, or strings)
                     if(currentUserData.rank === 2 || currentUserData.rank === "Admin") {
                         document.getElementById('rank-indicator').innerText = "ADMINISTRATOR";
                         document.getElementById('rank-indicator').style.color = "#ff4444";
@@ -178,30 +199,22 @@
                     } else if(currentUserData.rank === 1 || currentUserData.rank === "Staff") {
                         document.getElementById('rank-indicator').innerText = "STAFF";
                         document.getElementById('rank-indicator').style.color = "#00ff00";
+                        document.getElementById('adminBtn').classList.remove('hidden');
                     } else {
                         document.getElementById('rank-indicator').innerText = "MEMBER";
                         document.getElementById('rank-indicator').style.color = "#ffd700";
-                        document.getElementById('adminBtn').classList.add('hidden');
                     }
-
-                    // Sync customizer
-                    document.getElementById('edit-bio').value = currentUserData.bio || "";
-                    document.getElementById('color-h').value = currentUserData.colors?.h || "#f5cd30";
-                    document.getElementById('color-t').value = currentUserData.colors?.t || "#0d5f97";
-                    document.getElementById('color-l').value = currentUserData.colors?.l || "#a06110";
-                    document.getElementById('hat-select').value = currentUserData.hat || "none";
                 }
             });
 
-            // Notification logic
-            onValue(ref(db, `inbox/${user.uid}`), (snap) => {
-                let hasNew = false;
-                snap.forEach(m => { if(m.val().timestamp > sessionStartTime) hasNew = true; });
-                if(hasNew) {
-                    const toast = document.getElementById('notif-toast');
-                    toast.innerText = "New Message!";
-                    toast.classList.add('show');
-                    setTimeout(() => toast.classList.remove('show'), 4000);
+            // Listen for Global Announcements
+            onValue(ref(db, 'announcement'), (snap) => {
+                const banner = document.getElementById('announcement-banner');
+                if(snap.exists() && snap.val().text) {
+                    banner.innerText = snap.val().text;
+                    banner.style.display = 'block';
+                } else {
+                    banner.style.display = 'none';
                 }
             });
 
@@ -210,6 +223,15 @@
             document.getElementById('logged-in-view').classList.remove('hidden');
         }
     });
+
+    // ADMIN TOOLS LOGIC
+    document.getElementById('postAnnouncementBtn').onclick = () => {
+        const text = document.getElementById('admin-announcement-input').value;
+        if(text) set(ref(db, 'announcement'), { text: text });
+    };
+    document.getElementById('clearAnnouncementBtn').onclick = () => {
+        remove(ref(db, 'announcement'));
+    };
 
     // SEARCH LOGIC
     document.getElementById('searchBtn').onclick = async () => {
@@ -283,7 +305,6 @@
         document.getElementById('customizer-box').classList.toggle('hidden', uid !== auth.currentUser.uid);
     };
 
-    // FIXED PM SENDER (No more undefined)
     document.getElementById('sendPmBtn').onclick = () => {
         const msg = document.getElementById('pm-input').value;
         if(!msg.trim() || !currentUserData) return;
@@ -299,6 +320,7 @@
     window.showView = (id) => {
         document.getElementById('forum-home').classList.add('hidden');
         document.getElementById('profile-view').classList.add('hidden');
+        document.getElementById('admin-view').classList.add('hidden');
         document.getElementById(id).classList.remove('hidden');
     };
 
