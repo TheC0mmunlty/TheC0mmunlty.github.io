@@ -14,15 +14,14 @@
         .btn { background: #e1e1e1; border: 1px solid #777; padding: 5px 15px; cursor: pointer; font-size: 12px; font-weight: bold; margin: 2px; }
         .btn-submit { background: #ffcc00; border-color: #ccaa00; }
         .btn-danger { background: #ff4444; color: white; border: 1px solid #aa0000; }
-        .btn-admin { background: #ffff00; color: #000; border: 2px solid #000; }
         
         /* CATEGORY TABS */
-        .tabs { margin-bottom: 10px; display: flex; gap: 5px; }
-        .tab { padding: 5px 10px; background: #ddd; border: 1px solid #999; cursor: pointer; font-size: 12px; }
-        .tab.active { background: #fff; border-bottom: none; font-weight: bold; }
+        .tabs { margin-bottom: 10px; display: flex; gap: 5px; align-items: center;}
+        .tab { padding: 5px 10px; background: #ddd; border: 1px solid #999; cursor: pointer; font-size: 11px; }
+        .tab.active { background: #fff; border-bottom: 1px solid transparent; font-weight: bold; }
 
         /* NOTIFICATIONS */
-        #notif-toast { position: fixed; bottom: 20px; right: 20px; background: #0055ff; color: white; padding: 15px; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 1000; transition: opacity 1s; opacity: 0; pointer-events: none; }
+        #notif-toast { position: fixed; bottom: 20px; right: 20px; background: #0055ff; color: white; padding: 15px; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 1000; transition: opacity 0.5s; opacity: 0; pointer-events: none; }
         #notif-toast.show { opacity: 1; }
 
         /* BADGES */
@@ -33,9 +32,8 @@
         .badge-20 { background: #ff1493; border: 1px solid gold; }
 
         /* ADMIN PANEL */
-        #admin-panel { border: 4px solid #ffcc00; padding: 15px; background: #fff; margin-bottom: 15px; box-shadow: 4px 4px 0px #000; }
+        #admin-panel { border: 4px solid #ffcc00; padding: 15px; background: #fff; margin-bottom: 15px; box-shadow: 4px 4px 0px #000; font-size: 12px; }
         
-        /* AVATAR SYSTEM */
         .avatar-frame { width: 80px; height: 110px; position: relative; background: #e1e1e1; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; transform: scale(0.8); margin-top: 25px; }
         .char-head { width: 20px; height: 20px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; position: relative; }
         .char-torso { width: 40px; height: 40px; border: 1px solid rgba(0,0,0,0.2); position: relative; }
@@ -44,18 +42,11 @@
         .arm-r { right: -16px; transform: rotate(-5deg); }
         .char-leg { width: 18px; height: 40px; border: 1px solid rgba(0,0,0,0.2); display: inline-block; }
         
-        .hat-domino-css { width: 24px; height: 6px; background: #333; position: absolute; top: -6px; left: -2px; border: 1px solid #000; z-index: 10; }
-        .hat-domino-css::before { content: ''; position: absolute; top: -10px; left: 0; width: 6px; height: 10px; background: #eee; border: 1px solid #000; box-shadow: 8px 0 0 #eee, 8px 0 0 0 #000, 16px 0 0 #eee, 16px 0 0 0 #000; }
-        .hat-tophat-css { width: 24px; height: 4px; background: #222; position: absolute; top: -4px; left: -2px; border: 1px solid #000; z-index: 10; }
-        .hat-tophat-css::after { content: ''; position: absolute; top: -14px; left: 4px; width: 14px; height: 14px; background: #222; border: 1px solid #000; border-bottom: 2px solid #555; }
-
         .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; position: relative; }
-        .post-time { font-size: 10px; color: #888; margin-left: 8px; }
-        .delete-btn { position: absolute; top: 10px; right: 10px; font-size: 10px; }
-        .report-btn { position: absolute; bottom: 10px; right: 10px; font-size: 9px; color: red; cursor: pointer; }
+        .report-btn { position: absolute; bottom: 5px; right: 10px; font-size: 9px; color: red; cursor: pointer; font-weight: bold; text-decoration: underline; }
     </style>
 </head>
-<body onfocus="resetNotificationDot()">
+<body>
 
 <header>
     <div>
@@ -66,21 +57,21 @@
 </header>
 
 <div id="announcement-banner"></div>
-<div id="notif-toast">New Message Received!</div>
+<div id="notif-toast">New Message!</div>
 
 <div class="main-wrapper">
     <div id="auth-view" style="text-align:center; padding:40px;">
-        <h2 style="color:#0055ff;">Login to Account</h2>
-        <input type="text" id="reg-user" placeholder="Username" style="display:block; margin:10px auto; padding:8px; width:220px;">
-        <input type="email" id="auth-email" placeholder="Email" style="display:block; margin:10px auto; padding:8px; width:220px;">
-        <input type="password" id="auth-pass" placeholder="Password" style="display:block; margin:10px auto; padding:8px; width:220px;">
+        <h2>Login to Legacy</h2>
+        <input type="text" id="reg-user" placeholder="Username" style="display:block; margin:10px auto; padding:8px;">
+        <input type="email" id="auth-email" placeholder="Email" style="display:block; margin:10px auto; padding:8px;">
+        <input type="password" id="auth-pass" placeholder="Password" style="display:block; margin:10px auto; padding:8px;">
         <button class="btn btn-submit" id="loginBtn">Login</button>
         <button class="btn" id="signupBtn">Sign Up</button>
     </div>
 
     <div id="logged-in-view" class="hidden">
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <div id="welcome-text" style="font-weight:bold;">Level: <span id="level-display">1</span></div>
+            <div style="font-weight:bold;">Level: <span id="level-display">1</span></div>
             <div>
                 <button class="btn" onclick="showView('forum-home')">Forum</button>
                 <button class="btn" id="myProfileBtn">My Profile</button>
@@ -90,44 +81,47 @@
         </div>
 
         <div id="admin-panel" class="hidden">
-            <h3 style="margin-top:0;">🛡️ Administration Panel</h3>
-            <div id="reports-box" style="background:#fff2f2; border:1px solid red; padding:5px; margin-bottom:10px; font-size:11px; max-height:100px; overflow-y:auto;">
-                <strong>Recent Reports:</strong><div id="report-list">No new reports.</div>
+            <h3 style="margin:0 0 10px 0;">🛡️ STAFF TOOLS</h3>
+            <div id="reports-box" style="background:#fff2f2; border:1px solid red; padding:8px; margin-bottom:10px; max-height:120px; overflow-y:auto;">
+                <strong>Recent Reports:</strong><div id="report-list">Loading...</div>
             </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div style="border:1px solid #ccc; padding:10px; background:#f9f9f9;">
-                    <strong>Mod Actions</strong><br>
-                    UID: <input type="text" id="target-uid" placeholder="Paste UID here"><br>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div>
+                    <strong>User Management</strong><br>
+                    <input type="text" id="target-uid" placeholder="Enter Target UID" style="width:90%;"><br>
                     <button class="btn btn-danger" id="applyBan">PERM BAN</button>
                     <button class="btn" id="applyUnban">UNBAN</button>
                 </div>
-                <div style="border:1px solid #ccc; padding:10px; background:#f9f9f9;">
-                    <strong>Rank Control</strong><br>
-                    <select id="rank-select"><option value="0">Player</option><option value="1">Moderator</option><option value="2">Administrator</option></select>
-                    <button class="btn btn-submit" id="applyRank">Update</button>
+                <div>
+                    <strong>Rank</strong><br>
+                    <select id="rank-select"><option value="0">Player</option><option value="1">Moderator</option><option value="2">Admin</option></select>
+                    <button class="btn btn-submit" id="applyRank">Set Rank</button>
                 </div>
-            </div>
-            <div style="margin-top:10px;">
-                <strong>Global Announcement</strong><br>
-                <input type="text" id="announcement-input" style="width:70%;">
-                <button class="btn btn-submit" id="postAnnouncement">Update</button>
+                <div>
+                    <strong>Global Banner</strong><br>
+                    <input type="text" id="announcement-input" placeholder="Banner text" style="width:90%;"><br>
+                    <button class="btn btn-submit" id="postAnnouncement">Update</button>
+                    <button class="btn" id="clearAnnouncement">Clear</button>
+                </div>
             </div>
         </div>
 
         <div id="forum-home">
             <div class="tabs">
-                <div class="tab active" onclick="setCategory('All')">All</div>
-                <div class="tab" onclick="setCategory('Help')">Help</div>
-                <div class="tab" onclick="setCategory('Feedback')">Feedback</div>
-                <div class="tab" onclick="setCategory('Bug Report')">Bug Report</div>
-                <div class="tab" onclick="setCategory('Debate')">Debate</div>
-                <input type="text" id="search-user" placeholder="Search User..." style="margin-left:auto; padding:2px;">
-                <button class="btn btn-submit" onclick="searchUser()">Go</button>
+                <div class="tab active" data-cat="All">All</div>
+                <div class="tab" data-cat="Help">Help</div>
+                <div class="tab" data-cat="Feedback">Feedback</div>
+                <div class="tab" data-cat="Bug Report">Bug Report</div>
+                <div class="tab" data-cat="Debate">Debate</div>
+                <div style="margin-left:auto;">
+                    <input type="text" id="search-user" placeholder="Find User..." style="padding:3px; font-size:11px;">
+                    <button class="btn btn-submit" id="searchBtn">Search</button>
+                </div>
             </div>
-            <textarea id="post-input" placeholder="Yapping session starts here..." style="width:100%; height: 50px; border:1px solid #888;"></textarea>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <select id="category-select" style="font-size:12px;">
-                    <option value="General">General</option>
+            <textarea id="post-input" placeholder="What's on your mind?" style="width:100%; height: 50px;"></textarea>
+            <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                <select id="category-select">
+                    <option value="General">General Category</option>
                     <option value="Help">Help</option>
                     <option value="Feedback">Feedback</option>
                     <option value="Bug Report">Bug Report</option>
@@ -139,36 +133,37 @@
         </div>
 
         <div id="profile-view" class="hidden">
-            <div id="profile-content" style="display:flex; background:white; padding:20px; border:1px solid #ccc; gap:30px; flex-wrap:wrap;">
-                <div id="profile-render" style="transform: scale(1.4); margin: 20px;"></div>
-                <div style="flex-grow: 1; min-width:300px;">
-                    <h2 id="view-username">User</h2>
-                    <div id="view-badge-container"></div>
-                    <div id="view-id" style="font-size: 10px; color:#666;">UID: 0</div>
-                    <p id="view-bio" style="background:#eee; padding:10px; border-left:4px solid #0055ff;">...</p>
-                    <div id="social-actions">
+            <div style="display:flex; background:white; padding:20px; border:1px solid #ccc; gap:30px;">
+                <div id="profile-render"></div>
+                <div style="flex-grow: 1;">
+                    <h2 id="view-username" style="margin:0;">User</h2>
+                    <div id="view-badge-container" style="margin-bottom:10px;"></div>
+                    <div id="view-id" style="font-size: 10px; color:#999; margin-bottom:10px;">UID: 0</div>
+                    <p id="view-bio" style="background:#f0f0f0; padding:10px; border:1px solid #ddd;">...</p>
+                    
+                    <div id="profile-actions">
                         <button class="btn btn-submit" id="friendBtn">Add Friend</button>
                     </div>
-                    <hr>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">
                         <div>
-                            <strong>Inbox (PM)</strong>
-                            <div id="inbox-list" style="height:150px; overflow-y:auto; background:#f9f9f9; border:1px solid #ddd; font-size:11px; padding:5px;"></div>
-                            <input type="text" id="pm-input" placeholder="Send private message..." style="width:70%; font-size:11px;">
+                            <strong>Private Inbox</strong>
+                            <div id="inbox-list" style="height:120px; overflow-y:auto; background:#fff; border:1px solid #ccc; padding:5px; font-size:11px;"></div>
+                            <input type="text" id="pm-input" placeholder="Write message..." style="width:70%;">
                             <button class="btn btn-submit" id="sendPmBtn">Send</button>
                         </div>
                         <div>
-                            <strong>Friends</strong>
-                            <div id="friend-list" style="height:150px; overflow-y:auto; background:#f9f9f9; border:1px solid #ddd; font-size:11px; padding:5px;"></div>
-                            <div id="request-list"></div>
+                            <strong>Friend List</strong>
+                            <div id="friend-list" style="height:120px; overflow-y:auto; background:#fff; border:1px solid #ccc; padding:5px; font-size:11px;"></div>
                         </div>
                     </div>
+
                     <div id="customizer-box" class="hidden">
                         <hr>
-                        Bio: <input type="text" id="edit-bio" maxlength="100"><br>
-                        Colors: Head <input type="color" id="color-h"> Torso <input type="color" id="color-t"> Legs <input type="color" id="color-l">
+                        Bio: <input type="text" id="edit-bio" style="width:100%;"><br>
                         Hat: <select id="hat-select"><option value="none">None</option><option value="domino">Domino</option><option value="tophat">Top Hat</option></select>
-                        <button class="btn btn-submit" id="saveProfile">Update Profile</button>
+                        Colors: <input type="color" id="color-h"> <input type="color" id="color-t"> <input type="color" id="color-l">
+                        <button class="btn btn-submit" id="saveProfile">Save Changes</button>
                     </div>
                 </div>
             </div>
@@ -198,6 +193,7 @@
     let selectedCategory = 'All';
     let currentViewingUid = "";
 
+    // HELPERS
     const getBadge = (lvl) => {
         if (lvl >= 20) return '<span class="badge badge-20">The OG</span>';
         if (lvl >= 15) return '<span class="badge badge-15">The best former player ever.</span>';
@@ -212,25 +208,47 @@
         setTimeout(() => toast.classList.remove('show'), 5000);
     };
 
+    function createAvatarHTML(colors, hat) {
+        let hatHtml = (hat === 'domino') ? `<div style="width:24px;height:6px;background:#333;position:absolute;top:-6px;left:-2px;border:1px solid #000;z-index:10;"></div>` : (hat === 'tophat' ? `<div style="width:24px;height:14px;background:#222;position:absolute;top:-14px;left:-2px;border:1px solid #000;z-index:10;"></div>` : '');
+        const c = colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
+        return `<div class="avatar-frame">
+            <div class="char-head" style="background:${c.h}">${hatHtml}</div>
+            <div class="char-torso" style="background:${c.t}"><div class="char-arm arm-l" style="background:${c.h}"></div><div class="char-arm arm-r" style="background:${c.h}"></div></div>
+            <div style="display:flex;"><div class="char-leg" style="background:${c.l}"></div><div class="char-leg" style="background:${c.l}"></div></div>
+        </div>`;
+    }
+
+    // AUTH STATE
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             onValue(ref(db, `users/${user.uid}`), (snap) => {
                 const data = snap.val();
                 if(data?.banned) { signOut(auth).then(()=>location.reload()); return; }
                 currentUserRank = data?.rank || 0;
-                const lvl = Math.floor((data.posts || 0) / 5) + 1;
-                document.getElementById('level-display').innerText = lvl;
-                document.getElementById('rank-indicator').innerText = ["Player", "Moderator", "Administrator"][currentUserRank];
-                if(currentUserRank >= 1) {
-                    document.getElementById('adminBtn').classList.remove('hidden');
-                    onValue(ref(db, 'reports'), (s) => {
-                        const list = document.getElementById('report-list'); list.innerHTML = "";
-                        s.forEach(c => { list.innerHTML += `<div>[${c.val().from}] reported [${c.val().targetUID}]: ${c.val().msg}</div>`; });
-                    });
-                }
+                document.getElementById('level-display').innerText = Math.floor((data.posts || 0) / 5) + 1;
+                document.getElementById('rank-indicator').innerText = ["PLAYER", "MODERATOR", "ADMINISTRATOR"][currentUserRank];
+                if(currentUserRank >= 1) document.getElementById('adminBtn').classList.remove('hidden');
                 document.getElementById('user-display').innerText = "Hello, " + data.username;
             });
 
+            // Admin: Listen for Reports
+            onValue(ref(db, 'reports'), async (s) => {
+                const list = document.getElementById('report-list'); list.innerHTML = "";
+                if(!s.exists()) list.innerHTML = "No reports.";
+                s.forEach(c => {
+                    const r = c.val();
+                    list.innerHTML += `<div style="border-bottom:1px solid #ccc; margin-bottom:4px;"><b>${r.reporterName}</b> reported <b>${r.targetName}</b> (${r.targetUID}): "${r.reason}"</div>`;
+                });
+            });
+
+            // Global Banner
+            onValue(ref(db, 'announcement'), (s) => {
+                const b = document.getElementById('announcement-banner');
+                if(s.exists() && s.val() !== "") { b.innerText = s.val(); b.style.display = "block"; } 
+                else { b.style.display = "none"; }
+            });
+
+            // Inbox Notification Listener
             onValue(ref(db, `inbox/${user.uid}`), (snap) => {
                 if(snap.exists()) showNotif("You have a new message in your Inbox!");
             });
@@ -241,121 +259,179 @@
         }
     });
 
+    // FORUM ENGINE
     const renderForum = () => {
         onValue(ref(db, 'threads'), async (s) => {
             const display = document.getElementById('thread-display'); display.innerHTML = "";
             const usersSnap = await get(child(ref(db), 'users'));
             const allUsers = usersSnap.val() || {};
+            
             s.forEach(c => {
                 const p = c.val();
                 if (selectedCategory !== 'All' && p.category !== selectedCategory) return;
-                const author = allUsers[p.uid] || {};
+                const author = allUsers[p.uid] || {username: "Unknown"};
                 const lvl = Math.floor((author.posts || 0) / 5) + 1;
                 const div = document.createElement('div'); div.className = 'thread-row';
                 div.innerHTML = `${createAvatarHTML(author.colors, author.hat)}
                     <div style="margin-left:20px; flex-grow:1;">
-                        <strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${author.username}</strong> 
+                        <strong style="color:#0055ff; cursor:pointer;" onclick="window.loadProfile('${p.uid}')">${author.username}</strong> 
                         ${getBadge(lvl)} <span style="font-size:9px; color:#666;">[${p.category || 'General'}]</span>
-                        <br>${p.message}
+                        <div style="margin-top:5px; font-size:13px;">${p.message}</div>
                     </div>
-                    <div class="report-btn" onclick="reportUser('${p.uid}', '${p.message}')">REPORT</div>`;
+                    <div class="report-btn" onclick="window.reportUser('${p.uid}', '${author.username}')">REPORT USER</div>`;
                 display.prepend(div);
             });
         });
     };
 
-    window.setCategory = (cat) => {
-        selectedCategory = cat;
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
-        renderForum();
-    };
-
-    window.reportUser = (uid, msg) => {
-        if(confirm("Report this user to staff?")) push(ref(db, 'reports'), { targetUID: uid, msg: msg, from: auth.currentUser.uid });
-    };
-
-    document.getElementById('submitPost').onclick = () => {
-        const msg = document.getElementById('post-input').value;
-        const cat = document.getElementById('category-select').value;
-        if(!msg.trim()) return;
-        const userRef = ref(db, `users/${auth.currentUser.uid}`);
-        get(userRef).then(s => {
-            const currentPosts = s.val().posts || 0;
-            update(userRef, { posts: currentPosts + 1 });
-            push(ref(db, 'threads'), { message: msg, category: cat, uid: auth.currentUser.uid, timestamp: Date.now() });
-            document.getElementById('post-input').value = "";
+    // SEARCH & CATEGORY LOGIC
+    document.getElementById('searchBtn').onclick = async () => {
+        const query = document.getElementById('search-user').value.toLowerCase();
+        const usersSnap = await get(child(ref(db), 'users'));
+        let found = false;
+        usersSnap.forEach(u => {
+            if(u.val().username && u.val().username.toLowerCase() === query) {
+                window.loadProfile(u.key);
+                found = true;
+            }
         });
+        if(!found) alert("User not found!");
     };
 
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.onclick = () => {
+            selectedCategory = tab.getAttribute('data-cat');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            renderForum();
+        };
+    });
+
+    // REPORT SYSTEM
+    window.reportUser = async (uid, username) => {
+        const reason = prompt(`Reason for reporting ${username}:`);
+        if(!reason) return;
+        const myName = (await get(child(ref(db), `users/${auth.currentUser.uid}`))).val().username;
+        push(ref(db, 'reports'), {
+            targetUID: uid,
+            targetName: username,
+            reporterName: myName,
+            reason: reason,
+            timestamp: Date.now()
+        });
+        alert("Report sent to staff.");
+    };
+
+    // PROFILE & FRIENDS
     window.loadProfile = async (uid) => {
         currentViewingUid = uid;
         showView('profile-view');
         const snap = await get(child(ref(db), `users/${uid}`));
         const d = snap.val();
         const lvl = Math.floor((d.posts || 0) / 5) + 1;
+        
         document.getElementById('view-username').innerText = d.username;
         document.getElementById('view-badge-container').innerHTML = getBadge(lvl);
         document.getElementById('view-id').innerText = "UID: " + uid;
-        document.getElementById('view-bio').innerText = d.bio || "No bio yet.";
+        document.getElementById('view-bio').innerText = d.bio || "No bio set.";
         document.getElementById('profile-render').innerHTML = createAvatarHTML(d.colors, d.hat);
         
-        // Load PMs
-        onValue(ref(db, `inbox/${auth.currentUser.uid}`), (s) => {
+        // Friend Button Toggle
+        const friendBtn = document.getElementById('friendBtn');
+        const reqSnap = await get(child(ref(db), `friends/${uid}/${auth.currentUser.uid}`));
+        if(reqSnap.exists()) {
+            friendBtn.innerText = "Cancel Request";
+            friendBtn.className = "btn btn-danger";
+        } else {
+            friendBtn.innerText = "Add Friend";
+            friendBtn.className = "btn btn-submit";
+        }
+
+        // Inbox Listener for PMs
+        onValue(ref(db, `inbox/${uid}`), (s) => {
             const list = document.getElementById('inbox-list'); list.innerHTML = "";
-            s.forEach(m => { list.innerHTML += `<div><b>${m.val().fromName}:</b> ${m.val().msg}</div>`; });
+            s.forEach(m => { list.innerHTML += `<div><b>${m.val().from}:</b> ${m.val().msg}</div>`; });
         });
 
         document.getElementById('customizer-box').classList.toggle('hidden', uid !== auth.currentUser.uid);
-        document.getElementById('social-actions').classList.toggle('hidden', uid === auth.currentUser.uid);
+        document.getElementById('profile-actions').classList.toggle('hidden', uid === auth.currentUser.uid);
+    };
+
+    document.getElementById('friendBtn').onclick = async () => {
+        const btn = document.getElementById('friendBtn');
+        if(btn.innerText === "Add Friend") {
+            set(ref(db, `friends/${currentViewingUid}/${auth.currentUser.uid}`), { status: "pending" });
+            btn.innerText = "Cancel Request";
+            btn.className = "btn btn-danger";
+        } else {
+            remove(ref(db, `friends/${currentViewingUid}/${auth.currentUser.uid}`));
+            btn.innerText = "Add Friend";
+            btn.className = "btn btn-submit";
+        }
     };
 
     document.getElementById('sendPmBtn').onclick = async () => {
         const msg = document.getElementById('pm-input').value;
+        if(!msg.trim()) return;
         const myName = (await get(child(ref(db), `users/${auth.currentUser.uid}`))).val().username;
-        if(msg.trim()) {
-            push(ref(db, `inbox/${currentViewingUid}`), { fromName: myName, msg: msg });
-            document.getElementById('pm-input').value = "";
-            alert("Message sent!");
-        }
+        push(ref(db, `inbox/${currentViewingUid}`), { from: myName, msg: msg });
+        document.getElementById('pm-input').value = "";
+        alert("Message Sent!");
     };
 
-    window.searchUser = async () => {
-        const name = document.getElementById('search-user').value.toLowerCase();
-        const usersSnap = await get(child(ref(db), 'users'));
-        usersSnap.forEach(u => {
-            if(u.val().username.toLowerCase() === name) loadProfile(u.key);
+    // ADMIN ACTIONS
+    document.getElementById('applyBan').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        if(uid) update(ref(db, `users/${uid}`), { banned: true }).then(() => alert("User Banned"));
+    };
+    document.getElementById('applyRank').onclick = () => {
+        const uid = document.getElementById('target-uid').value;
+        const r = parseInt(document.getElementById('rank-select').value);
+        if(uid) update(ref(db, `users/${uid}`), { rank: r }).then(() => alert("Rank Updated"));
+    };
+    document.getElementById('postAnnouncement').onclick = () => {
+        set(ref(db, 'announcement'), document.getElementById('announcement-input').value);
+    };
+    document.getElementById('clearAnnouncement').onclick = () => set(ref(db, 'announcement'), "");
+
+    // GLOBAL ACTIONS
+    document.getElementById('submitPost').onclick = () => {
+        const msg = document.getElementById('post-input').value;
+        const cat = document.getElementById('category-select').value;
+        if(!msg.trim()) return;
+        const userRef = ref(db, `users/${auth.currentUser.uid}`);
+        get(userRef).then(s => {
+            update(userRef, { posts: (s.val().posts || 0) + 1 });
+            push(ref(db, 'threads'), { message: msg, category: cat, uid: auth.currentUser.uid, timestamp: Date.now() });
+            document.getElementById('post-input').value = "";
         });
     };
 
-    window.createAvatarHTML = (colors, hat) => {
-        let hatHtml = (hat === 'domino') ? `<div class="hat-domino-css"></div>` : (hat === 'tophat' ? `<div class="hat-tophat-css"></div>` : '');
-        const c = colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
-        return `<div class="avatar-frame">
-            <div class="char-head" style="background:${c.h}">${hatHtml}</div>
-            <div class="char-torso" style="background:${c.t}"><div class="char-arm arm-l" style="background:${c.h}"></div><div class="char-arm arm-r" style="background:${c.h}"></div></div>
-            <div style="display:flex;"><div class="char-leg" style="background:${c.l}"></div><div class="char-leg" style="background:${c.l}"></div></div>
-        </div>`;
+    document.getElementById('saveProfile').onclick = () => {
+        update(ref(db, `users/${auth.currentUser.uid}`), {
+            bio: document.getElementById('edit-bio').value,
+            hat: document.getElementById('hat-select').value,
+            colors: { h: document.getElementById('color-h').value, t: document.getElementById('color-t').value, l: document.getElementById('color-l').value }
+        }).then(() => window.loadProfile(auth.currentUser.uid));
     };
 
-    // Original logic for auth/admin
+    window.showView = (id) => {
+        document.getElementById('forum-home').classList.add('hidden');
+        document.getElementById('profile-view').classList.add('hidden');
+        document.getElementById(id).classList.remove('hidden');
+    };
+
     document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
     document.getElementById('signupBtn').onclick = () => {
         const u = document.getElementById('reg-user').value;
         createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then((r) => {
-            set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, posts: 0, banned: false, bio: 'Legacy Member', colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
+            set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, posts: 0, banned: false, bio: 'New Member', colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
         });
     };
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
+    document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
     document.getElementById('adminBtn').onclick = () => document.getElementById('admin-panel').classList.toggle('hidden');
-    document.getElementById('applyBan').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { banned: true });
-    window.showView = (id) => { 
-        document.getElementById('forum-home').classList.add('hidden'); 
-        document.getElementById('profile-view').classList.add('hidden'); 
-        document.getElementById(id).classList.remove('hidden'); 
-    };
-    document.getElementById('myProfileBtn').onclick = () => loadProfile(auth.currentUser.uid);
-    window.resetNotificationDot = () => {}; // Helper
+
 </script>
 </body>
 </html>
