@@ -7,6 +7,7 @@
     <style>
         body { font-family: "MS Sans Serif", Geneva, sans-serif; margin: 0; background: #ccc url('https://wallpapercave.com/wp/wp9084955.jpg') fixed center; background-size: cover; }
         header { background: #0055ff; color: white; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #0033aa; }
+        .user-info-bar { font-size: 11px; color: #eee; margin-top: 4px; }
         #announcement-container { background: #ff9800; border-bottom: 2px solid #cc7a00; color: #fff; padding: 12px; font-weight: bold; text-align: center; display: none; font-size: 14px; position: relative; z-index: 100; }
         .main-wrapper { width: 950px; margin: 20px auto; background: rgba(238, 238, 238, 0.95); border: 1px solid #888; min-height: 600px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.4); }
         .hidden { display: none !important; }
@@ -32,6 +33,7 @@
 
         .thread-row { border-bottom: 1px solid #ddd; padding: 12px; background: #fff; display: flex; align-items: center; position: relative; }
         .post-time { font-size: 10px; color: #888; margin-left: 8px; font-weight: normal; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 2px 6px; }
         #profile-404 { text-align: center; padding: 60px 20px; background: white; border: 1px solid #ccc; }
         .ceo-glow { outline: 3px solid gold !important; box-shadow: 0 0 15px gold; }
     </style>
@@ -39,7 +41,10 @@
 <body onfocus="resetNotificationDot()">
 
 <header>
-    <div style="font-weight:bold; font-size: 18px;">The Robloxians</div>
+    <div>
+        <div style="font-weight:bold; font-size: 18px;">The Robloxians</div>
+        <div class="user-info-bar" id="email-display">Not Signed In</div>
+    </div>
     <div id="user-display">Guest</div>
 </header>
 
@@ -68,18 +73,18 @@
 
         <div id="admin-panel" class="hidden" style="border: 2px solid #0055ff; padding: 15px; background: #fff; margin-bottom: 15px;">
             <h3 style="margin:0 0 10px 0;">Staff Tools</h3>
-            <strong>Target UID:</strong> <input type="text" id="target-uid" class="auto-uid-field" placeholder="Paste UID here"><br><br>
+            <strong>Target UID:</strong> <input type="text" id="target-uid" class="auto-uid-field" placeholder="Paste UID here">
+            <br><br>
             <strong>Moderation:</strong><br>
             Reason: <input type="text" id="ban-reason" placeholder="Rule Violation">
-            Limit: <select id="ban-limit"><option value="1">1 Day</option><option value="7">7 Days</option><option value="999">Permanent</option></select>
             <button class="btn btn-danger" id="applyBan">Ban User</button>
-            <button class="btn" id="applyUnban">Unban User</button>
+            <button class="btn" id="applyUnban">Unban</button>
             <hr>
-            <strong>Permissions:</strong><br>
-            Rank: <select id="rank-select"><option value="0">Player</option><option value="1">Mod</option><option value="2">Admin</option></select>
-            <button class="btn btn-submit" id="applyRank">Update Rank</button>
+            <strong>Rank:</strong> 
+            <select id="rank-select"><option value="0">Player</option><option value="1">Mod</option><option value="2">Admin</option></select>
+            <button class="btn btn-submit" id="applyRank">Set Rank</button>
             <hr>
-            <strong>Global Banner:</strong> <input type="text" id="announce-text" style="width:50%;"> <button class="btn" id="postAnnounce">Post</button>
+            <strong>Banner:</strong> <input type="text" id="announce-text" style="width:50%;"> <button class="btn" id="postAnnounce">Post</button>
         </div>
 
         <div id="forum-home">
@@ -91,26 +96,26 @@
         <div id="profile-view" class="hidden">
             <div id="profile-404" class="hidden">
                 <h1 style="color:#cc0000; font-size: 48px; margin:0;">404</h1>
-                <p style="font-size: 18px; font-weight: bold;">You can't see this player profile.</p>
-                <button class="btn btn-submit" onclick="showView('forum-home')">Back Home</button>
+                <p>Profile Restricted.</p>
+                <button class="btn btn-submit" onclick="showView('forum-home')">Home</button>
             </div>
             <div id="profile-content" style="display:flex; background:white; padding:20px; border:1px solid #ccc; gap:30px;">
                 <div id="profile-render" style="transform: scale(1.4); margin: 20px;"></div>
                 <div style="flex-grow: 1;">
                     <h2 id="view-username" style="margin:0;">User</h2>
-                    <div id="view-id" style="font-size: 10px; color:#666; margin-bottom: 10px;">UID: 0</div>
+                    <div id="view-id" style="font-size: 10px; color:#666;">UID: 0</div>
                     <p id="view-bio" style="border-left: 3px solid #0055ff; padding: 10px; background: #f9f9f9; min-height: 40px;">Bio...</p>
                     
                     <div id="customizer-box" class="hidden" style="margin-top:20px; border-top: 1px dashed #ccc; padding-top:10px;">
-                        <strong>Customize Character</strong><br><br>
+                        <strong>Customize</strong><br><br>
                         Bio: <input type="text" id="edit-bio" style="width:80%;"><br><br>
-                        Skin: <input type="color" id="color-h"> Torso: <input type="color" id="color-t"> Legs: <input type="color" id="color-l"><br><br>
+                        Colors: Head <input type="color" id="color-h"> Torso <input type="color" id="color-t"> Legs <input type="color" id="color-l"><br><br>
                         Hat: <select id="hat-select">
                             <option value="none">None</option>
-                            <option value="domino">Domino Crown (CSS)</option>
-                            <option value="tophat">Top Hat (CSS)</option>
+                            <option value="domino">Domino Crown</option>
+                            <option value="tophat">Top Hat</option>
                         </select>
-                        <button class="btn btn-submit" id="saveProfile" style="margin-left: 10px;">Save Changes</button>
+                        <button class="btn btn-submit" id="saveProfile">Save</button>
                     </div>
                 </div>
             </div>
@@ -140,44 +145,24 @@
     let firstLoad = true;
     let currentUserRank = 0;
 
-    // SAFE PLACEHOLDER DOT
     window.setNotificationDot = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 32; canvas.height = 32;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "#0055ff";
-        ctx.fillRect(0,0,32,32);
-        ctx.fillStyle = "white";
-        ctx.font = "bold 20px Arial";
-        ctx.fillText("TR", 2, 22);
-        ctx.beginPath(); ctx.arc(24, 8, 7, 0, 2 * Math.PI);
-        ctx.fillStyle = "red"; ctx.fill();
-        let link = document.querySelector("link[rel~='icon']");
-        if (!link) {
-            link = document.createElement('link');
-            link.rel = 'icon';
-            document.head.appendChild(link);
-        }
-        link.href = canvas.toDataURL();
+        const canvas = document.createElement('canvas'); canvas.width = 32; canvas.height = 32;
+        const ctx = canvas.getContext('2d'); ctx.fillStyle = "#0055ff"; ctx.fillRect(0,0,32,32);
+        ctx.fillStyle = "white"; ctx.font = "bold 20px Arial"; ctx.fillText("TR", 2, 22);
+        ctx.beginPath(); ctx.arc(24, 8, 7, 0, 2 * Math.PI); ctx.fillStyle = "red"; ctx.fill();
+        let link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+        link.rel = 'icon'; link.href = canvas.toDataURL(); document.head.appendChild(link);
     };
 
     window.resetNotificationDot = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 32; canvas.height = 32;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "#0055ff";
-        ctx.fillRect(0,0,32,32);
-        ctx.fillStyle = "white";
-        ctx.font = "bold 20px Arial";
-        ctx.fillText("TR", 2, 22);
-        let link = document.querySelector("link[rel~='icon']");
-        if(link) link.href = canvas.toDataURL();
+        const canvas = document.createElement('canvas'); canvas.width = 32; canvas.height = 32;
+        const ctx = canvas.getContext('2d'); ctx.fillStyle = "#0055ff"; ctx.fillRect(0,0,32,32);
+        ctx.fillStyle = "white"; ctx.font = "bold 20px Arial"; ctx.fillText("TR", 2, 22);
+        let link = document.querySelector("link[rel~='icon']"); if(link) link.href = canvas.toDataURL();
     };
 
     function createAvatarHTML(colors, isCEO, hat) {
-        let hatHtml = '';
-        if(hat === 'domino') hatHtml = `<div class="hat-domino-css"></div>`;
-        if(hat === 'tophat') hatHtml = `<div class="hat-tophat-css"></div>`;
+        let hatHtml = (hat === 'domino') ? `<div class="hat-domino-css"></div>` : (hat === 'tophat' ? `<div class="hat-tophat-css"></div>` : '');
         const c = colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
         return `<div class="avatar-frame ${isCEO ? 'ceo-glow' : ''}">
             <div class="char-head" style="background:${c.h}">${hatHtml}</div>
@@ -188,17 +173,16 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            document.getElementById('email-display').innerText = user.email;
             onValue(ref(db, `users/${user.uid}`), (snap) => {
                 const data = snap.val();
-                if(data?.banned) {
-                    alert(`BANNED: ${data.banReason}`);
-                    signOut(auth).then(()=>location.reload()); return;
-                }
+                if(data?.banned) { alert(`Banned: ${data.banReason}`); signOut(auth).then(()=>location.reload()); return; }
                 currentUserRank = data?.rank || 0;
                 if(currentUserRank >= 1) document.getElementById('adminBtn').classList.remove('hidden');
                 document.getElementById('welcome-text').innerText = "Hello, " + data.username;
                 document.getElementById('user-display').innerText = data.username;
             });
+
             onValue(ref(db, 'threads'), async (s) => {
                 if (!firstLoad && document.hidden) setNotificationDot();
                 firstLoad = false;
@@ -209,12 +193,16 @@
                     const p = c.val(); const author = allUsers[p.uid] || {};
                     const div = document.createElement('div');
                     div.className = 'thread-row';
+                    // DELETE LOGIC: Author OR Staff can delete
+                    const canDelete = (p.uid === auth.currentUser.uid || currentUserRank >= 1);
+                    const delBtn = canDelete ? `<button class="btn btn-danger delete-btn" onclick="deletePost('${c.key}')">Delete</button>` : '';
+                    
                     div.innerHTML = `${createAvatarHTML(author.colors, p.uid === CREATOR_UID, author.hat)}
-                        <div style="margin-left:20px;">
+                        <div style="margin-left:20px; flex-grow:1;">
                             <strong style="color:#0055ff; cursor:pointer;" onclick="loadProfile('${p.uid}')">${author.banned ? '[Content Deleted]' : author.username}</strong>
                             <span class="post-time">${p.timestamp ? new Date(p.timestamp).toLocaleString() : ""}</span><br>
                             ${author.banned ? '[Content Deleted]' : p.message}
-                        </div>`;
+                        </div>${delBtn}`;
                     display.prepend(div);
                 });
             });
@@ -222,6 +210,10 @@
             document.getElementById('logged-in-view').classList.remove('hidden');
         }
     });
+
+    window.deletePost = (key) => {
+        if(confirm("Delete this post?")) remove(ref(db, `threads/${key}`));
+    };
 
     window.loadProfile = async (uid) => {
         showView('profile-view');
@@ -249,9 +241,7 @@
     };
 
     document.getElementById('applyBan').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { banned: true, banReason: document.getElementById('ban-reason').value });
-    document.getElementById('applyUnban').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { banned: false });
     document.getElementById('applyRank').onclick = () => update(ref(db, `users/${document.getElementById('target-uid').value}`), { rank: parseInt(document.getElementById('rank-select').value) });
-    document.getElementById('postAnnounce').onclick = () => set(ref(db, 'announcement/text'), document.getElementById('announce-text').value);
     document.getElementById('saveProfile').onclick = () => {
         update(ref(db, `users/${auth.currentUser.uid}`), { 
             bio: document.getElementById('edit-bio').value, 
