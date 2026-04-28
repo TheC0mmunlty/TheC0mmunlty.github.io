@@ -21,19 +21,28 @@
         /* AVATAR SYSTEM */
         .avatar-frame { width: 80px; height: 110px; position: relative; background: #eee; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; margin: 10px; }
         .char-head { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; position: relative; margin-top: 10px; }
+        
+        /* CSS RECREATED GOLD CROWN */
+        .hat-goldcrown { 
+            position: absolute; top: -12px; left: -2px; width: 26px; height: 12px; 
+            background: #ffd700; z-index: 12; border: 1px solid #b8860b;
+            clip-path: polygon(0% 100%, 0% 0%, 25% 50%, 50% 0%, 75% 50%, 100% 0%, 100% 100%);
+        }
+        .hat-goldcrown::after {
+            content: ''; position: absolute; bottom: -2px; left: -1px; width: 26px; height: 3px; background: #b8860b;
+        }
+
         .hat-domino { position: absolute; top: -14px; left: -9px; width: 40px; height: 28px; z-index: 10; pointer-events: none; }
         .hat-tophat { position: absolute; top: -16px; left: 1px; width: 20px; height: 16px; background: #222; z-index: 10; border-bottom: 2px solid #444; }
         .hat-tophat::before { content: ''; position: absolute; bottom: -2px; left: -4px; width: 28px; height: 4px; background: #222; border-radius: 2px; }
         
-        /* OWNER ONLY GOLD CROWN (Using Provided Image) */
-        .hat-goldcrown { position: absolute; top: -18px; left: -5px; width: 32px; height: 32px; z-index: 12; pointer-events: none; }
-
         .char-torso { width: 44px; height: 44px; border: 1px solid rgba(0,0,0,0.2); position: relative; }
-        .tshirt-layer { position: absolute; top: 8px; left: 7px; width: 30px; height: 30px; object-fit: contain; z-index: 2; pointer-events: none; }
+        .tshirt-layer { position: absolute; top: 2px; left: 2px; width: 40px; height: 40px; object-fit: contain; z-index: 2; pointer-events: none; }
         .char-arm { width: 16px; height: 42px; border: 1px solid rgba(0,0,0,0.2); position: absolute; top: 0; }
         .arm-l { left: -17px; } .arm-r { right: -17px; }
         .char-leg-set { display: flex; }
         .char-leg { width: 20px; height: 44px; border: 1px solid rgba(0,0,0,0.2); }
+        
         .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 20px; }
         .market-card { background: white; border: 1px solid #999; padding: 10px; text-align: center; font-size: 11px; }
         .row { border-bottom: 1px solid #ddd; padding: 15px; background: #fff; display: flex; align-items: center; position: relative; }
@@ -60,7 +69,6 @@
         <input type="password" id="auth-pass" placeholder="Password" style="display:block; margin:10px auto; padding:8px; width:250px;">
         <button class="btn btn-yellow" id="loginBtn">Login</button>
         <button class="btn" id="signupBtn">Sign Up</button>
-        <div id="auth-error" style="color:red; margin-top:10px;"></div>
     </div>
 
     <div id="logged-in-view" class="hidden">
@@ -78,22 +86,17 @@
         <div id="forum-home">
             <textarea id="post-input" placeholder="Say something..." style="width:100%; height: 60px;"></textarea>
             <button class="btn btn-yellow" id="submitPost" style="width:100%; margin-top:5px;">Post</button>
-            <div id="thread-display" style="margin-top: 20px;"></div>
+            <div id="thread-display"></div>
         </div>
 
         <div id="market-view" class="hidden">
-            <h3>Classic T-Shirt Marketplace</h3>
+            <h3>Marketplace</h3>
             <div id="market-list" class="market-grid"></div>
         </div>
 
         <div id="inbox-view" class="hidden">
             <h3>Messages</h3>
-            <div style="margin-bottom:10px;">
-                <input type="text" id="msg-to-uid" placeholder="Recipient UID" style="width:150px;">
-                <input type="text" id="msg-content" placeholder="Message content" style="width:300px;">
-                <button class="btn btn-yellow" id="sendMsgBtn">Send Private Message</button>
-            </div>
-            <div id="message-display" style="background:#fff; border:1px solid #999; min-height:200px; padding:10px;"></div>
+            <div id="message-display"></div>
         </div>
 
         <div id="profile-view" class="hidden">
@@ -102,16 +105,16 @@
                 <div style="flex-grow: 1;">
                     <h2><span id="v-name"></span><span id="v-check"></span> <span id="v-id" style="color:#888; font-size:12px;"></span></h2>
                     
-                    <div id="uploader-section">
+                    <div id="uploader-section" class="hidden">
                         <hr>
-                        <strong>Upload T-Shirt (Marketplace)</strong><br>
-                        <input type="text" id="tshirt-url-input" placeholder="Paste Image URL" style="width:200px; padding:5px;">
-                        <button class="btn btn-yellow" id="upload-btn">Upload delays 5 sec</button>
+                        <strong>Upload T-Shirt</strong><br>
+                        <input type="file" id="tshirt-file-input" accept="image/*" style="font-size:11px; margin: 5px 0;"><br>
+                        <button class="btn btn-yellow" id="upload-btn">Upload to Market (5s)</button>
                     </div>
 
                     <div id="my-settings" class="hidden">
                         <hr>
-                        <strong>Appearance</strong><br>
+                        <strong>Customization</strong><br>
                         Hat: <select id="h-select">
                             <option value="none">None</option>
                             <option value="domino">Domino Crown</option>
@@ -119,8 +122,8 @@
                             <option id="gold-crown-opt" value="goldcrown" class="hidden">Gold Crown (OWNER)</option>
                         </select><br>
                         Colors: <input type="color" id="c-head"> <input type="color" id="c-torso"> <input type="color" id="c-leg"><br>
-                        <strong>T-Shirt:</strong> <button class="btn btn-red" onclick="unequipShirt()">Unequip Shirt</button><br>
-                        <button class="btn btn-yellow" id="saveProfile" style="margin-top:10px;">Save Changes</button>
+                        <button class="btn btn-red" onclick="unequipShirt()" style="margin-top:5px;">Unequip T-Shirt</button><br>
+                        <button class="btn btn-yellow" id="saveProfile" style="margin-top:10px;">Save Character</button>
                     </div>
                 </div>
             </div>
@@ -128,20 +131,10 @@
 
         <div id="admin-view" class="hidden">
             <div style="border: 2px solid #aa0000; padding: 20px; background: #fff;">
-                <h2 style="color:#aa0000;">Staff Control Panel</h2>
-                <input type="text" id="target-uid" placeholder="User UID" style="width: 250px; padding: 5px;"><br><br>
-                <input type="text" id="ban-reason" placeholder="Ban Reason" style="width: 200px; padding: 5px;">
-                <input type="number" id="ban-limit" placeholder="Ban Limit (Days)" style="width: 100px; padding: 5px;"><br><br>
-                <button class="btn btn-red" onclick="banUser()">BAN USER</button>
-                <button class="btn btn-yellow" onclick="toggleVerified()">TOGGLE VERIFIED</button>
-                <div id="rank-tools">
-                    <button class="btn" onclick="setRank(2)">PROMOTE TO ADMIN</button>
-                    <button class="btn" onclick="setRank(1)">PROMOTE TO MODERATOR</button>
-                </div>
-                <hr>
-                <strong>Global Banner:</strong><br>
-                <input type="text" id="banner-text" placeholder="Banner message..." style="width:300px;">
-                <button class="btn btn-yellow" onclick="setBanner()">Set Global Banner</button>
+                <h2 style="color:#aa0000;">Staff Panel</h2>
+                <input type="text" id="target-uid" placeholder="User UID"><br>
+                <button class="btn btn-red" onclick="banUser()">BAN</button>
+                <button class="btn btn-yellow" onclick="toggleVerified()">VERIFY</button>
             </div>
         </div>
     </div>
@@ -160,7 +153,7 @@
         let h = '';
         if(hat === 'domino') h = `<img src="https://i.imgur.com/e2aPq6G.png" class="hat-domino">`;
         else if(hat === 'tophat') h = `<div class="hat-tophat"></div>`;
-        else if(hat === 'goldcrown') h = `<img src="https://raw.githubusercontent.com/fahid001/assets/main/Golden_Crown.webp" class="hat-goldcrown">`; 
+        else if(hat === 'goldcrown') h = `<div class="hat-goldcrown"></div>`; 
         
         const c = colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
         return `<div class="avatar-frame">
@@ -179,87 +172,42 @@
 
     onAuthStateChanged(auth, (u) => {
         if (u) {
-            // OWNER CHECK
-            if(u.email === "fahid.001x@gmail.com") { 
-                document.getElementById('gold-crown-opt').classList.remove('hidden');
-            }
+            if(u.email === "fahid.001x@gmail.com") document.getElementById('gold-crown-opt').classList.remove('hidden');
             onValue(ref(db, `users/${u.uid}`), (s) => {
                 me = s.val() || {};
-                if(me.isBanned) {
-                    alert(`BANNED: ${me.banReason}\nLimit: ${me.banLimit} days`);
-                    signOut(auth); location.reload(); return;
-                }
+                if(me.isBanned) { signOut(auth); location.reload(); return; }
                 document.getElementById('user-display').innerText = "Logged in as: " + (me.username || "Guest");
                 document.getElementById('adminBtn').classList.toggle('hidden', (me.rank || 0) < 1);
-                document.getElementById('rank-tools').classList.toggle('hidden', me.rank < 2);
                 const ind = document.getElementById('rank-indicator');
-                ind.innerText = me.rank === 2 ? "ADMIN" : (me.rank === 1 ? "MOD" : "UNRANKED");
-                ind.style.color = me.rank === 2 ? "#ff4444" : (me.rank === 1 ? "#00ff00" : "#ffd700");
-                renderForum(); renderMarket(); renderMessages();
-            });
-            onValue(ref(db, 'settings/banner'), (s) => {
-                const b = document.getElementById('announcement-banner');
-                if(s.val()) { b.innerText = s.val(); b.style.display = 'block'; }
-                else b.style.display = 'none';
+                ind.innerText = me.rank === 2 ? "ADMIN" : (me.rank === 1 ? "MOD" : "USER");
+                renderForum(); renderMarket();
             });
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('logged-in-view').classList.remove('hidden');
         }
     });
 
-    const renderForum = () => {
-        onValue(ref(db, 'threads'), async (s) => {
-            const display = document.getElementById('thread-display'); display.innerHTML = "";
-            const users = (await get(child(ref(db), 'users'))).val() || {};
-            s.forEach(c => {
-                const p = c.val(); const author = users[p.uid] || {username: "Unknown", rank: 0};
-                const div = document.createElement('div'); div.className = 'row';
-                let delBtn = '';
-                if(me.rank >= 1 && author.rank < me.rank) {
-                    delBtn = `<span class="delete-btn" onclick="deletePost('${c.key}')">[DELETE]</span>`;
-                }
-                div.innerHTML = `${delBtn}
-                    <div style="transform:scale(0.5); width:40px;">${draw(author.colors, author.hat, author.equipped)}</div>
-                    <div style="margin-left:20px; flex-grow:1;">
-                        <strong onclick="window.loadProfile('${p.uid}')" style="color:#0055ff; cursor:pointer;">${author.username}${author.verified?'<span class="verified-badge"></span>':''}</strong>
-                        <div style="font-size:13px;">${p.msg}</div>
-                    </div>`;
-                display.prepend(div);
-            });
-        });
-    };
-
-    window.deletePost = (key) => { if(confirm("Staff: Remove this post?")) remove(ref(db, `threads/${key}`)); };
-
-    document.getElementById('sendMsgBtn').onclick = () => {
-        const to = document.getElementById('msg-to-uid').value;
-        const txt = document.getElementById('msg-content').value;
-        if(to && txt) {
-            push(ref(db, `msgs/${to}`), { from: me.username, msg: txt, fromUid: auth.currentUser.uid });
-            alert("Message Sent!");
-        }
-    };
-
-    function renderMessages() {
-        onValue(ref(db, `msgs/${auth.currentUser.uid}`), (s) => {
-            const display = document.getElementById('message-display'); display.innerHTML = "";
-            s.forEach(c => {
-                const m = c.val();
-                display.innerHTML += `<div style="border-bottom:1px solid #eee; padding:5px;"><strong>From ${m.from}:</strong> ${m.msg}</div>`;
-            });
-        });
-    }
-
+    // RESTORED OLD FILE UPLOADER LOGIC
     document.getElementById('upload-btn').onclick = () => {
-        const url = document.getElementById('tshirt-url-input').value;
-        if(!url) return alert("Enter a URL");
+        const file = document.getElementById('tshirt-file-input').files[0];
+        if(!file) return alert("Select a file first");
+        
+        const reader = new FileReader();
         document.getElementById('upload-btn').innerText = "Uploading...";
-        setTimeout(() => {
-            push(ref(db, 'marketplace'), { img: url, creator: me.username, uid: auth.currentUser.uid });
-            document.getElementById('upload-btn').innerText = "Upload delays 5 sec";
-            document.getElementById('tshirt-url-input').value = "";
-            alert("Sent to Marketplace!");
-        }, 5000);
+        
+        reader.onloadend = () => {
+            const base64String = reader.result;
+            setTimeout(() => {
+                push(ref(db, 'marketplace'), { 
+                    img: base64String, 
+                    creator: me.username, 
+                    uid: auth.currentUser.uid 
+                });
+                document.getElementById('upload-btn').innerText = "Upload to Market (5s)";
+                alert("T-Shirt Live!");
+            }, 5000);
+        };
+        reader.readAsDataURL(file);
     };
 
     window.buyItem = (url) => {
@@ -269,16 +217,34 @@
 
     window.unequipShirt = () => {
         update(ref(db, `users/${auth.currentUser.uid}`), { equipped: "" });
-        alert("Unequipped T-Shirt");
     };
 
     window.renderMarket = () => {
         onValue(ref(db, 'marketplace'), (s) => {
             const list = document.getElementById('market-list'); list.innerHTML = "";
             s.forEach(c => {
-                const item = c.val(); const div = document.createElement('div'); div.className = 'market-card';
+                const item = c.val();
+                const div = document.createElement('div'); div.className = 'market-card';
                 div.innerHTML = `<img src="${item.img}" style="width:60px; height:60px; object-fit:contain;"><br>By: ${item.creator}<br><button class="btn btn-yellow" onclick="buyItem('${item.img}')">EQUIP</button>`;
                 list.prepend(div);
+            });
+        });
+    };
+
+    const renderForum = () => {
+        onValue(ref(db, 'threads'), async (s) => {
+            const display = document.getElementById('thread-display'); display.innerHTML = "";
+            const users = (await get(child(ref(db), 'users'))).val() || {};
+            s.forEach(c => {
+                const p = c.val(); const author = users[p.uid] || {};
+                const div = document.createElement('div'); div.className = 'row';
+                div.innerHTML = `
+                    <div style="transform:scale(0.5); width:40px;">${draw(author.colors, author.hat, author.equipped)}</div>
+                    <div style="margin-left:20px;">
+                        <strong onclick="window.loadProfile('${p.uid}')" style="cursor:pointer; color:blue;">${author.username || 'User'}</strong>
+                        <div>${p.msg}</div>
+                    </div>`;
+                display.prepend(div);
             });
         });
     };
@@ -287,42 +253,19 @@
         showView('profile-view');
         const d = (await get(child(ref(db), `users/${uid}`))).val() || {};
         document.getElementById('v-name').innerText = d.username || "Unknown";
-        document.getElementById('v-check').innerHTML = d.verified ? `<span class="verified-badge"></span>` : '';
-        document.getElementById('v-id').innerText = "#" + (d.num || '0');
         document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat, d.equipped);
         const isMe = uid === auth.currentUser.uid;
         document.getElementById('my-settings').classList.toggle('hidden', !isMe);
         document.getElementById('uploader-section').classList.toggle('hidden', !isMe);
     };
 
-    window.banUser = () => {
-        const uid = document.getElementById('target-uid').value;
-        if(uid === "YOUR_UID_HERE") return alert("Anti-ban protection!"); 
-        const reason = document.getElementById('ban-reason').value || "No reason";
-        const limit = document.getElementById('ban-limit').value || "999";
-        update(ref(db, `users/${uid}`), { isBanned: true, banReason: reason, banLimit: limit });
+    window.showView = (id) => { 
+        ['forum-home', 'profile-view', 'admin-view', 'market-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); 
+        document.getElementById(id).classList.remove('hidden'); 
     };
 
-    window.setRank = (r) => {
-        const uid = document.getElementById('target-uid').value;
-        if(uid) update(ref(db, `users/${uid}`), { rank: r });
-    };
-
-    window.setBanner = () => {
-        set(ref(db, 'settings/banner'), document.getElementById('banner-text').value);
-    };
-
-    window.toggleVerified = async () => {
-        const uid = document.getElementById('target-uid').value;
-        if(uid) {
-            const s = await get(ref(db, `users/${uid}/verified`));
-            update(ref(db, `users/${uid}`), { verified: !s.val() });
-        }
-    };
-
-    window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view', 'market-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
     document.getElementById('saveProfile').onclick = () => update(ref(db, `users/${auth.currentUser.uid}`), { hat: document.getElementById('h-select').value, colors: { h: document.getElementById('c-head').value, t: document.getElementById('c-torso').value, l: document.getElementById('c-leg').value } });
-    document.getElementById('submitPost').onclick = () => { if(document.getElementById('post-input').value) push(ref(db, 'threads'), {msg: document.getElementById('post-input').value, uid: auth.currentUser.uid, time: Date.now()}); document.getElementById('post-input').value = ""; };
+    document.getElementById('submitPost').onclick = () => { push(ref(db, 'threads'), {msg: document.getElementById('post-input').value, uid: auth.currentUser.uid}); document.getElementById('post-input').value = ""; };
     document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
 
@@ -330,15 +273,10 @@
         const u = document.getElementById('reg-user').value;
         const e = document.getElementById('auth-email').value;
         const p = document.getElementById('auth-pass').value;
-        try {
-            const countSnap = await get(ref(db, 'stats/uCount'));
-            const newNum = (countSnap.val() || 0) + 1;
-            const r = await createUserWithEmailAndPassword(auth, e, p);
-            await set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, num: newNum, verified: false, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none', equipped: "" });
-            await update(ref(db, 'stats'), { uCount: increment(1) });
-        } catch (err) { alert(err.message); }
+        const r = await createUserWithEmailAndPassword(auth, e, p);
+        await set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
     };
-    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).catch(e => alert(e.message));
+    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
 </script>
 </body>
 </html>
