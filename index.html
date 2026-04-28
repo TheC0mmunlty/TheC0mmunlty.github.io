@@ -40,7 +40,6 @@
         .msg-box { border: 1px solid #999; padding: 10px; margin-bottom: 10px; background: #fff; font-size: 12px; position: relative; }
         .request-box { border: 2px solid #0055ff; background: #f0f5ff; }
 
-        /* BAN VIEW STYLE */
         #ban-view { text-align: center; padding: 100px 20px; }
         .ban-code { font-size: 72px; font-weight: bold; color: #ff4444; margin: 0; }
     </style>
@@ -104,7 +103,7 @@
             </div>
             <div style="margin-bottom: 15px; border-bottom: 1px dashed #999; padding-bottom: 10px;">
                 <strong>Send Message:</strong><br>
-                <input type="text" id="msg-to" placeholder="Recipient UID" style="width: 200px;">
+                <input type="text" id="msg-to" placeholder="Recipient UID" style="width: 250px;">
                 <input type="text" id="msg-body" placeholder="Message content..." style="width: 300px;">
                 <button class="btn btn-yellow" id="sendMsgBtn">Send</button>
             </div>
@@ -209,7 +208,6 @@
             onValue(ref(db, `users/${u.uid}`), (s) => {
                 me = s.val() || {};
                 if(me.isBanned) { 
-                    // CUSTOM BAN 404 LOGIC
                     document.getElementById('logged-in-view').classList.add('hidden');
                     document.getElementById('auth-view').classList.add('hidden');
                     document.getElementById('ban-view').classList.remove('hidden');
@@ -261,7 +259,6 @@
         const dS = await get(child(ref(db), `users/${uid}`));
         const d = dS.val() || {};
         document.getElementById('v-name').innerText = d.username || "Unknown";
-        // MODIFIED: Displays full UID for users to copy
         document.getElementById('v-id').innerText = "UID: " + uid;
         document.getElementById('v-bio').innerText = d.bio || "No bio yet.";
         document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat, d.equipped);
@@ -290,20 +287,12 @@
         alert("Friend Request Sent to Inbox!");
     };
 
-    // REPLY FEATURE
     window.replyToUser = (targetUid) => {
+        if(!targetUid || targetUid === "undefined") return alert("Error: User UID not found.");
+        showView('inbox-view');
         document.getElementById('msg-to').value = targetUid;
         document.getElementById('msg-body').focus();
-        window.scrollTo(0, 0);
     };
-
-    window.unfriend = (targetUid) => {
-        remove(ref(db, `users/${auth.currentUser.uid}/friends/${targetUid}`));
-        remove(ref(db, `users/${targetUid}/friends/${auth.currentUser.uid}`));
-        alert("Unfriended.");
-        window.loadProfile(targetUid);
-    };
-    document.getElementById('unfriendBtn').onclick = () => unfriend(viewingUid);
 
     window.acceptFriend = (reqKey, senderUid, senderName) => {
         update(ref(db, `users/${auth.currentUser.uid}/friends`), { [senderUid]: senderName });
@@ -329,7 +318,6 @@
                     <button class="btn btn-yellow" onclick="acceptFriend('${c.key}', '${m.fromUid}', '${m.fromName}')">Accept</button>
                     <button class="btn" onclick="declineFriend('${c.key}')">Decline</button>`;
                 } else {
-                    // ADDED REPLY BUTTON
                     div.innerHTML = `<strong>From ${m.from}:</strong><br>${m.msg}<br>
                     <button class="btn" style="margin-top:5px; font-size:10px;" onclick="replyToUser('${m.fromUid}')">Reply</button>`;
                 }
@@ -352,7 +340,6 @@
             return;
         }
 
-        // ADDED fromUid so recipient can reply
         push(ref(db, `msgs/${to}`), { from: me.username, fromUid: auth.currentUser.uid, msg: body });
         alert("Sent!");
         document.getElementById('msg-body').value = "";
@@ -360,7 +347,6 @@
 
     window.clearInbox = () => { if(confirm("Clear all messages?")) remove(ref(db, `msgs/${auth.currentUser.uid}`)); };
 
-    // Standard Handlers
     window.renderMarket = (s) => {
         const list = document.getElementById('market-list'); list.innerHTML = "";
         s.forEach(c => { const item = c.val(); const div = document.createElement('div'); div.className = 'market-card';
@@ -368,6 +354,7 @@
             list.prepend(div);
         });
     };
+
     document.getElementById('upload-btn').onclick = () => {
         const file = document.getElementById('tshirt-file-input').files[0]; if(!file) return alert("Select a file");
         const reader = new FileReader(); document.getElementById('upload-btn').innerText = "Uploading...";
@@ -375,9 +362,11 @@
         document.getElementById('upload-btn').innerText = "Upload (5s delay)"; alert("Marketplace updated!"); }, 5000); };
         reader.readAsDataURL(file);
     };
+
     window.deletePost = (key) => { if(confirm("Remove post?")) remove(ref(db, `threads/${key}`)); };
     window.buyItem = (url) => { update(ref(db, `users/${auth.currentUser.uid}`), { equipped: url }); alert("Equipped!"); };
     window.unequipShirt = () => { update(ref(db, `users/${auth.currentUser.uid}`), { equipped: "" }); alert("Unequipped!"); };
+    
     window.banUser = () => { 
         const uid = document.getElementById('target-uid').value; 
         if(!uid) return;
@@ -387,24 +376,41 @@
         }); 
         alert("User Banned.");
     };
+
     window.setRank = (r) => { const uid = document.getElementById('target-uid').value; if(uid) update(ref(db, `users/${uid}`), { rank: r }); };
     window.setBanner = () => { set(ref(db, 'settings/banner'), document.getElementById('banner-text').value); };
     window.toggleVerified = async () => { const uid = document.getElementById('target-uid').value; if(uid) { const s = await get(ref(db, `users/${uid}/verified`)); update(ref(db, `users/${uid}`), { verified: !s.val() }); } };
-    window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view', 'market-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
+    
+    window.showView = (id) => { 
+        ['forum-home', 'profile-view', 'admin-view', 'market-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); 
+        document.getElementById(id).classList.remove('hidden'); 
+    };
+
     document.getElementById('saveProfile').onclick = () => update(ref(db, `users/${auth.currentUser.uid}`), { 
         bio: document.getElementById('edit-bio').value, 
         msgPrivacy: document.getElementById('msg-privacy').value,
         hat: document.getElementById('h-select').value, 
         colors: { h: document.getElementById('c-head').value, t: document.getElementById('c-torso').value, l: document.getElementById('c-leg').value } 
-    });
-    document.getElementById('submitPost').onclick = () => { if(document.getElementById('post-input').value.trim() == "") return; push(ref(db, 'threads'), {msg: document.getElementById('post-input').value, uid: auth.currentUser.uid}); document.getElementById('post-input').value = ""; };
+    }).then(() => alert("Saved!"));
+
+    document.getElementById('submitPost').onclick = () => { 
+        if(document.getElementById('post-input').value.trim() == "") return; 
+        push(ref(db, 'threads'), {msg: document.getElementById('post-input').value, uid: auth.currentUser.uid}); 
+        document.getElementById('post-input').value = ""; 
+    };
+
     document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
+    
     document.getElementById('signupBtn').onclick = async () => {
         const u = document.getElementById('reg-user').value;
-        const r = await createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
+        const e = document.getElementById('auth-email').value;
+        const p = document.getElementById('auth-pass').value;
+        if(!u || !e || !p) return alert("Fill all fields");
+        const r = await createUserWithEmailAndPassword(auth, e, p);
         await set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none', bio: "I'm new here!", msgPrivacy: 'on' });
     };
+
     document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
 </script>
 </body>
