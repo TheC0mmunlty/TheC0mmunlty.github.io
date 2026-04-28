@@ -11,23 +11,21 @@
         .logo-text { font-weight:bold; font-size: 18px; cursor: pointer; user-select: none; }
         .header-meta { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #ffd700; }
         #announcement-banner { background: #ff9800; color: #ffffff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; width: 100%; display: none; border-bottom: 3px solid #e68a00; }
-        .ping-container { position: relative; display: inline-block; }
-        .ping-dot { position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; background: #ff4444; border: 2px solid white; border-radius: 50%; display: none; }
         .main-wrapper { width: 1000px; margin: 10px auto; background: rgba(238, 238, 238, 0.98); border: 1px solid #888; min-height: 700px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         .hidden { display: none !important; }
         .btn { background: #e1e1e1; border: 1px solid #777; padding: 4px 12px; cursor: pointer; font-size: 12px; font-weight: bold; box-shadow: inset 1px 1px #fff, inset -1px -1px #999; }
         .btn-red { background: #ff4444; color: white; border: 1px solid #aa0000; }
         .btn-yellow { background: #ffcc00; color: black; border: 1px solid #ccaa00; }
         .verified-badge { width: 14px; height: 14px; vertical-align: middle; margin-left: 4px; display: inline-block; background: url('https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg') no-repeat center; background-size: contain; }
-        #auth-error { color: #ff4444; font-size: 11px; margin-top: 8px; font-weight: bold; min-height: 14px; }
+        #auth-error { color: #ff4444; font-size: 11px; margin-top: 8px; font-weight: bold; }
         
-        /* AVATAR SYSTEM */
+        /* FIXED AVATAR SYSTEM */
         .avatar-frame { width: 80px; height: 110px; position: relative; background: #eee; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; margin: 10px; }
         .char-head { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,0.2); z-index: 5; position: relative; margin-top: 10px; }
         .hat-domino { position: absolute; top: -14px; left: -9px; width: 40px; height: 28px; z-index: 10; pointer-events: none; }
         .hat-tophat { position: absolute; top: -16px; left: 1px; width: 20px; height: 16px; background: #222; z-index: 10; border-bottom: 2px solid #444; }
         .hat-tophat::before { content: ''; position: absolute; bottom: -2px; left: -4px; width: 28px; height: 4px; background: #222; border-radius: 2px; }
-        .char-torso { width: 44px; height: 44px; border: 1px solid rgba(0,0,0,0.2); position: relative; overflow: hidden; }
+        .char-torso { width: 44px; height: 44px; border: 1px solid rgba(0,0,0,0.2); position: relative; }
         .tshirt-layer { position: absolute; top: 8px; left: 7px; width: 30px; height: 30px; object-fit: contain; z-index: 2; pointer-events: none; }
         .char-arm { width: 16px; height: 42px; border: 1px solid rgba(0,0,0,0.2); position: absolute; top: 0; }
         .arm-l { left: -17px; } .arm-r { right: -17px; }
@@ -35,8 +33,7 @@
         .char-leg { width: 20px; height: 44px; border: 1px solid rgba(0,0,0,0.2); }
         .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 20px; }
         .market-card { background: white; border: 1px solid #999; padding: 10px; text-align: center; font-size: 11px; }
-        .market-img { width: 60px; height: 60px; object-fit: contain; border: 1px solid #eee; }
-        .row { border-bottom: 1px solid #ddd; padding: 15px; background: #fff; display: flex; align-items: center; position: relative; }
+        .row { border-bottom: 1px solid #ddd; padding: 15px; background: #fff; display: flex; align-items: center; }
     </style>
 </head>
 <body>
@@ -53,7 +50,7 @@
 
 <div class="main-wrapper">
     <div id="auth-view" style="text-align:center; padding:50px;">
-        <h2>Login</h2>
+        <h2>Login / Sign Up</h2>
         <input type="text" id="reg-user" placeholder="Username" style="display:block; margin:10px auto; padding:8px; width:250px;">
         <input type="email" id="auth-email" placeholder="Email" style="display:block; margin:10px auto; padding:8px; width:250px;">
         <input type="password" id="auth-pass" placeholder="Password" style="display:block; margin:10px auto; padding:8px; width:250px;">
@@ -64,18 +61,13 @@
 
     <div id="logged-in-view" class="hidden">
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #ccc; padding-bottom: 10px;">
-            <div style="font-weight:bold;">Level: <span id="lvl">1</span></div>
             <div>
                 <button class="btn" onclick="showView('forum-home')">Forum</button>
                 <button class="btn" onclick="showView('market-view')">Marketplace</button>
-                <div class="ping-container">
-                    <button class="btn" onclick="openInbox()">Inbox</button>
-                    <div id="ping-dot" class="ping-dot"></div>
-                </div>
                 <button class="btn" id="myProfileBtn">My Profile</button>
-                <button class="btn btn-red hidden" id="adminBtn" onclick="showView('admin-view')">ADMIN PANEL</button>
-                <button class="btn" id="logoutBtn">Logout</button>
+                <button class="btn btn-red hidden" id="adminBtn" onclick="showView('admin-view')">ADMIN</button>
             </div>
+            <button class="btn" id="logoutBtn">Logout</button>
         </div>
 
         <div id="forum-home">
@@ -89,31 +81,27 @@
             <div id="market-list" class="market-grid"></div>
         </div>
 
-        <div id="inbox-view" class="hidden">
-            <h3>My Inbox</h3>
-            <div id="msg-list" style="max-height: 500px; overflow-y: auto;"></div>
-        </div>
-
         <div id="profile-view" class="hidden">
             <div style="display:flex; background:white; padding:20px; border:1px solid #ccc; gap:30px;">
                 <div id="profile-render"></div>
                 <div style="flex-grow: 1;">
                     <h2><span id="v-name"></span><span id="v-check"></span> <span id="v-id" style="color:#888; font-size:12px;"></span></h2>
-                    <p id="v-bio" style="border:1px solid #ddd; padding:10px;"></p>
+                    
                     <div id="uploader-section" class="hidden">
-                        <strong>Upload T-Shirt</strong><br>
-                        <input type="file" id="tshirt-file" accept="image/*">
-                        <button class="btn btn-yellow" id="upload-btn">Upload</button>
-                        <div id="upload-status" style="font-size:10px; color:blue;"></div>
+                        <strong>Upload T-Shirt (Marketplace)</strong><br>
+                        <input type="text" id="tshirt-url-input" placeholder="Paste Image URL" style="width:200px; padding:5px;">
+                        <button class="btn btn-yellow" id="upload-btn">Upload delays 5 sec</button>
                     </div>
+                    <hr>
                     <div id="my-settings" class="hidden">
-                        <strong>Inventory</strong><br>
-                        <div id="inventory-list" style="display:flex; gap:5px; background:#eee; padding:5px;"></div>
-                        <button class="btn" onclick="unequipItem()">Unequip</button>
-                        <hr>
-                        Hat: <select id="h-select"><option value="none">None</option><option value="domino">Domino Crown</option><option value="tophat">Top Hat</option></select><br>
+                        <strong>Appearance</strong><br>
+                        Hat: <select id="h-select">
+                            <option value="none">None</option>
+                            <option value="domino">Domino Crown</option>
+                            <option value="tophat">Top Hat</option>
+                        </select><br>
                         Colors: <input type="color" id="c-head"> <input type="color" id="c-torso"> <input type="color" id="c-leg"><br>
-                        <button class="btn btn-yellow" id="saveProfile" style="margin-top:10px; width:100%;">Save</button>
+                        <button class="btn btn-yellow" id="saveProfile" style="margin-top:10px;">Save Changes</button>
                     </div>
                 </div>
             </div>
@@ -121,15 +109,13 @@
 
         <div id="admin-view" class="hidden">
             <div style="border: 2px solid #aa0000; padding: 20px; background: #fff;">
-                <h2 style="color:#aa0000;">Staff Console</h2>
-                <input type="text" id="target-uid" placeholder="Target User UID" style="width: 50%;">
-                <div id="admin-ranking-tools" class="hidden">
-                    <button class="btn btn-red" onclick="setRank(2)">Make Admin</button>
-                    <button class="btn btn-yellow" onclick="toggleVerified()">Toggle Verified</button>
-                    <hr>
-                    <input type="text" id="banner-input" style="width:70%;">
-                    <button class="btn btn-yellow" onclick="updateBanner()">Set Banner</button>
-                </div>
+                <h2 style="color:#aa0000;">Staff Control Panel</h2>
+                <input type="text" id="target-uid" placeholder="User UID" style="width: 250px; padding: 5px;"><br><br>
+                <input type="text" id="ban-reason" placeholder="Ban Reason" style="width: 200px; padding: 5px;">
+                <input type="number" id="ban-limit" placeholder="Ban Limit (Days)" style="width: 100px; padding: 5px;"><br><br>
+                <button class="btn btn-red" onclick="banUser()">BAN USER</button>
+                <button class="btn btn-yellow" onclick="toggleVerified()">TOGGLE VERIFIED</button>
+                <button class="btn" onclick="setRank(2)">PROMOTE TO ADMIN</button>
             </div>
         </div>
     </div>
@@ -138,7 +124,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, get, child, update, increment, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, get, child, update, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const cfg = { apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU", authDomain: "testingforum-669a9.firebaseapp.com", databaseURL: "https://testingforum-669a9-default-rtdb.firebaseio.com", projectId: "testingforum-669a9", storageBucket: "testingforum-669a9.firebasestorage.app", messagingSenderId: "685025117821", appId: "1:685025117821:web:c3340c8d5475e33eded314" };
     const app = initializeApp(cfg); const auth = getAuth(app); const db = getDatabase(app);
@@ -147,40 +133,85 @@
     function draw(colors, hat, tshirtUrl) {
         let h = hat === 'domino' ? `<img src="https://i.imgur.com/e2aPq6G.png" class="hat-domino">` : (hat === 'tophat' ? `<div class="hat-tophat"></div>` : '');
         const c = colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
-        return `<div class="avatar-frame"><div class="char-head" style="background:${c.h}">${h}</div><div class="char-torso" style="background:${c.t}">${tshirtUrl?`<img src="${tshirtUrl}" class="tshirt-layer">`:''}<div class="char-arm arm-l" style="background:${c.h}"></div><div class="char-arm arm-r" style="background:${c.h}"></div></div><div class="char-leg-set"><div class="char-leg" style="background:${c.l}"></div><div class="char-leg" style="background:${c.l}"></div></div></div>`;
+        // The fix: Torso must be relative so Arms (absolute) stick to it
+        return `<div class="avatar-frame">
+            <div class="char-head" style="background:${c.h}">${h}</div>
+            <div class="char-torso" style="background:${c.t}">
+                ${tshirtUrl?`<img src="${tshirtUrl}" class="tshirt-layer">`:''}
+                <div class="char-arm arm-l" style="background:${c.h}"></div>
+                <div class="char-arm arm-r" style="background:${c.h}"></div>
+            </div>
+            <div class="char-leg-set">
+                <div class="char-leg" style="background:${c.l}"></div>
+                <div class="char-leg" style="background:${c.l}"></div>
+            </div>
+        </div>`;
     }
-
-    const setError = (msg) => { document.getElementById('auth-error').innerText = msg; };
 
     onAuthStateChanged(auth, (u) => {
         if (u) {
             onValue(ref(db, `users/${u.uid}`), (s) => {
                 me = s.val() || {};
-                document.getElementById('user-display').innerText = "User: " + (me.username || "Guest");
-                document.getElementById('adminBtn').classList.toggle('hidden', (me.rank || 0) < 1);
-                document.getElementById('admin-ranking-tools').classList.toggle('hidden', (me.rank || 0) < 2);
+                if(me.isBanned) {
+                    alert(`YOU ARE BANNED\nReason: ${me.banReason}\nLimit: ${me.banLimit} days`);
+                    signOut(auth);
+                    location.reload();
+                    return;
+                }
+                document.getElementById('user-display').innerText = "Logged in as: " + (me.username || "Guest");
+                document.getElementById('adminBtn').classList.toggle('hidden', (me.rank || 0) < 2);
                 const ind = document.getElementById('rank-indicator');
-                ind.innerText = me.rank === 2 ? "ADMIN" : (me.rank === 1 ? "MOD" : "MEMBER");
-                onValue(ref(db, `msgs/${u.uid}`), (ms) => {
-                    let unread = false; ms.forEach(m => { if(!m.val().read) unread = true; });
-                    document.getElementById('ping-dot').style.display = unread ? 'block' : 'none';
-                });
+                // Restored UNRANKED
+                ind.innerText = me.rank === 2 ? "ADMIN" : (me.rank === 1 ? "MOD" : "UNRANKED");
+                ind.style.color = me.rank === 2 ? "#ff4444" : "#ffd700";
                 renderForum(); renderMarket();
-            });
-            onValue(ref(db, 'settings/banner'), (s) => {
-                const b = document.getElementById('announcement-banner');
-                if(s.val()) { b.innerText = s.val(); b.style.display = 'block'; } else { b.style.display = 'none'; }
             });
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('logged-in-view').classList.remove('hidden');
         }
     });
 
+    const setError = (msg) => { document.getElementById('auth-error').innerText = msg; };
+
+    // SIGNUP logic with uCount
+    document.getElementById('signupBtn').onclick = async () => {
+        setError("");
+        const u = document.getElementById('reg-user').value;
+        const e = document.getElementById('auth-email').value;
+        const p = document.getElementById('auth-pass').value;
+        if(!u || !e || !p) return setError("Fill all fields.");
+        try {
+            const countSnap = await get(ref(db, 'stats/uCount'));
+            const newNum = (countSnap.val() || 0) + 1;
+            const r = await createUserWithEmailAndPassword(auth, e, p);
+            await set(ref(db, `users/${r.user.uid}`), { 
+                username: u, rank: 0, num: newNum, verified: false, 
+                colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' 
+            });
+            await update(ref(db, 'stats'), { uCount: increment(1) });
+        } catch (err) { if (err.code === 'auth/email-already-in-use') setError("Account exists."); }
+    };
+
+    document.getElementById('loginBtn').onclick = () => {
+        setError("");
+        signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value)
+        .catch(() => setError("Invalid credentials."));
+    };
+
+    // BAN logic with Reason and Limit
+    window.banUser = () => {
+        const uid = document.getElementById('target-uid').value;
+        const reason = document.getElementById('ban-reason').value || "No reason provided";
+        const limit = document.getElementById('ban-limit').value || "Permanent";
+        if(uid) update(ref(db, `users/${uid}`), { isBanned: true, banReason: reason, banLimit: limit });
+    };
+
     window.toggleVerified = async () => {
         const uid = document.getElementById('target-uid').value;
-        if(!uid) return;
-        const s = await get(ref(db, `users/${uid}/verified`));
-        update(ref(db, `users/${uid}`), { verified: !s.val() });
+        if(uid) {
+            const s = await get(ref(db, `users/${uid}/verified`));
+            update(ref(db, `users/${uid}`), { verified: !s.val() });
+        }
     };
 
     window.loadProfile = async (uid) => {
@@ -193,15 +224,23 @@
         const isMe = uid === auth.currentUser.uid;
         document.getElementById('my-settings').classList.toggle('hidden', !isMe);
         document.getElementById('uploader-section').classList.toggle('hidden', !isMe);
-        if(isMe) {
-            const inv = document.getElementById('inventory-list'); inv.innerHTML = "";
-            const snap = await get(ref(db, `users/${uid}/inventory`));
-            snap.forEach(c => {
-                const img = c.val().img;
-                const i = document.createElement('img'); i.src = img; i.style.width="30px"; i.onclick = () => update(ref(db, `users/${uid}`), {equipped: img});
-                inv.appendChild(i);
+    };
+
+    // MARKETPLACE UPLOADER with 5s Delay
+    document.getElementById('upload-btn').onclick = () => {
+        const url = document.getElementById('tshirt-url-input').value;
+        if(!url) return alert("Enter a URL");
+        document.getElementById('upload-btn').innerText = "Uploading...";
+        setTimeout(() => {
+            push(ref(db, 'marketplace'), { 
+                img: url, 
+                creator: me.username, 
+                uid: auth.currentUser.uid 
             });
-        }
+            document.getElementById('upload-btn').innerText = "Upload delays 5 sec";
+            document.getElementById('tshirt-url-input').value = "";
+            alert("Sent to Marketplace!");
+        }, 5000);
     };
 
     const renderForum = () => {
@@ -226,47 +265,15 @@
             const list = document.getElementById('market-list'); list.innerHTML = "";
             s.forEach(c => {
                 const item = c.val(); const div = document.createElement('div'); div.className = 'market-card';
-                div.innerHTML = `<img src="${item.img}" class="market-img"><br>By: ${item.creator}<br><button class="btn btn-yellow" onclick="buyItem('${item.img}')">GET</button>`;
+                div.innerHTML = `<img src="${item.img}" style="width:60px; height:60px; object-fit:contain;"><br>By: ${item.creator}<br><button class="btn btn-yellow" onclick="buyItem('${item.img}')">GET</button>`;
                 list.prepend(div);
             });
         });
     };
 
-    window.buyItem = (url) => push(ref(db, `users/${auth.currentUser.uid}/inventory`), { img: url });
-    window.unequipItem = () => update(ref(db, `users/${auth.currentUser.uid}`), { equipped: null });
-    window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view', 'market-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
+    window.buyItem = (url) => update(ref(db, `users/${auth.currentUser.uid}`), { equipped: url });
+    window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view', 'market-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
     document.getElementById('saveProfile').onclick = () => update(ref(db, `users/${auth.currentUser.uid}`), { hat: document.getElementById('h-select').value, colors: { h: document.getElementById('c-head').value, t: document.getElementById('c-torso').value, l: document.getElementById('c-leg').value } });
-    
-    document.getElementById('signupBtn').onclick = async () => {
-        setError("");
-        const u = document.getElementById('reg-user').value;
-        const e = document.getElementById('auth-email').value;
-        const p = document.getElementById('auth-pass').value;
-        if(!u || !e || !p) return setError("Fill all fields.");
-
-        try {
-            const countSnap = await get(ref(db, 'stats/uCount'));
-            const newNum = (countSnap.val() || 0) + 1;
-            const r = await createUserWithEmailAndPassword(auth, e, p);
-            await set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, num: newNum, verified: false, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
-            await update(ref(db, 'stats'), { uCount: increment(1) });
-        } catch (err) {
-            if (err.code === 'auth/email-already-in-use') setError("Account exists.");
-            else setError("Error creating account.");
-        }
-    };
-
-    document.getElementById('loginBtn').onclick = async () => {
-        setError("");
-        const e = document.getElementById('auth-email').value;
-        const p = document.getElementById('auth-pass').value;
-        try {
-            await signInWithEmailAndPassword(auth, e, p);
-        } catch (err) {
-            setError("Invalid credentials.");
-        }
-    };
-
     document.getElementById('submitPost').onclick = () => { if(document.getElementById('post-input').value) push(ref(db, 'threads'), {msg: document.getElementById('post-input').value, uid: auth.currentUser.uid, time: Date.now()}); document.getElementById('post-input').value = ""; };
     document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
