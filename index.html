@@ -302,7 +302,9 @@
     };
 
     window.replyToUser = (targetUid) => {
-        if(!targetUid || targetUid === "undefined" || targetUid === "null") return alert("Error: User UID not found.");
+        if(!targetUid || targetUid === "undefined" || targetUid === "null" || targetUid === "") {
+            return alert("Error: User UID not found.");
+        }
         showView('inbox-view');
         document.getElementById('msg-to').value = targetUid;
         document.getElementById('msg-body').focus();
@@ -326,14 +328,21 @@
                 const m = c.val();
                 const div = document.createElement('div');
                 div.className = 'msg-box';
+                
+                // Safe capture of fromUid
+                const senderId = m.fromUid || "";
+
                 if(m.type === 'friend_request') {
                     div.classList.add('request-box');
                     div.innerHTML = `<strong>Friend Request!</strong><br>${m.msg}<br>
-                    <button class="btn btn-yellow" onclick="acceptFriend('${c.key}', '${m.fromUid}', '${m.fromName}')">Accept</button>
+                    <button class="btn btn-yellow" onclick="acceptFriend('${c.key}', '${senderId}', '${m.fromName}')">Accept</button>
                     <button class="btn" onclick="declineFriend('${c.key}')">Decline</button>`;
                 } else {
                     div.innerHTML = `<strong>From ${m.from}:</strong><br>${m.msg}<br>
-                    <button class="btn" style="margin-top:5px; font-size:10px;" onclick="replyToUser('${m.fromUid}')">Reply</button>`;
+                    <button class="btn reply-btn" style="margin-top:5px; font-size:10px;">Reply</button>`;
+                    
+                    // Attach event listener directly to avoid string parsing errors in HTML
+                    div.querySelector('.reply-btn').onclick = () => window.replyToUser(senderId);
                 }
                 display.prepend(div);
             });
@@ -354,7 +363,11 @@
             return;
         }
 
-        push(ref(db, `msgs/${to}`), { from: me.username, fromUid: auth.currentUser.uid, msg: body });
+        push(ref(db, `msgs/${to}`), { 
+            from: me.username, 
+            fromUid: auth.currentUser.uid, 
+            msg: body 
+        });
         alert("Sent!");
         document.getElementById('msg-body').value = "";
     };
