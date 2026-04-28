@@ -9,7 +9,7 @@
         * { font-family: "MS Sans Serif", Geneva, sans-serif; -webkit-font-smoothing: none; box-sizing: border-box; }
         body { margin: 0; background: #ccc url('https://wallpapercave.com/wp/wp9084955.jpg') fixed center; background-size: cover; }
         
-        /* ORANGE GLOBAL BANNER (Fixed per request) */
+        /* ORANGE GLOBAL BANNER */
         #announcement-banner { 
             background: #ff9800; 
             color: #ffffff; 
@@ -26,7 +26,7 @@
         header { background: #0055ff; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #0033aa; }
         .header-meta { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #ffd700; }
         
-        /* NOTIFICATION PING (Discord Red Dot) */
+        /* DISCORD PING DOT */
         .ping-container { position: relative; display: inline-block; }
         .ping-dot { position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; background: #ff4444; border: 2px solid white; border-radius: 50%; display: none; }
 
@@ -38,11 +38,12 @@
         .btn-red { background: #ff4444; color: white; border: 1px solid #aa0000; }
         .btn-yellow { background: #ffcc00; color: black; border: 1px solid #ccaa00; }
 
-        /* DOMINO CROWN (Three-piece rework) */
-        .hat-domino { position: absolute; top: -16px; left: -6px; width: 34px; height: 20px; display: flex; gap: 2px; align-items: flex-end; }
-        .domino-piece { width: 10px; background: #000; border: 1px solid #fff; position: relative; }
-        .piece-1 { height: 14px; } .piece-2 { height: 20px; } .piece-3 { height: 14px; }
-        .domino-piece::after { content: '..'; color: white; font-size: 7px; position: absolute; top: 1px; left: 1px; line-height: 5px; }
+        /* REWORKED DOMINO CROWN (Based on Drawing) */
+        .hat-domino { position: absolute; top: -18px; left: -8px; width: 38px; height: 22px; display: flex; gap: 2px; align-items: flex-end; }
+        .domino-piece { width: 11px; background: #000; border: 1px solid #fff; position: relative; border-radius: 1px; }
+        .piece-1 { height: 16px; } .piece-2 { height: 22px; } .piece-3 { height: 16px; }
+        /* Domino Dots */
+        .domino-piece::before { content: '::'; color: white; font-size: 8px; position: absolute; top: 1px; left: 1px; letter-spacing: 1px; }
 
         /* AVATAR RENDER */
         .avatar-frame { width: 80px; height: 110px; position: relative; background: #eee; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; margin: 10px; }
@@ -53,9 +54,12 @@
         .char-leg-set { display: flex; }
         .char-leg { width: 20px; height: 44px; border: 1px solid rgba(0,0,0,0.2); }
 
-        /* FORUM ROWS */
+        /* INBOX LISTING */
+        .msg-item { background: white; border: 1px solid #ccc; padding: 10px; margin-bottom: 5px; position: relative; }
+        .msg-unread { border-left: 5px solid #ff4444; background: #fffcfc; }
+        .msg-sender { font-weight: bold; color: #0055ff; font-size: 12px; }
+
         .row { border-bottom: 1px solid #ddd; padding: 15px; background: #fff; display: flex; align-items: center; position: relative; }
-        .deleted-post { opacity: 0.3; background: #ffdada !important; border: 1px dashed red; }
     </style>
 </head>
 <body>
@@ -86,7 +90,7 @@
             <div>
                 <button class="btn" onclick="showView('forum-home')">Forum</button>
                 <div class="ping-container">
-                    <button class="btn" onclick="showView('inbox-view')">Inbox</button>
+                    <button class="btn" onclick="openInbox()">Inbox</button>
                     <div id="ping-dot" class="ping-dot"></div>
                 </div>
                 <button class="btn" id="myProfileBtn">My Profile</button>
@@ -101,9 +105,17 @@
             <div id="thread-display" style="margin-top: 20px;"></div>
         </div>
 
+        <div id="inbox-view" class="hidden">
+            <h3>My Inbox</h3>
+            <div id="msg-list" style="max-height: 500px; overflow-y: auto;">
+                <p style="color: #888;">No messages yet.</p>
+            </div>
+            <button class="btn" onclick="showView('forum-home')" style="margin-top: 10px;">Back to Forum</button>
+        </div>
+
         <div id="admin-view" class="hidden">
             <div style="border: 2px solid #aa0000; padding: 20px; background: #fff;">
-                <h2 style="color:#aa0000; margin-top:0;">Staff Control Console</h2>
+                <h2 style="color:#aa0000; margin-top:0;">Staff Console</h2>
                 <input type="text" id="target-uid" placeholder="Target User UID" style="width: 50%;">
                 
                 <div id="admin-ranking-tools" class="hidden">
@@ -111,15 +123,12 @@
                     <button class="btn btn-yellow" onclick="setRank(1)">Make Moderator</button>
                     <button class="btn" onclick="setRank(0)">Reset Rank</button>
                     <hr>
-                    <h3>Global Banner (Admin Only)</h3>
                     <input type="text" id="banner-input" style="width:70%;">
-                    <button class="btn btn-yellow" onclick="updateBanner()">Set Banner</button>
-                    <button class="btn" onclick="updateBanner('')">Clear</button>
+                    <button class="btn btn-yellow" onclick="updateBanner()">Set Global Banner</button>
                 </div>
 
                 <div id="mod-tools">
                     <hr>
-                    <h3>Staff Tools</h3>
                     <input type="text" id="ban-reason" placeholder="Ban Reason">
                     <button class="btn btn-red" onclick="executeBan()">BAN USER</button>
                 </div>
@@ -131,24 +140,17 @@
                 <div id="profile-render"></div>
                 <div style="flex-grow: 1;">
                     <h2><span id="v-name"></span> <span id="v-id" style="color:#888; font-size:12px;"></span></h2>
-                    <p id="v-bio" style="border:1px solid #ddd; padding:10px;">User bio here...</p>
+                    <p id="v-bio" style="border:1px solid #ddd; padding:10px;"></p>
                     <button class="btn btn-yellow" id="msgBtn">Send Message</button>
-                    
                     <div id="my-settings" class="hidden">
                         <hr>
-                        <strong>Customizer</strong><br>
                         Head: <input type="color" id="c-head"> Torso: <input type="color" id="c-torso"> Legs: <input type="color" id="c-leg"><br>
                         Hat: <select id="h-select"><option value="none">None</option><option value="domino">Domino Crown</option></select><br>
-                        Discord Pings: <input type="checkbox" id="notif-on" checked><br>
+                        Pings: <input type="checkbox" id="notif-on" checked><br>
                         <button class="btn btn-yellow" id="saveProfile" style="margin-top:10px; width:100%;">Save Profile</button>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div id="inbox-view" class="hidden">
-            <h3>Inbox</h3>
-            <div id="msg-list"></div>
         </div>
     </div>
 </div>
@@ -161,7 +163,6 @@
     const cfg = { apiKey: "AIzaSyANfmR8j_Z7mHmSO1GNXGnIGKTdBiU6uiU", authDomain: "testingforum-669a9.firebaseapp.com", databaseURL: "https://testingforum-669a9-default-rtdb.firebaseio.com", projectId: "testingforum-669a9", storageBucket: "testingforum-669a9.firebasestorage.app", messagingSenderId: "685025117821", appId: "1:685025117821:web:c3340c8d5475e33eded314" };
     const app = initializeApp(cfg); const auth = getAuth(app); const db = getDatabase(app);
     
-    // IMPORTANT: SET YOUR UID HERE TO PREVENT MODERATORS FROM DELETING YOUR POSTS
     const OWNER_UID = "YOUR_UID_HERE"; 
     let me = null;
 
@@ -177,8 +178,6 @@
                 me = s.val(); if(!me) return;
                 document.getElementById('user-display').innerText = "Logged in as: " + me.username;
                 const ind = document.getElementById('rank-indicator');
-                
-                // RANK UI LOGIC
                 document.getElementById('adminBtn').classList.toggle('hidden', me.rank < 1);
                 document.getElementById('admin-ranking-tools').classList.toggle('hidden', me.rank < 2);
                 
@@ -186,19 +185,17 @@
                 else if(me.rank === 1) { ind.innerText = "MODERATOR"; ind.style.color = "#ffff00"; }
                 else { ind.innerText = "MEMBER"; ind.style.color = "#ffd700"; }
                 
-                // NOTIFICATION LOGIC
+                // RED DOT PING LOGIC
                 onValue(ref(db, `msgs/${u.uid}`), (ms) => {
                     let hasUnread = false;
                     ms.forEach(m => { if(!m.val().read) hasUnread = true; });
                     document.getElementById('ping-dot').style.display = (hasUnread && me.pings !== false) ? 'block' : 'none';
                 });
             });
-            
-            // GLOBAL BANNER LISTENER
+
             onValue(ref(db, 'settings/banner'), (s) => {
                 const b = document.getElementById('announcement-banner');
-                if(s.val()) { b.innerText = s.val(); b.style.display = 'block'; } 
-                else { b.style.display = 'none'; }
+                if(s.val()) { b.innerText = s.val(); b.style.display = 'block'; } else { b.style.display = 'none'; }
             });
 
             renderForum();
@@ -207,14 +204,49 @@
         }
     });
 
-    // STAFF FUNCTIONS
+    // INBOX RENDERING (Fixes "Undefined" and Red Dot)
+    window.openInbox = () => {
+        showView('inbox-view');
+        const list = document.getElementById('msg-list');
+        onValue(ref(db, `msgs/${auth.currentUser.uid}`), (s) => {
+            list.innerHTML = "";
+            if(!s.exists()) { list.innerHTML = "<p>No messages.</p>"; return; }
+            s.forEach(child => {
+                const m = child.val();
+                const div = document.createElement('div');
+                div.className = 'msg-item' + (!m.read ? ' msg-unread' : '');
+                // Check for .text (new) or .msg (old) to avoid undefined
+                const content = m.text || m.msg || "[No content]";
+                div.innerHTML = `<div class="msg-sender">From: ${m.from}</div><div>${content}</div>`;
+                div.onclick = () => update(ref(db, `msgs/${auth.currentUser.uid}/${child.key}`), {read: true});
+                list.prepend(div);
+            });
+        });
+    };
+
+    window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
+
+    window.loadProfile = async (uid) => {
+        showView('profile-view');
+        const d = (await get(child(ref(db), `users/${uid}`))).val();
+        document.getElementById('v-name').innerText = d.username;
+        document.getElementById('v-id').innerText = "#" + (d.num || '0');
+        document.getElementById('v-bio').innerText = d.bio || "No bio set.";
+        document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat);
+        document.getElementById('my-settings').classList.toggle('hidden', uid !== auth.currentUser.uid);
+        document.getElementById('msgBtn').onclick = () => {
+            const m = prompt("Message to " + d.username + ":");
+            if(m) push(ref(db, `msgs/${uid}`), {from: me.username, text: m, read: false, time: Date.now()});
+        };
+    };
+
     window.setRank = (r) => { if(me.rank < 2) return; update(ref(db, `users/${document.getElementById('target-uid').value}`), {rank: r}); };
     window.executeBan = () => { if(me.rank < 1) return; update(ref(db, `users/${document.getElementById('target-uid').value}`), {isBanned: true, banReason: document.getElementById('ban-reason').value}); };
     window.updateBanner = (t) => { if(me.rank < 2) return; update(ref(db, 'settings'), {banner: t !== undefined ? t : document.getElementById('banner-input').value}); };
     
     window.deletePost = (id, authorUid) => {
         if(me.rank >= 1) {
-            if(me.rank === 1 && authorUid === OWNER_UID) { alert("Moderators cannot delete the Owner's posts!"); return; }
+            if(me.rank === 1 && authorUid === OWNER_UID) return alert("Mods cannot delete Owner posts!");
             update(ref(db, `threads/${id}`), {deleted: true});
         }
     };
@@ -224,8 +256,7 @@
             const display = document.getElementById('thread-display'); display.innerHTML = "";
             const users = (await get(child(ref(db), 'users'))).val() || {};
             s.forEach(c => {
-                const p = c.val();
-                if(p.deleted && me.rank === 0) return;
+                const p = c.val(); if(p.deleted && me.rank === 0) return;
                 const author = users[p.uid] || {username: "Unknown", num: 0};
                 const div = document.createElement('div');
                 div.className = 'row' + (p.deleted ? ' deleted-post' : '');
@@ -240,55 +271,28 @@
         });
     };
 
-    window.showView = (id) => { 
-        ['forum-home', 'profile-view', 'admin-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); 
-        document.getElementById(id).classList.remove('hidden'); 
-    };
-
-    window.loadProfile = async (uid) => {
-        showView('profile-view');
-        const d = (await get(child(ref(db), `users/${uid}`))).val();
-        document.getElementById('v-name').innerText = d.username;
-        document.getElementById('v-id').innerText = "#" + (d.num || '0');
-        document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat);
-        document.getElementById('my-settings').classList.toggle('hidden', uid !== auth.currentUser.uid);
-        document.getElementById('msgBtn').onclick = () => {
-            const m = prompt("Message to " + d.username + ":");
-            if(m) push(ref(db, `msgs/${uid}`), {from: me.username, text: m, read: false, time: Date.now()});
-        };
-    };
-
     document.getElementById('saveProfile').onclick = () => {
         update(ref(db, `users/${auth.currentUser.uid}`), {
             hat: document.getElementById('h-select').value,
             colors: { h: document.getElementById('c-head').value, t: document.getElementById('c-torso').value, l: document.getElementById('c-leg').value },
             pings: document.getElementById('notif-on').checked
-        }).then(() => alert("Profile Saved!"));
+        }).then(() => alert("Saved!"));
     };
 
     document.getElementById('signupBtn').onclick = async () => {
         const u = document.getElementById('reg-user').value;
-        if(!u) return alert("Enter a username");
         const countSnap = await get(ref(db, 'stats/uCount'));
         const newNum = (countSnap.val() || 0) + 1;
-        
         createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then(r => {
-            set(ref(db, `users/${r.user.uid}`), { 
-                username: u, rank: 0, num: newNum, 
-                colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, 
-                pings: true, hat: 'none' 
-            });
+            set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, num: newNum, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, pings: true, hat: 'none' });
             update(ref(db, 'stats'), { uCount: increment(1) });
-        }).catch(e => alert(e.message));
+        });
     };
 
-    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).catch(e => alert(e.message));
+    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value);
     document.getElementById('submitPost').onclick = () => { 
-        const msg = document.getElementById('post-input').value;
-        if(msg.trim()) {
-            push(ref(db, 'threads'), {msg: msg, uid: auth.currentUser.uid, time: Date.now()}); 
-            document.getElementById('post-input').value = ""; 
-        }
+        const m = document.getElementById('post-input').value;
+        if(m.trim()) { push(ref(db, 'threads'), {msg: m, uid: auth.currentUser.uid, time: Date.now()}); document.getElementById('post-input').value = ""; }
     };
     document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
