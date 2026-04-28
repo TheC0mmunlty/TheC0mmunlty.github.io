@@ -39,6 +39,10 @@
         .delete-btn { position: absolute; right: 10px; top: 10px; color: red; font-size: 10px; cursor: pointer; font-weight: bold; }
         .msg-box { border: 1px solid #999; padding: 10px; margin-bottom: 10px; background: #fff; font-size: 12px; position: relative; }
         .request-box { border: 2px solid #0055ff; background: #f0f5ff; }
+
+        /* BAN VIEW STYLE */
+        #ban-view { text-align: center; padding: 100px 20px; }
+        .ban-code { font-size: 72px; font-weight: bold; color: #ff4444; margin: 0; }
     </style>
 </head>
 <body>
@@ -54,6 +58,13 @@
 <div id="announcement-banner"></div>
 
 <div class="main-wrapper">
+    <div id="ban-view" class="hidden">
+        <p class="ban-code">404</p>
+        <h2>ACCOUNT TERMINATED</h2>
+        <p id="ban-msg-display" style="color: #555; margin-bottom: 20px;"></p>
+        <button class="btn btn-yellow" onclick="location.reload()">Back Home</button>
+    </div>
+
     <div id="auth-view" style="text-align:center; padding:50px;">
         <h2>Login / Sign Up</h2>
         <input type="text" id="reg-user" placeholder="Username" style="display:block; margin:10px auto; padding:8px; width:250px;">
@@ -104,7 +115,8 @@
             <div style="display:flex; background:white; padding:20px; border:1px solid #ccc; gap:30px;">
                 <div id="profile-render"></div>
                 <div style="flex-grow: 1;">
-                    <h2><span id="v-name"></span><span id="v-check"></span> <span id="v-id" style="color:#888; font-size:12px;"></span></h2>
+                    <h2><span id="v-name"></span><span id="v-check"></span></h2>
+                    <div id="v-id" style="color:#888; font-size:11px; margin-bottom:10px; background:#eee; padding:4px; border-radius:4px; display:inline-block;"></div>
                     
                     <p id="v-bio" style="font-style: italic; background: #f9f9f9; padding: 10px; border: 1px solid #eee; min-height: 40px;"></p>
 
@@ -196,7 +208,15 @@
             if(u.email === "fahid.001x@gmail.com") document.getElementById('gold-crown-opt').classList.remove('hidden');
             onValue(ref(db, `users/${u.uid}`), (s) => {
                 me = s.val() || {};
-                if(me.isBanned) { signOut(auth); location.reload(); return; }
+                if(me.isBanned) { 
+                    // CUSTOM BAN 404 LOGIC
+                    document.getElementById('logged-in-view').classList.add('hidden');
+                    document.getElementById('auth-view').classList.add('hidden');
+                    document.getElementById('ban-view').classList.remove('hidden');
+                    document.getElementById('ban-msg-display').innerText = "Reason: " + (me.banReason || "Terms of Service violation.");
+                    signOut(auth); 
+                    return; 
+                }
                 document.getElementById('user-display').innerText = "Logged in as: " + (me.username || "Guest");
                 document.getElementById('adminBtn').classList.toggle('hidden', (me.rank || 0) < 1);
                 document.getElementById('rank-tools').classList.toggle('hidden', me.rank < 2);
@@ -241,7 +261,8 @@
         const dS = await get(child(ref(db), `users/${uid}`));
         const d = dS.val() || {};
         document.getElementById('v-name').innerText = d.username || "Unknown";
-        document.getElementById('v-id').innerText = "#" + uid.substring(0,5);
+        // MODIFIED: Displays full UID for users to copy
+        document.getElementById('v-id').innerText = "UID: " + uid;
         document.getElementById('v-bio').innerText = d.bio || "No bio yet.";
         document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat, d.equipped);
         
@@ -267,6 +288,13 @@
             msg: `${me.username} sent you a friend request!`
         });
         alert("Friend Request Sent to Inbox!");
+    };
+
+    // REPLY FEATURE
+    window.replyToUser = (targetUid) => {
+        document.getElementById('msg-to').value = targetUid;
+        document.getElementById('msg-body').focus();
+        window.scrollTo(0, 0);
     };
 
     window.unfriend = (targetUid) => {
@@ -301,7 +329,9 @@
                     <button class="btn btn-yellow" onclick="acceptFriend('${c.key}', '${m.fromUid}', '${m.fromName}')">Accept</button>
                     <button class="btn" onclick="declineFriend('${c.key}')">Decline</button>`;
                 } else {
-                    div.innerHTML = `<strong>From ${m.from}:</strong><br>${m.msg}`;
+                    // ADDED REPLY BUTTON
+                    div.innerHTML = `<strong>From ${m.from}:</strong><br>${m.msg}<br>
+                    <button class="btn" style="margin-top:5px; font-size:10px;" onclick="replyToUser('${m.fromUid}')">Reply</button>`;
                 }
                 display.prepend(div);
             });
@@ -309,18 +339,21 @@
     }
 
     document.getElementById('sendMsgBtn').onclick = async () => {
-        const to = document.getElementById('msg-to').value;
+        const to = document.getElementById('msg-to').value.trim();
         const body = document.getElementById('msg-body').value;
         if(!to || !body) return;
         
         const targetS = await get(child(ref(db), `users/${to}`));
         const target = targetS.val();
-        if(target && target.msgPrivacy === 'off') {
+        if(!target) return alert("User UID not found!");
+        
+        if(target.msgPrivacy === 'off') {
             alert("This user has disabled messages.");
             return;
         }
 
-        push(ref(db, `msgs/${to}`), { from: me.username, msg: body });
+        // ADDED fromUid so recipient can reply
+        push(ref(db, `msgs/${to}`), { from: me.username, fromUid: auth.currentUser.uid, msg: body });
         alert("Sent!");
         document.getElementById('msg-body').value = "";
     };
@@ -345,7 +378,15 @@
     window.deletePost = (key) => { if(confirm("Remove post?")) remove(ref(db, `threads/${key}`)); };
     window.buyItem = (url) => { update(ref(db, `users/${auth.currentUser.uid}`), { equipped: url }); alert("Equipped!"); };
     window.unequipShirt = () => { update(ref(db, `users/${auth.currentUser.uid}`), { equipped: "" }); alert("Unequipped!"); };
-    window.banUser = () => { const uid = document.getElementById('target-uid').value; update(ref(db, `users/${uid}`), { isBanned: true, banReason: document.getElementById('ban-reason').value }); };
+    window.banUser = () => { 
+        const uid = document.getElementById('target-uid').value; 
+        if(!uid) return;
+        update(ref(db, `users/${uid}`), { 
+            isBanned: true, 
+            banReason: document.getElementById('ban-reason').value || "Banned by Admin." 
+        }); 
+        alert("User Banned.");
+    };
     window.setRank = (r) => { const uid = document.getElementById('target-uid').value; if(uid) update(ref(db, `users/${uid}`), { rank: r }); };
     window.setBanner = () => { set(ref(db, 'settings/banner'), document.getElementById('banner-text').value); };
     window.toggleVerified = async () => { const uid = document.getElementById('target-uid').value; if(uid) { const s = await get(ref(db, `users/${uid}/verified`)); update(ref(db, `users/${uid}`), { verified: !s.val() }); } };
