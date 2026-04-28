@@ -19,6 +19,7 @@
         .btn-red { background: #ff4444; color: white; border: 1px solid #aa0000; }
         .btn-yellow { background: #ffcc00; color: black; border: 1px solid #ccaa00; }
         .verified-badge { width: 14px; height: 14px; vertical-align: middle; margin-left: 4px; display: inline-block; background: url('https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg') no-repeat center; background-size: contain; }
+        #auth-error { color: #ff4444; font-size: 11px; margin-top: 8px; font-weight: bold; min-height: 14px; }
         
         /* AVATAR SYSTEM */
         .avatar-frame { width: 80px; height: 110px; position: relative; background: #eee; border: 1px solid #999; display: flex; flex-direction: column; align-items: center; margin: 10px; }
@@ -58,6 +59,7 @@
         <input type="password" id="auth-pass" placeholder="Password" style="display:block; margin:10px auto; padding:8px; width:250px;">
         <button class="btn btn-yellow" id="loginBtn">Login</button>
         <button class="btn" id="signupBtn">Sign Up</button>
+        <div id="auth-error"></div>
     </div>
 
     <div id="logged-in-view" class="hidden">
@@ -148,6 +150,8 @@
         return `<div class="avatar-frame"><div class="char-head" style="background:${c.h}">${h}</div><div class="char-torso" style="background:${c.t}">${tshirtUrl?`<img src="${tshirtUrl}" class="tshirt-layer">`:''}<div class="char-arm arm-l" style="background:${c.h}"></div><div class="char-arm arm-r" style="background:${c.h}"></div></div><div class="char-leg-set"><div class="char-leg" style="background:${c.l}"></div><div class="char-leg" style="background:${c.l}"></div></div></div>`;
     }
 
+    const setError = (msg) => { document.getElementById('auth-error').innerText = msg; };
+
     onAuthStateChanged(auth, (u) => {
         if (u) {
             onValue(ref(db, `users/${u.uid}`), (s) => {
@@ -182,7 +186,7 @@
     window.loadProfile = async (uid) => {
         showView('profile-view');
         const d = (await get(child(ref(db), `users/${uid}`))).val() || {};
-        document.getElementById('v-name').innerText = d.username;
+        document.getElementById('v-name').innerText = d.username || "Unknown";
         document.getElementById('v-check').innerHTML = d.verified ? `<span class="verified-badge"></span>` : '';
         document.getElementById('v-id').innerText = "#" + (d.num || '0');
         document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat, d.equipped);
@@ -232,13 +236,40 @@
     window.unequipItem = () => update(ref(db, `users/${auth.currentUser.uid}`), { equipped: null });
     window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view', 'market-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
     document.getElementById('saveProfile').onclick = () => update(ref(db, `users/${auth.currentUser.uid}`), { hat: document.getElementById('h-select').value, colors: { h: document.getElementById('c-head').value, t: document.getElementById('c-torso').value, l: document.getElementById('c-leg').value } });
+    
     document.getElementById('signupBtn').onclick = async () => {
+        setError("");
         const u = document.getElementById('reg-user').value;
-        const countSnap = await get(ref(db, 'stats/uCount'));
-        const newNum = (countSnap.val() || 0) + 1;
-        createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value).then(r => {
-            set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, num: newNum, verified: false, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
-            update(ref(db, 'stats'), { uCount: increment(1) });
-        });
+        const e = document.getElementById('auth-email').value;
+        const p = document.getElementById('auth-pass').value;
+        if(!u || !e || !p) return setError("Fill all fields.");
+
+        try {
+            const countSnap = await get(ref(db, 'stats/uCount'));
+            const newNum = (countSnap.val() || 0) + 1;
+            const r = await createUserWithEmailAndPassword(auth, e, p);
+            await set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, num: newNum, verified: false, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
+            await update(ref(db, 'stats'), { uCount: increment(1) });
+        } catch (err) {
+            if (err.code === 'auth/email-already-in-use') setError("Account exists.");
+            else setError("Error creating account.");
+        }
     };
-    document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, document.getElementById('
+
+    document.getElementById('loginBtn').onclick = async () => {
+        setError("");
+        const e = document.getElementById('auth-email').value;
+        const p = document.getElementById('auth-pass').value;
+        try {
+            await signInWithEmailAndPassword(auth, e, p);
+        } catch (err) {
+            setError("Invalid credentials.");
+        }
+    };
+
+    document.getElementById('submitPost').onclick = () => { if(document.getElementById('post-input').value) push(ref(db, 'threads'), {msg: document.getElementById('post-input').value, uid: auth.currentUser.uid, time: Date.now()}); document.getElementById('post-input').value = ""; };
+    document.getElementById('myProfileBtn').onclick = () => window.loadProfile(auth.currentUser.uid);
+    document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
+</script>
+</body>
+</html>
