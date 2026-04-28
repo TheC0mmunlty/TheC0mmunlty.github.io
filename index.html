@@ -25,10 +25,8 @@
         .hat-tophat { position: absolute; top: -16px; left: 1px; width: 20px; height: 16px; background: #222; z-index: 10; border-bottom: 2px solid #444; }
         .hat-tophat::before { content: ''; position: absolute; bottom: -2px; left: -4px; width: 28px; height: 4px; background: #222; border-radius: 2px; }
         
-        /* OWNER ONLY GOLD CROWN CSS */
-        .hat-goldcrown { position: absolute; top: -15px; left: -2px; width: 26px; height: 18px; z-index: 12; }
-        .crown-base { position: absolute; bottom: 0; width: 100%; height: 6px; background: #ffd700; border: 1px solid #b8860b; }
-        .crown-spike { position: absolute; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 10px solid #ffd700; top: -8px; }
+        /* OWNER ONLY GOLD CROWN (Using Provided Image) */
+        .hat-goldcrown { position: absolute; top: -18px; left: -5px; width: 32px; height: 32px; z-index: 12; pointer-events: none; }
 
         .char-torso { width: 44px; height: 44px; border: 1px solid rgba(0,0,0,0.2); position: relative; }
         .tshirt-layer { position: absolute; top: 8px; left: 7px; width: 30px; height: 30px; object-fit: contain; z-index: 2; pointer-events: none; }
@@ -103,13 +101,16 @@
                 <div id="profile-render"></div>
                 <div style="flex-grow: 1;">
                     <h2><span id="v-name"></span><span id="v-check"></span> <span id="v-id" style="color:#888; font-size:12px;"></span></h2>
-                    <div id="uploader-section" class="hidden">
+                    
+                    <div id="uploader-section">
+                        <hr>
                         <strong>Upload T-Shirt (Marketplace)</strong><br>
                         <input type="text" id="tshirt-url-input" placeholder="Paste Image URL" style="width:200px; padding:5px;">
                         <button class="btn btn-yellow" id="upload-btn">Upload delays 5 sec</button>
                     </div>
-                    <hr>
+
                     <div id="my-settings" class="hidden">
+                        <hr>
                         <strong>Appearance</strong><br>
                         Hat: <select id="h-select">
                             <option value="none">None</option>
@@ -118,6 +119,7 @@
                             <option id="gold-crown-opt" value="goldcrown" class="hidden">Gold Crown (OWNER)</option>
                         </select><br>
                         Colors: <input type="color" id="c-head"> <input type="color" id="c-torso"> <input type="color" id="c-leg"><br>
+                        <strong>T-Shirt:</strong> <button class="btn btn-red" onclick="unequipShirt()">Unequip Shirt</button><br>
                         <button class="btn btn-yellow" id="saveProfile" style="margin-top:10px;">Save Changes</button>
                     </div>
                 </div>
@@ -158,19 +160,13 @@
         let h = '';
         if(hat === 'domino') h = `<img src="https://i.imgur.com/e2aPq6G.png" class="hat-domino">`;
         else if(hat === 'tophat') h = `<div class="hat-tophat"></div>`;
-        else if(hat === 'goldcrown') {
-            h = `<div class="hat-goldcrown">
-                    <div class="crown-spike" style="left:0"></div>
-                    <div class="crown-spike" style="left:9px"></div>
-                    <div class="crown-spike" style="left:18px"></div>
-                    <div class="crown-base"></div>
-                 </div>`;
-        }
+        else if(hat === 'goldcrown') h = `<img src="https://raw.githubusercontent.com/fahid001/assets/main/Golden_Crown.webp" class="hat-goldcrown">`; 
+        
         const c = colors || {h:'#f5cd30', t:'#0d5f97', l:'#a06110'};
         return `<div class="avatar-frame">
             <div class="char-head" style="background:${c.h}">${h}</div>
             <div class="char-torso" style="background:${c.t}">
-                ${tshirtUrl?`<img src="${tshirtUrl}" class="tshirt-layer">`:''}
+                ${tshirtUrl ? `<img src="${tshirtUrl}" class="tshirt-layer">` : ''}
                 <div class="char-arm arm-l" style="background:${c.h}"></div>
                 <div class="char-arm arm-r" style="background:${c.h}"></div>
             </div>
@@ -183,7 +179,8 @@
 
     onAuthStateChanged(auth, (u) => {
         if (u) {
-            if(u.email === "your-email@example.com") { // Replace with your actual email
+            // OWNER CHECK
+            if(u.email === "fahid.001x@gmail.com") { 
                 document.getElementById('gold-crown-opt').classList.remove('hidden');
             }
             onValue(ref(db, `users/${u.uid}`), (s) => {
@@ -210,7 +207,6 @@
         }
     });
 
-    // Forum Render with Delete Post logic
     const renderForum = () => {
         onValue(ref(db, 'threads'), async (s) => {
             const display = document.getElementById('thread-display'); display.innerHTML = "";
@@ -219,7 +215,6 @@
                 const p = c.val(); const author = users[p.uid] || {username: "Unknown", rank: 0};
                 const div = document.createElement('div'); div.className = 'row';
                 let delBtn = '';
-                // Staff can delete player posts. Players cannot delete staff posts.
                 if(me.rank >= 1 && author.rank < me.rank) {
                     delBtn = `<span class="delete-btn" onclick="deletePost('${c.key}')">[DELETE]</span>`;
                 }
@@ -236,7 +231,6 @@
 
     window.deletePost = (key) => { if(confirm("Staff: Remove this post?")) remove(ref(db, `threads/${key}`)); };
 
-    // Private Messaging
     document.getElementById('sendMsgBtn').onclick = () => {
         const to = document.getElementById('msg-to-uid').value;
         const txt = document.getElementById('msg-content').value;
@@ -256,10 +250,54 @@
         });
     }
 
-    // Admin Tools
+    document.getElementById('upload-btn').onclick = () => {
+        const url = document.getElementById('tshirt-url-input').value;
+        if(!url) return alert("Enter a URL");
+        document.getElementById('upload-btn').innerText = "Uploading...";
+        setTimeout(() => {
+            push(ref(db, 'marketplace'), { img: url, creator: me.username, uid: auth.currentUser.uid });
+            document.getElementById('upload-btn').innerText = "Upload delays 5 sec";
+            document.getElementById('tshirt-url-input').value = "";
+            alert("Sent to Marketplace!");
+        }, 5000);
+    };
+
+    window.buyItem = (url) => {
+        update(ref(db, `users/${auth.currentUser.uid}`), { equipped: url });
+        alert("Equipped!");
+    };
+
+    window.unequipShirt = () => {
+        update(ref(db, `users/${auth.currentUser.uid}`), { equipped: "" });
+        alert("Unequipped T-Shirt");
+    };
+
+    window.renderMarket = () => {
+        onValue(ref(db, 'marketplace'), (s) => {
+            const list = document.getElementById('market-list'); list.innerHTML = "";
+            s.forEach(c => {
+                const item = c.val(); const div = document.createElement('div'); div.className = 'market-card';
+                div.innerHTML = `<img src="${item.img}" style="width:60px; height:60px; object-fit:contain;"><br>By: ${item.creator}<br><button class="btn btn-yellow" onclick="buyItem('${item.img}')">EQUIP</button>`;
+                list.prepend(div);
+            });
+        });
+    };
+
+    window.loadProfile = async (uid) => {
+        showView('profile-view');
+        const d = (await get(child(ref(db), `users/${uid}`))).val() || {};
+        document.getElementById('v-name').innerText = d.username || "Unknown";
+        document.getElementById('v-check').innerHTML = d.verified ? `<span class="verified-badge"></span>` : '';
+        document.getElementById('v-id').innerText = "#" + (d.num || '0');
+        document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat, d.equipped);
+        const isMe = uid === auth.currentUser.uid;
+        document.getElementById('my-settings').classList.toggle('hidden', !isMe);
+        document.getElementById('uploader-section').classList.toggle('hidden', !isMe);
+    };
+
     window.banUser = () => {
         const uid = document.getElementById('target-uid').value;
-        if(uid === "YOUR_UID_HERE") return alert("You cannot ban the owner!"); // Anti-ban yourself
+        if(uid === "YOUR_UID_HERE") return alert("Anti-ban protection!"); 
         const reason = document.getElementById('ban-reason').value || "No reason";
         const limit = document.getElementById('ban-limit').value || "999";
         update(ref(db, `users/${uid}`), { isBanned: true, banReason: reason, banLimit: limit });
@@ -282,42 +320,6 @@
         }
     };
 
-    window.loadProfile = async (uid) => {
-        showView('profile-view');
-        const d = (await get(child(ref(db), `users/${uid}`))).val() || {};
-        document.getElementById('v-name').innerText = d.username || "Unknown";
-        document.getElementById('v-check').innerHTML = d.verified ? `<span class="verified-badge"></span>` : '';
-        document.getElementById('v-id').innerText = "#" + (d.num || '0');
-        document.getElementById('profile-render').innerHTML = draw(d.colors, d.hat, d.equipped);
-        const isMe = uid === auth.currentUser.uid;
-        document.getElementById('my-settings').classList.toggle('hidden', !isMe);
-        document.getElementById('uploader-section').classList.toggle('hidden', !isMe);
-    };
-
-    document.getElementById('upload-btn').onclick = () => {
-        const url = document.getElementById('tshirt-url-input').value;
-        if(!url) return alert("Enter a URL");
-        document.getElementById('upload-btn').innerText = "Uploading...";
-        setTimeout(() => {
-            push(ref(db, 'marketplace'), { img: url, creator: me.username, uid: auth.currentUser.uid });
-            document.getElementById('upload-btn').innerText = "Upload delays 5 sec";
-            document.getElementById('tshirt-url-input').value = "";
-            alert("Sent to Marketplace!");
-        }, 5000);
-    };
-
-    window.renderMarket = () => {
-        onValue(ref(db, 'marketplace'), (s) => {
-            const list = document.getElementById('market-list'); list.innerHTML = "";
-            s.forEach(c => {
-                const item = c.val(); const div = document.createElement('div'); div.className = 'market-card';
-                div.innerHTML = `<img src="${item.img}" style="width:60px; height:60px; object-fit:contain;"><br>By: ${item.creator}<br><button class="btn btn-yellow" onclick="buyItem('${item.img}')">GET</button>`;
-                list.prepend(div);
-            });
-        });
-    };
-
-    window.buyItem = (url) => update(ref(db, `users/${auth.currentUser.uid}`), { equipped: url });
     window.showView = (id) => { ['forum-home', 'profile-view', 'admin-view', 'market-view', 'inbox-view'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); };
     document.getElementById('saveProfile').onclick = () => update(ref(db, `users/${auth.currentUser.uid}`), { hat: document.getElementById('h-select').value, colors: { h: document.getElementById('c-head').value, t: document.getElementById('c-torso').value, l: document.getElementById('c-leg').value } });
     document.getElementById('submitPost').onclick = () => { if(document.getElementById('post-input').value) push(ref(db, 'threads'), {msg: document.getElementById('post-input').value, uid: auth.currentUser.uid, time: Date.now()}); document.getElementById('post-input').value = ""; };
@@ -332,7 +334,7 @@
             const countSnap = await get(ref(db, 'stats/uCount'));
             const newNum = (countSnap.val() || 0) + 1;
             const r = await createUserWithEmailAndPassword(auth, e, p);
-            await set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, num: newNum, verified: false, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none' });
+            await set(ref(db, `users/${r.user.uid}`), { username: u, rank: 0, num: newNum, verified: false, colors: {h:'#f5cd30', t:'#0d5f97', l:'#a06110'}, hat: 'none', equipped: "" });
             await update(ref(db, 'stats'), { uCount: increment(1) });
         } catch (err) { alert(err.message); }
     };
